@@ -619,4 +619,18 @@ ArchiveTune sẽ chỉ trích xuất token của bạn, và mọi thứ khác đ
     <string name="permission_status_required">Vui lòng cho phép tất cả quyền cần thiết để tiếp tục.</string>
     <string name="next">Tiếp theo</string>
     <string name="allow">Cho phép</string>
+
+    <!-- Discord Token Login -->
+    <string name="discord_token_input">Token Discord</string>
+    <string name="discord_token_hint">Dán token Discord của bạn vào đây</string>
+    <string name="discord_token_login_button">Đăng nhập bằng Token</string>
+    <string name="discord_token_invalid">Token không hợp lệ</string>
+    <string name="discord_token_login_success">Token đã được xác thực thành công</string>
+    <string name="discord_token_login_failed">Xác thực token thất bại</string>
+    <string name="discord_token_logout_success">Đã đăng xuất thành công</string>
+    <string name="discord_token_show">HIỂN THỊ</string>
+    <string name="discord_token_hide">ẨN</string>
+    <string name="discord_token_validating">Đang xác thực token...</string>
+    <string name="discord_token_form_title">Đăng nhập bằng Token Discord</string>
+    <string name="discord_account_locked_info">Tài khoản Discord hiện đang đăng nhập</string>
 </resources>

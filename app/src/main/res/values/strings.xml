@@ -643,4 +643,18 @@ ArchiveTune will only extract your token, and everything else is stored locally.
     <string name="next">Next</string>
     <string name="next_song">Next Song</string>
     <string name="allow">Allow</string>
+
+    <!-- Discord Token Login -->
+    <string name="discord_token_input">Discord Token</string>
+    <string name="discord_token_hint">Paste your Discord token here</string>
+    <string name="discord_token_login_button">Login with Token</string>
+    <string name="discord_token_invalid">Invalid token</string>
+    <string name="discord_token_login_success">Token verified successfully</string>
+    <string name="discord_token_login_failed">Failed to verify token</string>
+    <string name="discord_token_logout_success">Successfully logged out</string>
+    <string name="discord_token_show">SHOW</string>
+    <string name="discord_token_hide">HIDE</string>
+    <string name="discord_token_validating">Validating token...</string>
+    <string name="discord_token_form_title">Discord Token Login</string>
+    <string name="discord_account_locked_info">Discord account is currently logged in</string>
 </resources>

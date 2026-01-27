@@ -560,4 +560,18 @@
     <string name="update_notification_title">업데이트 가능</string>
     <string name="update_notification_text">ArchiveTune %s이(가) 출시되었습니다</string>
     <string name="download">다운로드</string>
+
+    <!-- Discord Token Login -->
+    <string name="discord_token_input">Discord 토큰</string>
+    <string name="discord_token_hint">Discord 토큰을 여기에 붙여넣으세요</string>
+    <string name="discord_token_login_button">토큰으로 로그인</string>
+    <string name="discord_token_invalid">잘못된 토큰</string>
+    <string name="discord_token_login_success">토큰이 성공적으로 확인되었습니다</string>
+    <string name="discord_token_login_failed">토큰 확인 실패</string>
+    <string name="discord_token_logout_success">성공적으로 로그아웃되었습니다</string>
+    <string name="discord_token_show">표시</string>
+    <string name="discord_token_hide">숨기기</string>
+    <string name="discord_token_validating">토큰 확인 중...</string>
+    <string name="discord_token_form_title">Discord 토큰 로그인</string>
+    <string name="discord_account_locked_info">Discord 계정이 현재 로그인되어 있습니다</string>
 </resources>

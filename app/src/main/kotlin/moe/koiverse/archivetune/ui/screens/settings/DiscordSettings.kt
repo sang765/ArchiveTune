@@ -27,6 +27,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.media3.common.Player.STATE_READY
 import androidx.navigation.NavController
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -60,6 +63,156 @@ import kotlinx.coroutines.*
 import moe.koiverse.archivetune.utils.ArtworkStorage
 
 enum class ActivitySource { ARTIST, ALBUM, SONG, APP }
+
+@Composable
+fun DiscordTokenForm(
+    isLoggedIn: Boolean,
+    onLogin: (String) -> Unit,
+    onLogout: () -> Unit,
+    modifier: Modifier = Modifier,
+    coroutineScope: CoroutineScope,
+    snackbarHostState: SnackbarHostState
+) {
+    var token by rememberSaveable { mutableStateOf("") }
+    var isValidating by remember { mutableStateOf(false) }
+    var showToken by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .then(
+                if (isLoggedIn) {
+                    Modifier
+                        .blur(4.dp)
+                        .alpha(0.6f)
+                } else {
+                    Modifier
+                }
+            ),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.discord_token_form_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            if (isLoggedIn) {
+                Text(
+                    text = stringResource(R.string.discord_account_locked_info),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+            }
+
+            OutlinedTextField(
+                value = token,
+                onValueChange = { token = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                label = { Text(stringResource(R.string.discord_token_input)) },
+                placeholder = { Text(stringResource(R.string.discord_token_hint)) },
+                visualTransformation = if (showToken) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
+                },
+                singleLine = true,
+                enabled = !isLoggedIn && !isValidating,
+                trailingIcon = {
+                    if (!isLoggedIn) {
+                        TextButton(
+                            onClick = { showToken = !showToken },
+                            enabled = !isValidating
+                        ) {
+                            Text(
+                                text = if (showToken) {
+                                    stringResource(R.string.discord_token_hide)
+                                } else {
+                                    stringResource(R.string.discord_token_show)
+                                }
+                            )
+                        }
+                    }
+                }
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (!isLoggedIn) {
+                    Button(
+                        onClick = {
+                            if (token.isNotBlank()) {
+                                isValidating = true
+                                coroutineScope.launch {
+                                    try {
+                                        val result = withContext(Dispatchers.IO) {
+                                            KizzyRPC.getUserInfo(token)
+                                        }
+                                        
+                                        result.onSuccess {
+                                            onLogin(token)
+                                            snackbarHostState.showSnackbar(
+                                                context.getString(R.string.discord_token_login_success)
+                                            )
+                                        }.onFailure {
+                                            snackbarHostState.showSnackbar(
+                                                context.getString(R.string.discord_token_invalid)
+                                            )
+                                        }
+                                    } catch (e: Exception) {
+                                        Timber.tag("DiscordTokenForm").w(e, "Token validation failed")
+                                        snackbarHostState.showSnackbar(
+                                            context.getString(R.string.discord_token_login_failed)
+                                        )
+                                    } finally {
+                                        isValidating = false
+                                    }
+                                }
+                            }
+                        },
+                        enabled = token.isNotBlank() && !isValidating && !isLoggedIn,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        if (isValidating) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(stringResource(R.string.discord_token_login_button))
+                        }
+                    }
+                } else {
+                    Button(
+                        onClick = {
+                            onLogout()
+                            snackbarHostState.showSnackbar(
+                                context.getString(R.string.discord_token_logout_success)
+                            )
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(stringResource(R.string.action_logout))
+                    }
+                }
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -190,46 +343,22 @@ fun DiscordSettings(
             .padding(horizontal = 16.dp, vertical = 8.dp)
         )
 
-    var showLogoutConfirm by remember { mutableStateOf(false) }
-
-    PreferenceEntry(
-            title = {
-                Text(
-                    text = if (isLoggedIn) discordName else stringResource(R.string.not_logged_in),
-                    modifier = Modifier.alpha(if (isLoggedIn) 1f else 0.5f),
-                )
+        DiscordTokenForm(
+            isLoggedIn = isLoggedIn,
+            onLogin = { token ->
+                discordToken = token
+                // Clear user info when logging in with new token
+                discordName = ""
+                discordUsername = ""
             },
-            description = if (discordUsername.isNotEmpty()) "@$discordUsername" else null,
-            icon = { Icon(painterResource(R.drawable.discord), null) },
-            trailingContent = {
-                if (isLoggedIn) {
-                        OutlinedButton(onClick = { showLogoutConfirm = true }) { Text(stringResource(R.string.action_logout)) }
-                    } else {
-                    OutlinedButton(onClick = {
-                        navController.navigate("settings/discord/login")
-                    }) { Text(stringResource(R.string.action_login)) }
-                }
+            onLogout = {
+                discordToken = ""
+                discordName = ""
+                discordUsername = ""
             },
+            coroutineScope = coroutineScope,
+            snackbarHostState = snackbarHostState
         )
-
-            if (showLogoutConfirm) {
-                AlertDialog(
-                    onDismissRequest = { showLogoutConfirm = false },
-                    title = { Text(stringResource(R.string.logout_confirm_title)) },
-                    text = { Text(stringResource(R.string.logout_confirm_message)) },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            discordName = ""
-                            discordToken = ""
-                            discordUsername = ""
-                            showLogoutConfirm = false
-                        }) { Text(stringResource(R.string.logout_confirm_yes)) }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showLogoutConfirm = false }) { Text(stringResource(R.string.logout_confirm_no)) }
-                    }
-                )
-            }
 
         Text(
             text = stringResource(R.string.options),

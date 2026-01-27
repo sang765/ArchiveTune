@@ -610,4 +610,18 @@
     <string name="next">次</string>
     <string name="next_song">次の曲</string>
     <string name="allow">許可する</string>
+
+    <!-- Discord Token Login -->
+    <string name="discord_token_input">Discordトークン</string>
+    <string name="discord_token_hint">Discordトークンをここに貼り付けてください</string>
+    <string name="discord_token_login_button">トークンでログイン</string>
+    <string name="discord_token_invalid">無効なトークン</string>
+    <string name="discord_token_login_success">トークンが正常に検証されました</string>
+    <string name="discord_token_login_failed">トークンの検証に失敗しました</string>
+    <string name="discord_token_logout_success">正常にログアウトしました</string>
+    <string name="discord_token_show">表示</string>
+    <string name="discord_token_hide">非表示</string>
+    <string name="discord_token_validating">トークンを検証中...</string>
+    <string name="discord_token_form_title">Discordトークンログイン</string>
+    <string name="discord_account_locked_info">Discordアカウントが現在ログインしています</string>
 </resources>
