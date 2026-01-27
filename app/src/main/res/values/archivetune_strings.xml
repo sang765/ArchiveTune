@@ -131,6 +131,8 @@
     <string name="discord_token_instructions">Where to find it: Discord Desktop/Web → open Developer Tools → Application/Storage → Local Storage → https://discord.com → token.</string>
     <string name="discord_token_warning">Warning: your token is equivalent to your password. Never share it.</string>
     <string name="discord_token_error_empty">Token cannot be empty</string>
+    <string name="discord_token_error_invalid">Invalid token</string>
+    <string name="discord_token_validating">Validating token…</string>
     <string name="discord_token_saved">Token saved</string>
 
     <string name="token_hidden">Tap to show token</string>

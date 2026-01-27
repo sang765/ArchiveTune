@@ -12,12 +12,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,10 +47,15 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.my.kizzy.rpc.KizzyRPC
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moe.koiverse.archivetune.LocalPlayerAwareWindowInsets
 import moe.koiverse.archivetune.R
+import moe.koiverse.archivetune.constants.DiscordNameKey
 import moe.koiverse.archivetune.constants.DiscordTokenKey
+import moe.koiverse.archivetune.constants.DiscordUsernameKey
 import moe.koiverse.archivetune.ui.component.IconButton
 import moe.koiverse.archivetune.ui.utils.backToMain
 import moe.koiverse.archivetune.utils.rememberPreference
@@ -61,12 +68,17 @@ fun DiscordTokenInputScreen(navController: NavController) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
     val emptyTokenMessage = stringResource(R.string.discord_token_error_empty)
+    val invalidTokenMessage = stringResource(R.string.discord_token_error_invalid)
     val tokenSavedMessage = stringResource(R.string.discord_token_saved)
+    val validatingMessage = stringResource(R.string.discord_token_validating)
 
     var discordToken by rememberPreference(DiscordTokenKey, "")
+    var discordUsername by rememberPreference(DiscordUsernameKey, "")
+    var discordName by rememberPreference(DiscordNameKey, "")
 
     var tokenInput by rememberSaveable { mutableStateOf("") }
     var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
+    var isValidating by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -85,18 +97,34 @@ fun DiscordTokenInputScreen(navController: NavController) {
         }
 
         errorMessage = null
-        discordToken = trimmed
+        isValidating = true
 
-        focusManager.clearFocus()
-        keyboardController?.hide()
+        scope.launch(Dispatchers.IO) {
+            KizzyRPC.getUserInfo(trimmed).onSuccess { userInfo ->
+                withContext(Dispatchers.Main) {
+                    isValidating = false
+                    errorMessage = null
+                    discordToken = trimmed
+                    discordUsername = userInfo.username
+                    discordName = userInfo.name
 
-        scope.launch {
-            snackbarHostState.showSnackbar(
-                message = tokenSavedMessage,
-                withDismissAction = true,
-                duration = SnackbarDuration.Short,
-            )
-            navController.navigateUp()
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+
+                    snackbarHostState.showSnackbar(
+                        message = tokenSavedMessage,
+                        withDismissAction = true,
+                        duration = SnackbarDuration.Short,
+                    )
+                    navController.navigateUp()
+                }
+            }.onFailure {
+                withContext(Dispatchers.Main) {
+                    isValidating = false
+                    errorMessage = invalidTokenMessage
+                    snackbarHostState.showSnackbar(invalidTokenMessage)
+                }
+            }
         }
     }
 
@@ -139,13 +167,22 @@ fun DiscordTokenInputScreen(navController: NavController) {
                 label = { Text(stringResource(R.string.discord_token)) },
                 placeholder = { Text("mfa.xxxxx... or xxxxx.yyyyy.zzzzz") },
                 isError = errorMessage != null,
+                enabled = !isValidating,
                 supportingText = {
-                    errorMessage?.let {
+                    if (isValidating) {
                         Text(
-                            text = it,
-                            color = MaterialTheme.colorScheme.error,
+                            text = validatingMessage,
+                            color = MaterialTheme.colorScheme.primary,
                             style = MaterialTheme.typography.bodySmall,
                         )
+                    } else {
+                        errorMessage?.let {
+                            Text(
+                                text = it,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
                     }
                 },
                 keyboardOptions = KeyboardOptions(
@@ -185,6 +222,7 @@ fun DiscordTokenInputScreen(navController: NavController) {
                 OutlinedButton(
                     onClick = { cancel() },
                     modifier = Modifier.weight(1f),
+                    enabled = !isValidating,
                 ) {
                     Text(stringResource(R.string.cancel))
                 }
@@ -192,8 +230,17 @@ fun DiscordTokenInputScreen(navController: NavController) {
                 Button(
                     onClick = { save() },
                     modifier = Modifier.weight(1f),
+                    enabled = !isValidating,
                 ) {
-                    Text(stringResource(R.string.action_login))
+                    if (isValidating) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                        )
+                    } else {
+                        Text(stringResource(R.string.action_login))
+                    }
                 }
             }
 
