@@ -231,6 +231,13 @@ fun DiscordSettings(
                 )
             }
 
+            PreferenceEntry(
+                title = { Text(stringResource(R.string.advanced_login)) },
+                description = stringResource(R.string.discord_token_login_option_desc),
+                icon = { Icon(painterResource(R.drawable.edit), null) },
+                onClick = { navController.navigate("settings/discord/token-login") },
+            )
+
         Text(
             text = stringResource(R.string.options),
             style = MaterialTheme.typography.headlineSmall,

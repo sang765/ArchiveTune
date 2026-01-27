@@ -123,6 +123,16 @@
     <string name="google">Google</string>
     <string name="discord">Discord</string>
     <string name="advanced_login">Login with token</string>
+
+    <string name="discord_token_login_title">Discord token login</string>
+    <string name="discord_token_login_description">Paste your Discord user token to enable Rich Presence without using the web login.</string>
+    <string name="discord_token_login_option_desc">Quick login: paste your token directly (advanced).</string>
+    <string name="discord_token">Discord token</string>
+    <string name="discord_token_instructions">Where to find it: Discord Desktop/Web → open Developer Tools → Application/Storage → Local Storage → https://discord.com → token.</string>
+    <string name="discord_token_warning">Warning: your token is equivalent to your password. Never share it.</string>
+    <string name="discord_token_error_empty">Token cannot be empty</string>
+    <string name="discord_token_saved">Token saved</string>
+
     <string name="token_hidden">Tap to show token</string>
     <string name="token_shown">Tap again to copy or edit</string>
     <string name="token_adv_login_description">This is an ADVANCED login method. As an alternative to the web portal, you may directly enter or update your login token here. For example, this can speed up logging in on multiple devices. Please note that any invalid token formats the app fails to parse will not be accepted</string>
