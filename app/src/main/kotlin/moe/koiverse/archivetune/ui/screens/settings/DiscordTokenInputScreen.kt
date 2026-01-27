@@ -18,6 +18,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,6 +48,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.my.kizzy.rpc.KizzyRPC
@@ -77,6 +82,7 @@ fun DiscordTokenInputScreen(navController: NavController) {
     var discordName by rememberPreference(DiscordNameKey, "")
 
     var tokenInput by rememberSaveable { mutableStateOf("") }
+    var tokenVisible by rememberSaveable { mutableStateOf(false) }
     var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
     var isValidating by remember { mutableStateOf(false) }
 
@@ -168,6 +174,20 @@ fun DiscordTokenInputScreen(navController: NavController) {
                 placeholder = { Text("mfa.xxxxx... or xxxxx.yyyyy.zzzzz") },
                 isError = errorMessage != null,
                 enabled = !isValidating,
+                visualTransformation = if (tokenVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    val image = if (tokenVisible)
+                        Icons.Filled.Visibility
+                    else Icons.Filled.VisibilityOff
+
+                    val description = if (tokenVisible)
+                        stringResource(R.string.hide_token)
+                    else stringResource(R.string.show_token)
+
+                    androidx.compose.material3.IconButton(onClick = { tokenVisible = !tokenVisible }) {
+                        Icon(imageVector = image, contentDescription = description)
+                    }
+                },
                 supportingText = {
                     if (isValidating) {
                         Text(

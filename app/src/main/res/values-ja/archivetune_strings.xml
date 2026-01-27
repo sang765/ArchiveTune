@@ -103,6 +103,21 @@
     <string name="google">グーグル</string>
     <string name="discord">不和</string>
     <string name="advanced_login">トークンを使用してログインする</string>
+
+    <string name="discord_token_login_title">Discordトークンログイン</string>
+    <string name="discord_token_login_description">Webログインを使用せずに、Discordユーザートークンを貼り付けてRich Presenceを有効にします。</string>
+    <string name="discord_token_login_option_desc">クイックログイン：トークンを直接貼り付けます（上級者向け）。</string>
+    <string name="discord_token">Discordトークン</string>
+    <string name="discord_token_instructions">トークンの取得方法: Discord Desktop/Web → 開発者ツールを開く → Application/Storage → Local Storage → https://discord.com → token。</string>
+    <string name="discord_token_warning">警告：トークンはパスワードと同じです。共有しないでください。</string>
+    <string name="discord_token_error_empty">トークンを入力してください</string>
+    <string name="discord_token_error_invalid">無効なトークンです</string>
+    <string name="discord_token_validating">トークンを確認中…</string>
+    <string name="discord_token_saved">トークンを保存しました</string>
+
+    <string name="show_token">トークンを表示</string>
+    <string name="hide_token">トークンを非表示</string>
+
     <string name="token_hidden">タップしてトークンを表示</string>
     <string name="token_shown">もう一度タップしてコピーまたは編集します</string>
     <string name="token_adv_login_description">これは高度なログイン方法です。 Web ポータルの代わりに、ここでログイン トークンを直接入力または更新することもできます。たとえば、これにより複数のデバイスでのログインが高速化されます。アプリが解析できない無効なトークン形式は受け入れられないことに注意してください</string>

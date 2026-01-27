@@ -135,6 +135,9 @@
     <string name="discord_token_validating">Validating token…</string>
     <string name="discord_token_saved">Token saved</string>
 
+    <string name="show_token">Show token</string>
+    <string name="hide_token">Hide token</string>
+
     <string name="token_hidden">Tap to show token</string>
     <string name="token_shown">Tap again to copy or edit</string>
     <string name="token_adv_login_description">This is an ADVANCED login method. As an alternative to the web portal, you may directly enter or update your login token here. For example, this can speed up logging in on multiple devices. Please note that any invalid token formats the app fails to parse will not be accepted</string>
