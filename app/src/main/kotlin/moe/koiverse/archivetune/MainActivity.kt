@@ -469,28 +469,19 @@ class MainActivity : ComponentActivity() {
 
                         Spacer(Modifier.height(12.dp))
 
-                        Box(modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f, fill = false)
-                            .verticalScroll(rememberScrollState())
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f, fill = false)
+                                .verticalScroll(rememberScrollState())
                         ) {
                             val notes = releaseNotesState.value
                             if (notes != null && notes.isNotBlank()) {
-                                val lines = notes.lines()
                                 Column(modifier = Modifier.padding(end = 8.dp)) {
-                                    lines.forEach { line ->
-                                        when {
-                                            line.startsWith("# ") -> Text(line.removePrefix("# ").trim(), style = MaterialTheme.typography.titleLarge)
-                                            line.startsWith("## ") -> Text(line.removePrefix("## ").trim(), style = MaterialTheme.typography.titleMedium)
-                                            line.startsWith("### ") -> Text(line.removePrefix("### ").trim(), style = MaterialTheme.typography.titleSmall)
-                                            line.startsWith("- ") -> Row {
-                                                Text("• ", style = MaterialTheme.typography.bodyLarge)
-                                                Text(line.removePrefix("- ").trim(), style = MaterialTheme.typography.bodyLarge)
-                                            }
-                                            else -> Text(line, style = MaterialTheme.typography.bodyMedium)
-                                        }
-                                        Spacer(Modifier.height(6.dp))
-                                    }
+                                    moe.koiverse.archivetune.ui.component.RichTextContent(
+                                        content = notes,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                    )
                                 }
                             } else {
                                 Text(
