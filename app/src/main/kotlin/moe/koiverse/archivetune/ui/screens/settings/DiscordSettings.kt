@@ -245,7 +245,7 @@ fun DiscordSettings(
 
             if (showTokenInputDialog) {
                 TextFieldDialog(
-                    title = { Text("Discord Token Login") },
+                    title = { Text(stringResource(R.string.discord_token_login_title)) },
                     initialTextFieldValue = TextFieldValue(),
                     singleLine = true,
                     isInputValid = { it.trim().isNotEmpty() },
@@ -259,16 +259,16 @@ fun DiscordSettings(
                                             discordToken = trimmed
                                             discordUsername = userInfo.username
                                             discordName = userInfo.name
-                                            snackbarHostState.showSnackbar("Logged in successfully!")
+                                            snackbarHostState.showSnackbar(context.getString(R.string.discord_token_login_success))
                                         }
                                     }.onFailure { error ->
                                         withContext(Dispatchers.Main) {
-                                            snackbarHostState.showSnackbar("Invalid token: ${error.message}")
+                                            snackbarHostState.showSnackbar(context.getString(R.string.discord_token_login_invalid, error.message))
                                         }
                                     }
                                 } catch (e: Exception) {
                                     withContext(Dispatchers.Main) {
-                                        snackbarHostState.showSnackbar("Login failed: ${e.message}")
+                                        snackbarHostState.showSnackbar(context.getString(R.string.login_failed) + ": ${e.message}")
                                     }
                                 }
                             }
@@ -279,7 +279,7 @@ fun DiscordSettings(
                     extraContent = {
                         Spacer(Modifier.height(8.dp))
                         InfoLabel(
-                            text = "Enter your Discord user token. You can find this in Discord Developer Tools (Network tab → any request → Authorization header)."
+                            text = stringResource(R.string.discord_token_login_info)
                         )
                     }
                 )

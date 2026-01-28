@@ -553,6 +553,10 @@ ArchiveTune will only extract your token, and everything else is stored locally.
     <string name="logout_confirm_message">Are you sure you want to log out of Discord?.</string>
     <string name="logout_confirm_yes">Log out</string>
     <string name="logout_confirm_no">Cancel</string>
+    <string name="discord_token_login_title">Discord Token Login</string>
+    <string name="discord_token_login_success">Logged in successfully!</string>
+    <string name="discord_token_login_invalid">Invalid token: %s</string>
+    <string name="discord_token_login_info">Enter your Discord user token. You can find this in Discord Developer Tools (Network tab → any request → Authorization header).</string>
     <!--Misc settings additions-->
     <string name="experiment_settings">Experimental Settings</string>
     <string name="show_discord_debug_ui">Show Debug UI</string>

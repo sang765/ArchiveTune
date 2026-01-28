@@ -551,6 +551,10 @@ ArchiveTune sẽ chỉ trích xuất token của bạn, và mọi thứ khác đ
     <string name="logout_confirm_message">Bạn có chắc chắn muốn đăng xuất Discord không?.</string>
     <string name="logout_confirm_yes">Đăng xuất</string>
     <string name="logout_confirm_no">Hủy</string>
+    <string name="discord_token_login_title">Đăng nhập bằng Token Discord</string>
+    <string name="discord_token_login_success">Đăng nhập thành công!</string>
+    <string name="discord_token_login_invalid">Token không hợp lệ: %s</string>
+    <string name="discord_token_login_info">Nhập token người dùng Discord của bạn. Bạn có thể tìm thấy trong Discord Developer Tools (tab Network → bất kỳ request nào → Authorization header).</string>
     <!--Misc settings additions-->
     <string name="experiment_settings">Cài đặt Thử nghiệm</string>
     <string name="show_discord_debug_ui">Hiển thị UI Debug</string>

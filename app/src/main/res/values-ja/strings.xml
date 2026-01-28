@@ -504,6 +504,10 @@
     <string name="logout_confirm_message">Discordからログアウトしてもよろしいですか？。</string>
     <string name="logout_confirm_yes">ログアウト</string>
     <string name="logout_confirm_no">キャンセル</string>
+    <string name="discord_token_login_title">Discordトークンログイン</string>
+    <string name="discord_token_login_success">ログインに成功しました！</string>
+    <string name="discord_token_login_invalid">無効なトークン: %s</string>
+    <string name="discord_token_login_info">Discordユーザートークンを入力してください。Discord開発者ツール（ネットワークタブ → 任意のリクエスト → Authorizationヘッダー）で見つけることができます。</string>
     <!--Misc settings additions-->
     <string name="experiment_settings">実験設定</string>
     <string name="show_discord_debug_ui">デバッグ UI を表示</string>
