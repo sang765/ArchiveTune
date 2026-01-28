@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -191,6 +192,10 @@ fun DiscordSettings(
         )
 
     var showLogoutConfirm by remember { mutableStateOf(false) }
+    var showTokenLoginDialog by remember { mutableStateOf(false) }
+    var tokenInput by remember { mutableStateOf("") }
+    var isValidatingToken by remember { mutableStateOf(false) }
+    var tokenError by remember { mutableStateOf<String?>(null) }
 
     PreferenceEntry(
             title = {
@@ -205,9 +210,20 @@ fun DiscordSettings(
                 if (isLoggedIn) {
                         OutlinedButton(onClick = { showLogoutConfirm = true }) { Text(stringResource(R.string.action_logout)) }
                     } else {
-                    OutlinedButton(onClick = {
-                        navController.navigate("settings/discord/login")
-                    }) { Text(stringResource(R.string.action_login)) }
+                    OutlinedButton(
+                        onClick = {
+                            navController.navigate("settings/discord/login")
+                        },
+                        modifier = Modifier.pointerInput(Unit) {
+                            detectTapGestures(
+                                onLongPress = {
+                                    showTokenLoginDialog = true
+                                    tokenInput = ""
+                                    tokenError = null
+                                }
+                            )
+                        }
+                    ) { Text(stringResource(R.string.action_login)) }
                 }
             },
         )
@@ -227,6 +243,102 @@ fun DiscordSettings(
                     },
                     dismissButton = {
                         TextButton(onClick = { showLogoutConfirm = false }) { Text(stringResource(R.string.logout_confirm_no)) }
+                    }
+                )
+            }
+
+            if (showTokenLoginDialog) {
+                AlertDialog(
+                    onDismissRequest = {
+                        if (!isValidatingToken) {
+                            showTokenLoginDialog = false
+                            tokenInput = ""
+                            tokenError = null
+                        }
+                    },
+                    title = { Text("Login with Token") },
+                    text = {
+                        Column {
+                            Text(
+                                text = "Enter your Discord token to log in. You can find your token in Discord's developer tools.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+                            OutlinedTextField(
+                                value = tokenInput,
+                                onValueChange = {
+                                    tokenInput = it
+                                    tokenError = null
+                                },
+                                label = { Text("Discord Token") },
+                                enabled = !isValidatingToken,
+                                isError = tokenError != null,
+                                supportingText = tokenError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } },
+                                modifier = Modifier.fillMaxWidth(),
+                                singleLine = false,
+                                maxLines = 3
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(
+                            enabled = tokenInput.isNotBlank() && !isValidatingToken,
+                            onClick = {
+                                isValidatingToken = true
+                                tokenError = null
+                                coroutineScope.launch {
+                                    try {
+                                        val result = withContext(Dispatchers.IO) {
+                                            KizzyRPC.getUserInfo(tokenInput.trim())
+                                        }
+                                        result.onSuccess { userInfo ->
+                                            discordToken = tokenInput.trim()
+                                            discordUsername = userInfo.username
+                                            discordName = userInfo.name
+                                            showTokenLoginDialog = false
+                                            tokenInput = ""
+                                            tokenError = null
+                                            withContext(Dispatchers.Main) {
+                                                snackbarHostState.showSnackbar("Logged in as ${userInfo.name}")
+                                            }
+                                        }.onFailure { error ->
+                                            tokenError = "Invalid token or network error"
+                                            Timber.tag("DiscordSettings").e(error, "Token login failed")
+                                        }
+                                    } catch (e: Exception) {
+                                        tokenError = "Failed to validate token"
+                                        Timber.tag("DiscordSettings").e(e, "Token validation exception")
+                                    } finally {
+                                        isValidatingToken = false
+                                    }
+                                }
+                            }
+                        ) {
+                            if (isValidatingToken) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(16.dp),
+                                        strokeWidth = 2.dp
+                                    )
+                                    Text("Validating...")
+                                }
+                            } else {
+                                Text("Login")
+                            }
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            enabled = !isValidatingToken,
+                            onClick = {
+                                showTokenLoginDialog = false
+                                tokenInput = ""
+                                tokenError = null
+                            }
+                        ) { Text("Cancel") }
                     }
                 )
             }
