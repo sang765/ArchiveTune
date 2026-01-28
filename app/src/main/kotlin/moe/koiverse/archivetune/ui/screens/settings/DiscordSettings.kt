@@ -256,11 +256,11 @@ fun DiscordSettings(
                             tokenError = null
                         }
                     },
-                    title = { Text("Login with Token") },
+                    title = { Text(stringResource(R.string.token_login_title)) },
                     text = {
                         Column {
                             Text(
-                                text = "Enter your Discord token to log in. You can find your token in Discord's developer tools.",
+                                text = stringResource(R.string.token_login_message),
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.padding(bottom = 16.dp)
                             )
@@ -270,7 +270,7 @@ fun DiscordSettings(
                                     tokenInput = it
                                     tokenError = null
                                 },
-                                label = { Text("Discord Token") },
+                                label = { Text(stringResource(R.string.discord_token_label)) },
                                 enabled = !isValidatingToken,
                                 isError = tokenError != null,
                                 supportingText = tokenError?.let { { Text(it, color = MaterialTheme.colorScheme.error) } },
@@ -299,14 +299,14 @@ fun DiscordSettings(
                                             tokenInput = ""
                                             tokenError = null
                                             withContext(Dispatchers.Main) {
-                                                snackbarHostState.showSnackbar("Logged in as ${userInfo.name}")
+                                                snackbarHostState.showSnackbar(context.getString(R.string.logged_in_as, userInfo.name))
                                             }
                                         }.onFailure { error ->
-                                            tokenError = "Invalid token or network error"
+                                            tokenError = context.getString(R.string.token_validation_error)
                                             Timber.tag("DiscordSettings").e(error, "Token login failed")
                                         }
                                     } catch (e: Exception) {
-                                        tokenError = "Failed to validate token"
+                                        tokenError = context.getString(R.string.token_validation_failed)
                                         Timber.tag("DiscordSettings").e(e, "Token validation exception")
                                     } finally {
                                         isValidatingToken = false
@@ -323,10 +323,10 @@ fun DiscordSettings(
                                         modifier = Modifier.size(16.dp),
                                         strokeWidth = 2.dp
                                     )
-                                    Text("Validating...")
+                                    Text(stringResource(R.string.validating))
                                 }
                             } else {
-                                Text("Login")
+                                Text(stringResource(R.string.action_login))
                             }
                         }
                     },
@@ -338,7 +338,7 @@ fun DiscordSettings(
                                 tokenInput = ""
                                 tokenError = null
                             }
-                        ) { Text("Cancel") }
+                        ) { Text(stringResource(R.string.cancel)) }
                     }
                 )
             }
@@ -442,9 +442,9 @@ fun DiscordSettings(
                         // Show snackbar on main thread
                         withContext(Dispatchers.Main) {
                             if (success) {
-                                snackbarHostState.showSnackbar("Refreshed!")
+                                snackbarHostState.showSnackbar(context.getString(R.string.refreshed))
                             } else {
-                                snackbarHostState.showSnackbar("Refresh failed")
+                                snackbarHostState.showSnackbar(context.getString(R.string.refresh_failed))
                             }
                         }
                     }
@@ -467,11 +467,11 @@ fun DiscordSettings(
         ExposedDropdownMenuBox(expanded = activityStatusExpanded, onExpandedChange = { activityStatusExpanded = it }) {
             TextField(
                 value = when (activityStatusSelection) {
-                    "online" -> "Online"
-                    "dnd" -> "Do Not Disturb"
-                    "idle" -> "Idle"
-                    "streaming" -> "Streaming"
-                    else -> "Online"
+                    "online" -> stringResource(R.string.online)
+                    "dnd" -> stringResource(R.string.dnd)
+                    "idle" -> stringResource(R.string.idle)
+                    "streaming" -> stringResource(R.string.streaming)
+                    else -> stringResource(R.string.online)
                 },
                 onValueChange = {},
                 readOnly = true,
@@ -487,10 +487,10 @@ fun DiscordSettings(
             ExposedDropdownMenu(expanded = activityStatusExpanded, onDismissRequest = { activityStatusExpanded = false }) {
                 activityStatus.forEach { opt ->
                     val display = when (opt) {
-                        "online" -> "Online"
-                        "dnd" -> "Do Not Disturb"
-                        "idle" -> "Idle"
-                        "streaming" -> "Streaming"
+                        "online" -> stringResource(R.string.online)
+                        "dnd" -> stringResource(R.string.dnd)
+                        "idle" -> stringResource(R.string.idle)
+                        "streaming" -> stringResource(R.string.streaming)
                         else -> opt
                     }
                     DropdownMenuItem(text = { Text(display) }, onClick = {
@@ -593,7 +593,7 @@ if (intervalSelection == "Custom") {
                     }
                 }
             },
-            label = { Text("Value") },
+            label = { Text(stringResource(R.string.value)) },
             modifier = Modifier.weight(1f).padding(end = 8.dp),
             singleLine = true
         )
@@ -602,14 +602,14 @@ if (intervalSelection == "Custom") {
         ExposedDropdownMenuBox(expanded = unitExpanded, onExpandedChange = { unitExpanded = it }) {
             TextField(
                 value = when (customUnit) {
-                    "S" -> "Seconds"
-                    "M" -> "Minutes"
-                    "H" -> "Hours"
-                    else -> "Seconds"
+                    "S" -> stringResource(R.string.seconds)
+                    "M" -> stringResource(R.string.minutes)
+                    "H" -> stringResource(R.string.hours)
+                    else -> stringResource(R.string.seconds)
                 },
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Unit") },
+                label = { Text(stringResource(R.string.unit)) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = unitExpanded) },
                 modifier = Modifier
                     .menuAnchor()
@@ -617,7 +617,11 @@ if (intervalSelection == "Custom") {
                     .pointerInput(Unit) { detectTapGestures { unitExpanded = true } }
             )
             ExposedDropdownMenu(expanded = unitExpanded, onDismissRequest = { unitExpanded = false }) {
-                listOf("S" to "Seconds", "M" to "Minutes", "H" to "Hours").forEach { (code, label) ->
+                listOf(
+                    "S" to stringResource(R.string.seconds),
+                    "M" to stringResource(R.string.minutes),
+                    "H" to stringResource(R.string.hours)
+                ).forEach { (code, label) ->
                     DropdownMenuItem(text = { Text(label) }, onClick = {
                         // Enforce minimum when switching to seconds
                         if (code == "S" && customValue < 30) {
@@ -772,7 +776,7 @@ ExposedDropdownMenuBox(expanded = largeImageExpanded, onExpandedChange = { large
     ExposedDropdownMenu(expanded = largeImageExpanded, onDismissRequest = { largeImageExpanded = false }) {
         imageOptions.forEach { opt ->
             val display = when (opt) {
-                "appicon" -> "App Icon"
+                "appicon" -> stringResource(R.string.app_icon)
                 else -> opt.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
             }
             DropdownMenuItem(text = { Text(display) }, onClick = {
@@ -810,12 +814,12 @@ ExposedDropdownMenuBox(expanded = largeTextExpanded, onExpandedChange = { largeT
     ExposedDropdownMenu(expanded = largeTextExpanded, onDismissRequest = { largeTextExpanded = false }) {
         largeTextOptions.forEach { opt ->
             val display = when (opt) {
-                "song" -> "Song name"
-                "artist" -> "Artist name"
-                "album" -> "Album name"
-                "app" -> "App name"
-                "custom" -> "Custom text"
-                "dontshow" -> "Don't show"
+                "song" -> stringResource(R.string.song_name)
+                "artist" -> stringResource(R.string.artist_name)
+                "album" -> stringResource(R.string.album_name)
+                "app" -> stringResource(R.string.app_name)
+                "custom" -> stringResource(R.string.custom_text)
+                "dontshow" -> stringResource(R.string.dont_show)
                 else -> opt
             }
             DropdownMenuItem(
@@ -857,8 +861,8 @@ ExposedDropdownMenuBox(expanded = smallImageExpanded, onExpandedChange = { small
     ExposedDropdownMenu(expanded = smallImageExpanded, onDismissRequest = { smallImageExpanded = false }) {
         smallImageOptions.forEach { opt ->
             val display = when (opt) {
-                "appicon" -> "App Icon"
-                "dontshow" -> "Don't show"
+                "appicon" -> stringResource(R.string.app_icon)
+                "dontshow" -> stringResource(R.string.dont_show)
                 else -> opt.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
             }
             DropdownMenuItem(text = { Text(display) }, onClick = {
@@ -1007,23 +1011,24 @@ fun EditablePreference(
         description = description ?: if (value.isEmpty()) defaultValue else value,
         icon = { Icon(painterResource(iconRes), null) },
         trailingContent = {
-            TextButton(onClick = { showDialog = true }) { Text("Edit") }
+            TextButton(onClick = { showDialog = true }) { Text(stringResource(R.string.edit)) }
         }
     )
     if (showDialog) {
         var text by remember { mutableStateOf(value) }
+        val context = LocalContext.current
         AlertDialog(
             onDismissRequest = { showDialog = false },
             confirmButton = {
                 TextButton(onClick = {
                     onValueChange(if (text.isBlank()) "" else text)
                     showDialog = false
-                }) { Text("Save") }
+                }) { Text(stringResource(R.string.save)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDialog = false }) { Text("Cancel") }
+                TextButton(onClick = { showDialog = false }) { Text(stringResource(R.string.cancel)) }
             },
-            title = { Text("Edit $title") },
+            title = { Text(stringResource(R.string.edit_title, title)) },
             text = {
                 TextField(
                     value = text,
@@ -1083,31 +1088,31 @@ fun RichPresence(
    val (largeTextCustom) = rememberPreference(DiscordLargeTextCustomKey, "")
 
     val previewLargeText = when (largeTextSource) {
-    "song" -> song?.song?.title ?: "Song name"
-    "artist" -> song?.artists?.firstOrNull()?.name ?: "Artist"
-    "album" -> song?.song?.albumName ?: song?.album?.title ?: "Album"
+    "song" -> song?.song?.title ?: stringResource(R.string.song_name)
+    "artist" -> song?.artists?.firstOrNull()?.name ?: stringResource(R.string.artist_name)
+    "album" -> song?.song?.albumName ?: song?.album?.title ?: stringResource(R.string.album_name)
     "app" -> stringResource(R.string.app_name)
-    "custom" -> largeTextCustom.ifBlank { "Custom text" }
+    "custom" -> largeTextCustom.ifBlank { stringResource(R.string.custom_text) }
     "dontshow" -> null
     else -> song?.song?.albumName ?: song?.album?.title
     }
     val resolvedButton1Url = resolveUrl(button1UrlSource, song, button1CustomUrl)
     val resolvedButton2Url = resolveUrl(button2UrlSource, song, button2CustomUrl)
     val activityVerb = when (activityType.uppercase()) {
-    "PLAYING" -> "Playing"
-    "LISTENING" -> "Listening to"
-    "WATCHING" -> "Watching"
-    "STREAMING" -> "Streaming"
-    "COMPETING" -> "Competing in"
-    else -> activityType.replaceFirstChar { 
-        if (it.isLowerCase()) it.titlecase() else it.toString() 
+    "PLAYING" -> stringResource(R.string.playing)
+    "LISTENING" -> stringResource(R.string.listening_to)
+    "WATCHING" -> stringResource(R.string.watching)
+    "STREAMING" -> stringResource(R.string.streaming)
+    "COMPETING" -> stringResource(R.string.competing_in)
+    else -> activityType.replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase() else it.toString()
        }
     }
 
     val previewTitle = when (nameSource) {
-    ActivitySource.ARTIST -> "$activityVerb ${song?.artists?.firstOrNull()?.name ?: "Artist"}"
-    ActivitySource.ALBUM -> "$activityVerb ${song?.album?.title ?: song?.song?.albumName ?: "Album"}"
-    ActivitySource.SONG -> "$activityVerb ${song?.song?.title ?: "Song"}"
+    ActivitySource.ARTIST -> "$activityVerb ${song?.artists?.firstOrNull()?.name ?: stringResource(R.string.artist_name)}"
+    ActivitySource.ALBUM -> "$activityVerb ${song?.album?.title ?: song?.song?.albumName ?: stringResource(R.string.album_name)}"
+    ActivitySource.SONG -> "$activityVerb ${song?.song?.title ?: stringResource(R.string.song_name)}"
     ActivitySource.APP -> "$activityVerb ArchiveTune"
    }
 
@@ -1206,9 +1211,9 @@ fun RichPresence(
 
                             // Compute a preview for the "state" line according to the selected stateSource
                             val previewState = when (stateSource) {
-                                ActivitySource.ARTIST -> song?.artists?.joinToString { it.name } ?: "Artist"
-                                ActivitySource.ALBUM -> song?.song?.albumName ?: song?.album?.title ?: song?.song?.title ?: "Unknown Album"
-                                ActivitySource.SONG -> song?.song?.title ?: "Song"
+                                ActivitySource.ARTIST -> song?.artists?.joinToString { it.name } ?: stringResource(R.string.artist_name)
+                                ActivitySource.ALBUM -> song?.song?.albumName ?: song?.album?.title ?: song?.song?.title ?: stringResource(R.string.album_name)
+                                ActivitySource.SONG -> song?.song?.title ?: stringResource(R.string.song_name)
                                 ActivitySource.APP -> stringResource(R.string.app_name)
                             }
 
