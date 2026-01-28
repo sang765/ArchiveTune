@@ -41,6 +41,8 @@ import moe.koiverse.archivetune.ui.component.PreferenceEntry
 import moe.koiverse.archivetune.ui.component.PreferenceGroupTitle
 import moe.koiverse.archivetune.ui.component.SwitchPreference
 import moe.koiverse.archivetune.ui.component.ListItem
+import moe.koiverse.archivetune.ui.component.TextFieldDialog
+import moe.koiverse.archivetune.ui.component.InfoLabel
 import moe.koiverse.archivetune.ui.utils.backToMain
 import moe.koiverse.archivetune.utils.makeTimeString
 import moe.koiverse.archivetune.utils.rememberEnumPreference
@@ -52,6 +54,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.TextButton
+import androidx.compose.ui.text.input.TextFieldValue
 import com.my.kizzy.rpc.KizzyRPC
 import timber.log.Timber
 import moe.koiverse.archivetune.utils.DiscordRPC
@@ -191,6 +194,7 @@ fun DiscordSettings(
         )
 
     var showLogoutConfirm by remember { mutableStateOf(false) }
+    var showTokenInputDialog by remember { mutableStateOf(false) }
 
     PreferenceEntry(
             title = {
@@ -205,9 +209,17 @@ fun DiscordSettings(
                 if (isLoggedIn) {
                         OutlinedButton(onClick = { showLogoutConfirm = true }) { Text(stringResource(R.string.action_logout)) }
                     } else {
-                    OutlinedButton(onClick = {
-                        navController.navigate("settings/discord/login")
-                    }) { Text(stringResource(R.string.action_login)) }
+                    Box(
+                        modifier = Modifier.pointerInput(Unit) {
+                            detectTapGestures(
+                                onLongPress = { showTokenInputDialog = true }
+                            )
+                        }
+                    ) {
+                        OutlinedButton(onClick = {
+                            navController.navigate("settings/discord/login")
+                        }) { Text(stringResource(R.string.action_login)) }
+                    }
                 }
             },
         )
@@ -227,6 +239,48 @@ fun DiscordSettings(
                     },
                     dismissButton = {
                         TextButton(onClick = { showLogoutConfirm = false }) { Text(stringResource(R.string.logout_confirm_no)) }
+                    }
+                )
+            }
+
+            if (showTokenInputDialog) {
+                TextFieldDialog(
+                    title = { Text("Discord Token Login") },
+                    initialTextFieldValue = TextFieldValue(),
+                    singleLine = true,
+                    isInputValid = { it.trim().isNotEmpty() },
+                    onDone = { token ->
+                        val trimmed = token.trim()
+                        if (trimmed.isNotEmpty() && trimmed != "null" && trimmed != "error") {
+                            coroutineScope.launch(Dispatchers.IO) {
+                                try {
+                                    KizzyRPC.getUserInfo(trimmed).onSuccess { userInfo ->
+                                        withContext(Dispatchers.Main) {
+                                            discordToken = trimmed
+                                            discordUsername = userInfo.username
+                                            discordName = userInfo.name
+                                            snackbarHostState.showSnackbar("Logged in successfully!")
+                                        }
+                                    }.onFailure { error ->
+                                        withContext(Dispatchers.Main) {
+                                            snackbarHostState.showSnackbar("Invalid token: ${error.message}")
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    withContext(Dispatchers.Main) {
+                                        snackbarHostState.showSnackbar("Login failed: ${e.message}")
+                                    }
+                                }
+                            }
+                        }
+                        showTokenInputDialog = false
+                    },
+                    onDismiss = { showTokenInputDialog = false },
+                    extraContent = {
+                        Spacer(Modifier.height(8.dp))
+                        InfoLabel(
+                            text = "Enter your Discord user token. You can find this in Discord Developer Tools (Network tab → any request → Authorization header)."
+                        )
                     }
                 )
             }
