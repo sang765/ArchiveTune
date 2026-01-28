@@ -69,7 +69,9 @@ class DiscordAuthManager(private val context: Context) {
     /**
      * Get current token from preferences
      */
-    fun getToken(): String? = runCatching {
+suspend fun getToken(): String? = runCatching {
+    context.dataStore.data.first()[DiscordTokenKey]
+}.getOrNull()
         context.dataStore.data.first()[DiscordTokenKey]
     }.getOrNull()
 
