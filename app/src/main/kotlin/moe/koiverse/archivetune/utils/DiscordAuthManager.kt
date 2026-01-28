@@ -119,7 +119,12 @@ suspend fun getToken(): String? = runCatching {
     /**
      * Check if user is logged in
      */
-    fun isLoggedIn(): Boolean {
+suspend fun isLoggedIn(): Boolean {
+    val token = runCatching {
+        context.dataStore.data.first()[DiscordTokenKey]
+    }.getOrNull()
+    return !token.isNullOrEmpty()
+}
         val token = runCatching {
             context.dataStore.data.first()[DiscordTokenKey]
         }.getOrNull()
