@@ -119,6 +119,7 @@ val DiscordTokenKey = stringPreferencesKey("discordToken")
 val DiscordInfoDismissedKey = booleanPreferencesKey("discordInfoDismissed")
 val DiscordUsernameKey = stringPreferencesKey("discordUsername")
 val DiscordNameKey = stringPreferencesKey("discordName")
+val DiscordAvatarUrlKey = stringPreferencesKey("discordAvatarUrl")
 val EnableDiscordRPCKey = booleanPreferencesKey("discordRPCEnable")
 // Discord activity customization keys
 val DiscordActivityNameKey = stringPreferencesKey("discordActivityName")

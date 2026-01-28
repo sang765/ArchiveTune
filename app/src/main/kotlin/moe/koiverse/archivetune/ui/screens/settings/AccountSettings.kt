@@ -32,12 +32,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -85,6 +87,9 @@ import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.constants.AccountChannelHandleKey
 import moe.koiverse.archivetune.constants.AccountEmailKey
 import moe.koiverse.archivetune.constants.AccountNameKey
+import moe.koiverse.archivetune.constants.DiscordNameKey
+import moe.koiverse.archivetune.constants.DiscordTokenKey
+import moe.koiverse.archivetune.constants.DiscordUsernameKey
 import moe.koiverse.archivetune.constants.DataSyncIdKey
 import moe.koiverse.archivetune.constants.InnerTubeCookieKey
 import moe.koiverse.archivetune.constants.SelectedYtmPlaylistsKey
@@ -96,10 +101,13 @@ import moe.koiverse.archivetune.innertube.utils.completed
 import moe.koiverse.archivetune.innertube.utils.parseCookieString
 import moe.koiverse.archivetune.ui.component.InfoLabel
 import moe.koiverse.archivetune.ui.component.TextFieldDialog
+import moe.koiverse.archivetune.utils.DiscordAuthManager
 import moe.koiverse.archivetune.utils.Updater
 import moe.koiverse.archivetune.utils.dataStore
 import moe.koiverse.archivetune.utils.rememberPreference
 import moe.koiverse.archivetune.viewmodels.HomeViewModel
+import com.my.kizzy.rpc.KizzyRPC
+import timber.log.Timber
 
 @Composable
 fun AccountSettings(
@@ -130,8 +138,17 @@ fun AccountSettings(
     var showToken by remember { mutableStateOf(false) }
     var showTokenEditor by remember { mutableStateOf(false) }
     var showPlaylistDialog by remember { mutableStateOf(false) }
+    var showDiscordTokenDialog by remember { mutableStateOf(false) }
+    var showDiscordLogoutConfirm by remember { mutableStateOf(false) }
 
     val hasUpdate = latestVersionName != BuildConfig.VERSION_NAME
+
+    // Discord preferences
+    var discordToken by rememberPreference(DiscordTokenKey, "")
+    var discordUsername by rememberPreference(DiscordUsernameKey, "")
+    var discordName by rememberPreference(DiscordNameKey, "")
+    val scope = rememberCoroutineScope()
+    val discordAuthManager = remember { DiscordAuthManager(context) }
 
     Column(
         modifier = Modifier
@@ -183,6 +200,24 @@ fun AccountSettings(
                     onDismiss = { showTokenEditor = false }
                 )
             }
+
+            // Discord Account Section
+            DiscordAccountSection(
+                discordToken = discordToken,
+                discordUsername = discordUsername,
+                discordName = discordName,
+                discordAuthManager = discordAuthManager,
+                scope = scope,
+                onTokenLoginClick = { showDiscordTokenDialog = true },
+                onWebViewLoginClick = { navController.navigate("discordLoginScreen") },
+                onValidateClick = {
+                    scope.launch {
+                        val isValid = discordAuthManager.isTokenValid()
+                        Timber.d("Discord token validation: $isValid")
+                    }
+                },
+                onLogoutClick = { showDiscordLogoutConfirm = true }
+            )
 
             // Account Options Section
             AnimatedVisibility(
@@ -293,6 +328,44 @@ fun AccountSettings(
     if (showPlaylistDialog) {
         PlaylistSelectionDialog(
             onDismiss = { showPlaylistDialog = false }
+        )
+    }
+
+    // Discord Token Input Dialog
+    if (showDiscordTokenDialog) {
+        TokenInputDialog(
+            onDismiss = { showDiscordTokenDialog = false },
+            onLoginSuccess = {
+                showDiscordTokenDialog = false
+            },
+            authManager = discordAuthManager
+        )
+    }
+
+    // Discord Logout Confirmation Dialog
+    if (showDiscordLogoutConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDiscordLogoutConfirm = false },
+            title = { Text("Logout from Discord") },
+            text = { Text("Are you sure you want to log out? This will disable Discord Rich Presence.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            discordAuthManager.clearToken()
+                            discordToken = ""
+                            showDiscordLogoutConfirm = false
+                        }
+                    }
+                ) {
+                    Text("Logout", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDiscordLogoutConfirm = false }) {
+                    Text("Cancel")
+                }
+            }
         )
     }
 }
@@ -943,4 +1016,138 @@ private fun PlaylistSelectionDialog(onDismiss: () -> Unit) {
             }
         }
     )
+}
+
+@Composable
+private fun DiscordAccountSection(
+    discordToken: String,
+    discordUsername: String,
+    discordName: String,
+    discordAuthManager: DiscordAuthManager,
+    scope: kotlinx.coroutines.CoroutineScope,
+    onTokenLoginClick: () -> Unit,
+    onWebViewLoginClick: () -> Unit,
+    onValidateClick: () -> Unit,
+    onLogoutClick: () -> Unit
+) {
+    val isLoggedIn = discordToken.isNotEmpty()
+
+    Text(
+        text = "Discord Account",
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
+        fontWeight = FontWeight.Medium,
+        modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
+    )
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
+    ) {
+        if (!isLoggedIn) {
+            // Not logged in - show two login options
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "Discord Rich Presence",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Text(
+                    text = "Display your music activity on Discord",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                FilledButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = onWebViewLoginClick
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.discord),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Login with Discord (WebView)")
+                }
+
+                FilledTonalButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = onTokenLoginClick
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.token),
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("Login with Discord Token")
+                }
+            }
+        } else {
+            // Logged in - show account info
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.discord),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            text = discordName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                    Text(
+                        text = "@$discordUsername",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "Connected • RPC: Active",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                Column(horizontalAlignment = Alignment.End) {
+                    FilledTonalButton(
+                        onClick = onValidateClick,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Validate")
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    FilledTonalButton(
+                        onClick = onLogoutClick,
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Logout")
+                    }
+                }
+            }
+        }
+    }
 }
