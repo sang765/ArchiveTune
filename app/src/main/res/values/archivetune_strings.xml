@@ -249,4 +249,15 @@
     <string name="theme_preview_secondary_action">Secondary Action</string>
 
     <string name="copy">Copy</string>
+    <!-- Discord Token Login Dialog -->
+    <string name="discord_token_login_title">Login with Discord Token</string>
+    <string name="discord_token_description">Enter your Discord token to enable Discord Rich Presence. Your token allows the app to update your Discord status with your current music playback.</string>
+    <string name="discord_token_instructions">To find your Discord token:\n1. Open Discord in your browser\n2. Press F12 to open Developer Tools\n3. Go to the \"Application\" or \"Storage\" tab\n4. Expand \"Local Storage\" and select discord.com\n5. Find and copy the \"token\" value</string>
+    <string name="discord_token_placeholder">Paste your Discord token here</string>
+    <string name="discord_token_login_success">Successfully logged in as %1$s</string>
+    <string name="discord_token_login_failed">Invalid Discord token</string>
+    <string name="discord_token_network_error">Failed to validate token. Check your connection.</string>
+    <string name="discord_token_invalid_format">Invalid token format. Discord tokens should start with letters or numbers and be at least 50 characters long.</string>
+    <string name="paste_from_clipboard">Paste from Clipboard</string>
+    <string name="hold_for_discord_login">Hold for Discord token login</string>
 </resources>

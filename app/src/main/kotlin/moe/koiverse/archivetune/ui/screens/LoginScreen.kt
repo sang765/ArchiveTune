@@ -6,20 +6,37 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import moe.koiverse.archivetune.LocalPlayerAwareWindowInsets
 import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.constants.AccountChannelHandleKey
@@ -33,10 +50,6 @@ import moe.koiverse.archivetune.ui.utils.backToMain
 import moe.koiverse.archivetune.utils.rememberPreference
 import moe.koiverse.archivetune.utils.reportException
 import moe.koiverse.archivetune.innertube.YouTube
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 @SuppressLint("SetJavaScriptEnabled")
 @OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
@@ -51,6 +64,7 @@ fun LoginScreen(
     var accountName by rememberPreference(AccountNameKey, "")
     var accountEmail by rememberPreference(AccountEmailKey, "")
     var accountChannelHandle by rememberPreference(AccountChannelHandleKey, "")
+    var showDiscordTokenDialog by remember { mutableStateOf(false) }
 
     var webView: WebView? = null
 
@@ -122,5 +136,59 @@ fun LoginScreen(
 
     BackHandler(enabled = webView?.canGoBack() == true) {
         webView?.goBack()
+    }
+
+    // Discord token login FAB with hold gesture
+    var isHoldingDiscord by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        FloatingActionButton(
+            onClick = { /* Short press does nothing */ },
+            modifier = Modifier
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = { /* Do nothing on tap */ },
+                        onPress = {
+                            isHoldingDiscord = true
+                            awaitRelease()
+                            isHoldingDiscord = false
+                            if (it.pressed) {
+                                coroutineScope.launch {
+                                    delay(600) // 600ms hold threshold
+                                    showDiscordTokenDialog = true
+                                    isHoldingDiscord = false
+                                }
+                            }
+                        }
+                    )
+                }
+                .offset(x = (-16).dp, y = (-16).dp),
+            containerColor = if (isHoldingDiscord) {
+                MaterialTheme.colorScheme.tertiary
+            } else {
+                MaterialTheme.colorScheme.tertiaryContainer
+            },
+            contentColor = if (isHoldingDiscord) {
+                MaterialTheme.colorScheme.onTertiary
+            } else {
+                MaterialTheme.colorScheme.onTertiaryContainer
+            }
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.discord),
+                contentDescription = stringResource(R.string.hold_for_discord_login)
+            )
+        }
+    }
+
+    if (showDiscordTokenDialog) {
+        DiscordTokenLoginDialog(
+            onDismiss = { showDiscordTokenDialog = false }
+        )
     }
 }
