@@ -205,60 +205,120 @@ fun DiscordSettings(
                 if (isLoggedIn) {
                         OutlinedButton(onClick = { showLogoutConfirm = true }) { Text(stringResource(R.string.action_logout)) }
                     } else {
-                    OutlinedButton(onClick = {
-                        navController.navigate("settings/discord/login")
-                    }) { Text(stringResource(R.string.action_login)) }
-                }
-            },
-        )
-
+       Text(
+           text = stringResource(R.string.account),
+           style = MaterialTheme.typography.headlineSmall,
+           modifier = Modifier
+           .fillMaxWidth()
+           .padding(horizontal = 16.dp, vertical = 8.dp)
+       )
             if (showLogoutConfirm) {
-                AlertDialog(
+
+   var showLogoutConfirm by remember { mutableStateOf(false) }
+    var showTokenDialog by remember { mutableStateOf(false) }
                     onDismissRequest = { showLogoutConfirm = false },
-                    title = { Text(stringResource(R.string.logout_confirm_title)) },
-                    text = { Text(stringResource(R.string.logout_confirm_message)) },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            discordName = ""
-                            discordToken = ""
-                            discordUsername = ""
-                            showLogoutConfirm = false
-                        }) { Text(stringResource(R.string.logout_confirm_yes)) }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showLogoutConfirm = false }) { Text(stringResource(R.string.logout_confirm_no)) }
-                    }
-                )
-            }
 
-        Text(
-            text = stringResource(R.string.options),
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier
-                .fillMaxWidth()
+   PreferenceEntry(
+           title = {
+               Text(
+                   text = if (isLoggedIn) discordName else stringResource(R.string.not_logged_in),
+                   modifier = Modifier.alpha(if (isLoggedIn) 1f else 0.5f),
+               )
+           },
+           description = if (discordUsername.isNotEmpty()) "@$discordUsername" else null,
+           icon = { Icon(painterResource(R.drawable.discord), null) },
+           trailingContent = {
+               if (isLoggedIn) {
+                       OutlinedButton(onClick = { showLogoutConfirm = true }) { Text(stringResource(R.string.action_logout)) }
+                   } else {
+                    OutlinedButton(
+                        modifier = Modifier.pointerInput(Unit) {
+                            detectTapGestures(onLongPress = { showTokenDialog = true })
+                        },
+                        onClick = {
+                            navController.navigate("settings/discord/login")
+                        }) { Text(stringResource(R.string.action_login)) }
+                   }
+               }
+           },
+       )
                 .padding(horizontal = 16.dp, vertical = 8.dp)
-        )
 
-        SwitchPreference(
-            title = { Text(stringResource(R.string.enable_discord_rpc)) },
-            checked = discordRPC,
-            onCheckedChange = onDiscordRPCChange,
-            isEnabled = isLoggedIn,
-        )
-
-        // Add a refresh action to manually re-update Discord RPC
-        // PreferenceEntry(
-        //     title = { Text(stringResource(R.string.refresh)) },
-        //     description = stringResource(R.string.description_refresh),
-        //     icon = { Icon(painterResource(R.drawable.refresh), null) },
-        //     trailingContent = {
-        //         IconButton(onClick = {
-        //             // trigger update in background
-        //             coroutineScope.launch(Dispatchers.IO) {
+           if (showLogoutConfirm) {
+               AlertDialog(
+                   onDismissRequest = { showLogoutConfirm = false },
+                   title = { Text(stringResource(R.string.logout_confirm_title)) },
+                   text = { Text(stringResource(R.string.logout_confirm_message)) },
+                   confirmButton = {
+                       TextButton(onClick = {
+                           discordName = ""
+                           discordToken = ""
+                           discordUsername = ""
+                           showLogoutConfirm = false
+                       }) { Text(stringResource(R.string.logout_confirm_yes)) }
+                   },
+                   dismissButton = {
+                       TextButton(onClick = { showLogoutConfirm = false }) { Text(stringResource(R.string.logout_confirm_no)) }
+                   }
+               )
+           }
+        if (showTokenDialog) {
+            var tokenText by remember { mutableStateOf("") }
+            AlertDialog(
+                onDismissRequest = { showTokenDialog = false },
+                title = { Text("Enter Discord Token") },
+                text = {
+                    TextField(
+                        value = tokenText,
+                        onValueChange = { tokenText = it },
+                        label = { Text("Token") },
+                        singleLine = true,
+                        placeholder = { Text("Paste your Discord token here") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val trimmed = tokenText.trim()
+                        if (trimmed.isNotEmpty() && trimmed != "null" && trimmed != "error") {
+                            coroutineScope.launch(Dispatchers.IO) {
+                                KizzyRPC.getUserInfo(trimmed)
+                                    .onSuccess {
+                                        withContext(Dispatchers.Main) {
+                                            discordToken = trimmed
+                                            discordUsername = it.username
+                                            discordName = it.name
+                                            showTokenDialog = false
+                                            snackbarHostState.showSnackbar("Logged in with token!")
+                                        }
+                                    }
+                                    .onFailure {
+                                        withContext(Dispatchers.Main) {
+                                            snackbarHostState.showSnackbar("Invalid token")
+                                        }
+                                    }
+                            }
+                        } else {
+                            showTokenDialog = false
+                        }
+                    }) { Text("Login") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showTokenDialog = false }) { Text("Cancel") }
+                }
+            )
+        }
         //                 val token = discordToken
-        //                 if (token.isNotBlank()) {
-        //                     try {
-        //                         val rpc = DiscordRPC(context, token)
+
+       Text(
+           text = stringResource(R.string.options),
+           style = MaterialTheme.typography.headlineSmall,
+           modifier = Modifier
+               .fillMaxWidth()
+               .padding(horizontal = 16.dp, vertical = 8.dp)
+       )
         //                         song?.let { rpc.updateSong(it, position) }
         //                     } catch (_: Exception) {
         //                         // ignore
