@@ -106,6 +106,12 @@
     <string name="token_hidden">토큰을 표시하려면 탭하세요.</string>
     <string name="token_shown">복사하거나 수정하려면 다시 탭하세요.</string>
     <string name="token_adv_login_description">이것은 ADVANCED 로그인 방법입니다. 웹 포털 대신 여기에 로그인 토큰을 직접 입력하거나 업데이트할 수도 있습니다. 예를 들어 이렇게 하면 여러 장치에서 로그인하는 속도가 빨라질 수 있습니다. 앱이 구문 분석하지 못한 유효하지 않은 토큰 형식은 허용되지 않습니다.</string>
+    <string name="discord_token_login">토큰으로 로그인</string>
+    <string name="discord_view_edit_token">토큰 보기/편집</string>
+    <string name="discord_enter_token">Discord 토큰 입력</string>
+    <string name="discord_token_hint">Discord 토큰을 여기에 붙여넣으세요</string>
+    <string name="discord_token_warning">토큰을 안전하게 보관하세요. 다른 사람과 공유하지 마세요.</string>
+    <string name="discord_token_invalid">잘못된 토큰 형식</string>
     <string name="ytm_sync">YouTube Music 계정과 자동으로 동기화</string>
     <string name="yt_sync">계정과 자동 동기화</string>
     <string name="more_content">더 많은 콘텐츠</string>

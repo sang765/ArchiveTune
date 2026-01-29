@@ -125,6 +125,12 @@
     <string name="token_hidden">Nhấn để hiện token</string>
     <string name="token_shown">Nhấn lại để sao chép hoặc chỉnh sửa</string>
     <string name="token_adv_login_description">Đây là phương thức đăng nhập NÂNG CAO. Thay vì cổng web, bạn có thể nhập hoặc cập nhật token đăng nhập ở đây. Ví dụ, điều này có thể tăng tốc đăng nhập trên nhiều thiết bị. Xin lưu ý rằng bất kỳ định dạng token nào không hợp lệ mà ứng dụng không thể phân tích sẽ không được chấp nhận</string>
+    <string name="discord_token_login">Đăng nhập bằng Token</string>
+    <string name="discord_view_edit_token">Xem/Chỉnh sửa Token</string>
+    <string name="discord_enter_token">Nhập Discord Token</string>
+    <string name="discord_token_hint">Dán Discord token của bạn vào đây</string>
+    <string name="discord_token_warning">Giữ token của bạn an toàn. Không bao giờ chia sẻ với người khác.</string>
+    <string name="discord_token_invalid">Định dạng token không hợp lệ</string>
     <string name="ytm_sync">Tự động đồng bộ với tài khoản YouTube Music của bạn</string>
     <string name="yt_sync">Tự đồng bộ với tài khoản</string>
     <string name="more_content">Thêm nội dung</string>

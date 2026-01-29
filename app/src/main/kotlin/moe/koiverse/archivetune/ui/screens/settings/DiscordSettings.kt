@@ -205,12 +205,44 @@ fun DiscordSettings(
                 if (isLoggedIn) {
                         OutlinedButton(onClick = { showLogoutConfirm = true }) { Text(stringResource(R.string.action_logout)) }
                     } else {
-                    OutlinedButton(onClick = {
-                        navController.navigate("settings/discord/login")
-                    }) { Text(stringResource(R.string.action_login)) }
-                }
+
+            if (showLogoutConfirm) {
+                        }) { Text(stringResource(R.string.action_login)) }
+                    text = { Text(stringResource(R.string.logout_confirm_message)) },
             },
         )
+
+        // Add token login option when not logged in
+        if (!isLoggedIn) {
+            PreferenceEntry(
+                title = { Text(stringResource(R.string.discord_token_login)) },
+                description = "Alternative login method using Discord token",
+                icon = { Icon(painterResource(R.drawable.token), null) },
+                trailingContent = {
+                    OutlinedButton(onClick = {
+                        navController.navigate("settings/discord/token_login")
+                    }) { 
+                        Text(stringResource(R.string.action_login)) 
+                    }
+                }
+            )
+        }
+
+        // Add token management option when logged in
+        if (isLoggedIn) {
+            PreferenceEntry(
+                title = { Text(stringResource(R.string.discord_view_edit_token)) },
+                description = "Manage your Discord token",
+                icon = { Icon(painterResource(R.drawable.token), null) },
+                trailingContent = {
+                    OutlinedButton(onClick = {
+                        navController.navigate("settings/discord/token_login")
+                    }) { 
+                        Text(stringResource(R.string.edit)) 
+                    }
+                }
+            )
+        }
 
             if (showLogoutConfirm) {
                 AlertDialog(
@@ -237,33 +269,8 @@ fun DiscordSettings(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 8.dp)
-        )
-
-        SwitchPreference(
-            title = { Text(stringResource(R.string.enable_discord_rpc)) },
-            checked = discordRPC,
-            onCheckedChange = onDiscordRPCChange,
-            isEnabled = isLoggedIn,
-        )
-
-        // Add a refresh action to manually re-update Discord RPC
-        // PreferenceEntry(
-        //     title = { Text(stringResource(R.string.refresh)) },
-        //     description = stringResource(R.string.description_refresh),
-        //     icon = { Icon(painterResource(R.drawable.refresh), null) },
-        //     trailingContent = {
-        //         IconButton(onClick = {
-        //             // trigger update in background
-        //             coroutineScope.launch(Dispatchers.IO) {
-        //                 val token = discordToken
-        //                 if (token.isNotBlank()) {
-        //                     try {
-        //                         val rpc = DiscordRPC(context, token)
-        //                         song?.let { rpc.updateSong(it, position) }
-        //                     } catch (_: Exception) {
-        //                         // ignore
-        //                     }
-        //                 }
+                            discordName = ""
+                            discordToken = ""
         //             }
         //         }) {
         //             Icon(painterResource(R.drawable.update), contentDescription = null)

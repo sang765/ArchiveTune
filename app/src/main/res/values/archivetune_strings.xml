@@ -126,6 +126,12 @@
     <string name="token_hidden">Tap to show token</string>
     <string name="token_shown">Tap again to copy or edit</string>
     <string name="token_adv_login_description">This is an ADVANCED login method. As an alternative to the web portal, you may directly enter or update your login token here. For example, this can speed up logging in on multiple devices. Please note that any invalid token formats the app fails to parse will not be accepted</string>
+    <string name="discord_token_login">Login with Token</string>
+    <string name="discord_view_edit_token">View/Edit Token</string>
+    <string name="discord_enter_token">Enter Discord Token</string>
+    <string name="discord_token_hint">Paste your Discord token here</string>
+    <string name="discord_token_warning">Keep your token secure. Never share it with others.</string>
+    <string name="discord_token_invalid">Invalid token format</string>
     <string name="ytm_sync">Automatically sync with your YouTube Music account</string>
     <string name="yt_sync">Auto sync with account</string>
     <string name="more_content">More content</string>

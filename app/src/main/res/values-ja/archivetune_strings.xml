@@ -106,6 +106,12 @@
     <string name="token_hidden">タップしてトークンを表示</string>
     <string name="token_shown">もう一度タップしてコピーまたは編集します</string>
     <string name="token_adv_login_description">これは高度なログイン方法です。 Web ポータルの代わりに、ここでログイン トークンを直接入力または更新することもできます。たとえば、これにより複数のデバイスでのログインが高速化されます。アプリが解析できない無効なトークン形式は受け入れられないことに注意してください</string>
+    <string name="discord_token_login">トークンでログイン</string>
+    <string name="discord_view_edit_token">トークンを表示/編集</string>
+    <string name="discord_enter_token">Discordトークンを入力</string>
+    <string name="discord_token_hint">Discordトークンをここに貼り付けてください</string>
+    <string name="discord_token_warning">トークンを安全に保管してください。他の人と共有しないでください。</string>
+    <string name="discord_token_invalid">無効なトークン形式</string>
     <string name="ytm_sync">YouTube Music アカウントと自動的に同期します</string>
     <string name="yt_sync">アカウントと自動同期</string>
     <string name="more_content">さらなるコンテンツ</string>
