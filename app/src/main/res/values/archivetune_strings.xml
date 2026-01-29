@@ -124,6 +124,13 @@
     <string name="discord">Discord</string>
     <string name="advanced_login">Login with token</string>
     <string name="token_hidden">Tap to show token</string>
+    <string name="discord_token_login">Discord Token Login</string>
+    <string name="discord_login_with_token">Login with Token</string>
+    <string name="discord_view_edit_token">View/Edit Token</string>
+    <string name="discord_token">Discord Token</string>
+    <string name="discord_token_placeholder">Paste your Discord token here</string>
+    <string name="discord_token_info">Enter your Discord token to login without using the web browser. This method is faster but requires you to obtain your token manually from Discord.</string>
+    <string name="discord_token_help">Warning: Keep your token secure and never share it with others. You can find your token in Discord's developer tools.</string>
     <string name="token_shown">Tap again to copy or edit</string>
     <string name="token_adv_login_description">This is an ADVANCED login method. As an alternative to the web portal, you may directly enter or update your login token here. For example, this can speed up logging in on multiple devices. Please note that any invalid token formats the app fails to parse will not be accepted</string>
     <string name="ytm_sync">Automatically sync with your YouTube Music account</string>
@@ -249,4 +256,6 @@
     <string name="theme_preview_secondary_action">Secondary Action</string>
 
     <string name="copy">Copy</string>
+    <string name="save">Save</string>
+    <string name="clear_token">Clear Token</string>
 </resources>

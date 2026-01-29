@@ -65,6 +65,7 @@ import moe.koiverse.archivetune.ui.screens.settings.DarkMode
 import moe.koiverse.archivetune.ui.screens.settings.DiscordLoginScreen
 import moe.koiverse.archivetune.ui.screens.settings.DiscordSettings
 import moe.koiverse.archivetune.ui.screens.settings.DebugSettings
+import moe.koiverse.archivetune.ui.screens.settings.DiscordTokenLoginScreen
 import moe.koiverse.archivetune.ui.screens.settings.IntegrationScreen
 import moe.koiverse.archivetune.ui.screens.settings.LastFMSettings
 import moe.koiverse.archivetune.ui.screens.settings.PalettePickerScreen
@@ -338,6 +339,9 @@ fun NavGraphBuilder.navigationBuilder(
     }
     composable("settings/discord/login") {
         DiscordLoginScreen(navController)
+    }
+    composable("settings/discord/token") {
+        DiscordTokenLoginScreen(navController)
     }
     composable("settings/about") {
         AboutScreen(navController, scrollBehavior)

@@ -202,12 +202,28 @@ fun DiscordSettings(
             description = if (discordUsername.isNotEmpty()) "@$discordUsername" else null,
             icon = { Icon(painterResource(R.drawable.discord), null) },
             trailingContent = {
+                Column(horizontalAlignment = Alignment.End) {
                 if (isLoggedIn) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedButton(onClick = {
+                                navController.navigate("settings/discord/token")
+                            }) { 
+                                Text(stringResource(R.string.discord_view_edit_token)) 
+                            }
                         OutlinedButton(onClick = { showLogoutConfirm = true }) { Text(stringResource(R.string.action_logout)) }
+                        }
                     } else {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedButton(onClick = {
+                                navController.navigate("settings/discord/token")
+                            }) { 
+                                Text(stringResource(R.string.discord_login_with_token)) 
+                            }
                     OutlinedButton(onClick = {
                         navController.navigate("settings/discord/login")
                     }) { Text(stringResource(R.string.action_login)) }
+                        }
+                }
                 }
             },
         )

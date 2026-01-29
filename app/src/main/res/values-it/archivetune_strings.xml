@@ -126,6 +126,11 @@
     <string name="discord">Discordia</string>
     <string name="advanced_login">Accedi con gettone</string>
     <string name="token_hidden">Tocca per mostrare il token</string>
+    <string name="discord_token_login">Accesso con token Discord</string>
+    <string name="discord_login_with_token">Accedi con token</string>
+    <string name="discord_view_edit_token">Visualizza/Modifica token</string>
+    <string name="discord_token_info">Inserisci il tuo token Discord per accedere senza utilizzare il browser web. Questo metodo è più veloce ma richiede di ottenere il token manualmente da Discord.</string>
+    <string name="discord_token_help">Attenzione: Mantieni il tuo token sicuro e non condividerlo mai con altri. Puoi trovare il tuo token negli strumenti per sviluppatori di Discord.</string>
     <string name="token_shown">Tocca di nuovo per copiare o modificare</string>
     <string name="token_adv_login_description">Questo è un metodo di accesso AVANZATO. In alternativa al portale web, puoi inserire o aggiornare direttamente il tuo token di accesso qui. Ciò può ad esempio velocizzare l\'accesso su più dispositivi. Tieni presente che eventuali formati di token non validi che l\'app non riesce ad analizzare non saranno accettati</string>
     <string name="ytm_sync">Sincronizza automaticamente con il tuo account YouTube Music</string>

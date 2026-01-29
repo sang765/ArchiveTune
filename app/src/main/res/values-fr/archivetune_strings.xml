@@ -109,6 +109,11 @@
     <string name="discord">Discord</string>
     <string name="advanced_login">Connexion avec un jeton</string>
     <string name="token_hidden">Cliquer pour afficher le jeton</string>
+    <string name="discord_token_login">Connexion par jeton Discord</string>
+    <string name="discord_login_with_token">Se connecter avec un jeton</string>
+    <string name="discord_view_edit_token">Voir/Modifier le jeton</string>
+    <string name="discord_token_info">Entrez votre jeton Discord pour vous connecter sans utiliser le navigateur web. Cette méthode est plus rapide mais nécessite d\'obtenir votre jeton manuellement depuis Discord.</string>
+    <string name="discord_token_help">Attention : Gardez votre jeton sécurisé et ne le partagez jamais avec d\'autres. Vous pouvez trouver votre jeton dans les outils de développement de Discord.</string>
     <string name="token_shown">Cliquer encore pour copier ou éditer</string>
     <string name="token_adv_login_description">Il s\'agit d\'une méthode de connexion avancée. En alternative au portail web, vous pouvez saisir ou mettre à jour directement votre jeton de connexion ici. Cela peut, par exemple, accélérer la connexion sur plusieurs appareils. Veuillez noter que tout jeton invalide que l\'application ne parvient pas à analyser sera refusé.</string>
     <string name="ytm_sync">Synchronise automatiquement avec votre compte YouTube Music</string>
