@@ -1,4 +1,4 @@
-﻿package moe.koiverse.archivetune.ui.player
+package moe.koiverse.archivetune.ui.player
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -75,6 +75,7 @@ import moe.koiverse.archivetune.constants.MiniPlayerHeight
 import moe.koiverse.archivetune.constants.SwipeSensitivityKey
 import moe.koiverse.archivetune.constants.ThumbnailCornerRadius
 import moe.koiverse.archivetune.constants.UseNewMiniPlayerDesignKey
+import moe.koiverse.archivetune.constants.CropThumbnailToSquareKey
 import moe.koiverse.archivetune.db.entities.ArtistEntity
 import moe.koiverse.archivetune.extensions.togglePlayPause
 import moe.koiverse.archivetune.models.MediaMetadata
@@ -373,6 +374,7 @@ private fun LegacyMiniMediaInfo(
     pureBlack: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val cropThumbnailToSquare by rememberPreference(CropThumbnailToSquareKey, false)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier,
@@ -390,6 +392,7 @@ private fun LegacyMiniMediaInfo(
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier
                     .fillMaxSize()
+                    .let { if (cropThumbnailToSquare) it.aspectRatio(1f) else it }
                     .graphicsLayer(
                         renderEffect = BlurEffect(
                             radiusX = 75f,
@@ -403,10 +406,11 @@ private fun LegacyMiniMediaInfo(
             AsyncImage(
                 model = mediaMetadata.thumbnailUrl,
                 contentDescription = null,
-                contentScale = ContentScale.Fit,
+                contentScale = if (cropThumbnailToSquare) ContentScale.Crop else ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxSize()
-                    .clip(RoundedCornerShape(ThumbnailCornerRadius)),
+                    .clip(RoundedCornerShape(ThumbnailCornerRadius))
+                    .let { if (cropThumbnailToSquare) it.aspectRatio(1f) else it },
             )
 
             androidx.compose.animation.AnimatedVisibility(
