@@ -1,5 +1,4 @@
 package moe.koiverse.archivetune.ui.screens.settings
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,8 +49,6 @@ import androidx.navigation.NavController
 import com.my.kizzy.rpc.KizzyRPC
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import moe.koiverse.archivetune.LocalPlayerAwareWindowInsets
 import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.constants.DiscordNameKey
 import moe.koiverse.archivetune.constants.DiscordTokenKey
@@ -63,6 +60,7 @@ import moe.koiverse.archivetune.utils.rememberPreference
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiscordTokenInputScreen(navController: NavController) {
+import moe.koiverse.archivetune.utils.EncryptedPreferenceManager
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -78,36 +76,9 @@ fun DiscordTokenInputScreen(navController: NavController) {
 
     var tokenInput by rememberSaveable { mutableStateOf("") }
     var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
-    var isValidating by remember { mutableStateOf(false) }
-
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    fun cancel() {
-        focusManager.clearFocus()
-        keyboardController?.hide()
-        navController.navigateUp()
-    }
-
-    fun save() {
-        val trimmed = tokenInput.trim()
-        if (trimmed.isEmpty()) {
-            errorMessage = emptyTokenMessage
-            scope.launch { snackbarHostState.showSnackbar(emptyTokenMessage) }
-            return
-        }
-
-        errorMessage = null
-        isValidating = true
-
-        scope.launch(Dispatchers.IO) {
-            KizzyRPC.getUserInfo(trimmed).onSuccess { userInfo ->
-                withContext(Dispatchers.Main) {
-                    isValidating = false
-                    errorMessage = null
-                    discordToken = trimmed
-                    discordUsername = userInfo.username
-                    discordName = userInfo.name
-
+    var discordToken by remember { mutableStateOf(EncryptedPreferenceManager.getString(context, EncryptedPreferenceManager.Keys.DISCORD_TOKEN)) }
+    var discordUsername by remember { mutableStateOf(EncryptedPreferenceManager.getString(context, EncryptedPreferenceManager.Keys.DISCORD_USERNAME)) }
+    var discordName by remember { mutableStateOf(EncryptedPreferenceManager.getString(context, EncryptedPreferenceManager.Keys.DISCORD_NAME)) }
                     focusManager.clearFocus()
                     keyboardController?.hide()
 
@@ -136,9 +107,9 @@ fun DiscordTokenInputScreen(navController: NavController) {
                         WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
                     )
                 )
-                .verticalScroll(rememberScrollState())
-                .imePadding()
-        ) {
+                    EncryptedPreferenceManager.putString(context, EncryptedPreferenceManager.Keys.DISCORD_TOKEN, trimmed)
+                    EncryptedPreferenceManager.putString(context, EncryptedPreferenceManager.Keys.DISCORD_USERNAME, userInfo.username)
+                    EncryptedPreferenceManager.putString(context, EncryptedPreferenceManager.Keys.DISCORD_NAME, userInfo.name)
             Spacer(
                 Modifier.windowInsetsPadding(
                     LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Top)
