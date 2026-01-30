@@ -175,6 +175,7 @@ import moe.koiverse.archivetune.db.entities.SearchHistory
 import moe.koiverse.archivetune.innertube.YouTube
 import moe.koiverse.archivetune.innertube.models.SongItem
 import moe.koiverse.archivetune.innertube.models.WatchEndpoint
+import moe.koiverse.archivetune.models.MediaMetadata
 import moe.koiverse.archivetune.models.toMediaMetadata
 import moe.koiverse.archivetune.playback.DownloadUtil
 import moe.koiverse.archivetune.playback.MusicService
@@ -191,6 +192,7 @@ import moe.koiverse.archivetune.ui.component.IconButton
 import moe.koiverse.archivetune.ui.component.LocalBottomSheetPageState
 import moe.koiverse.archivetune.ui.component.LocalMenuState
 import moe.koiverse.archivetune.ui.component.StarDialog
+import com.mikepenz.markdown.m3.Markdown
 import moe.koiverse.archivetune.ui.component.TopSearch
 import moe.koiverse.archivetune.ui.component.rememberBottomSheetState
 import moe.koiverse.archivetune.ui.component.shimmer.ShimmerTheme
@@ -239,6 +241,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var navController: NavHostController
     private var pendingIntent: Intent? = null
+    private var pendingYouTubeQueue: PendingYouTubeQueue? = null
     private var latestVersionName by mutableStateOf(BuildConfig.VERSION_NAME)
 
     private var playerConnection by mutableStateOf<PlayerConnection?>(null)
@@ -254,6 +257,7 @@ class MainActivity : ComponentActivity() {
                 if (service is MusicBinder) {
                     playerConnection =
                         PlayerConnection(this@MainActivity, service, database, lifecycleScope)
+                    playPendingYouTubeQueueIfReady()
                 }
             }
 
@@ -264,6 +268,18 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+    private data class PendingYouTubeQueue(
+        val endpoint: WatchEndpoint,
+        val preloadItem: MediaMetadata?,
+    )
+
+    private fun playPendingYouTubeQueueIfReady() {
+        val pending = pendingYouTubeQueue ?: return
+        val connection = playerConnection ?: return
+        pendingYouTubeQueue = null
+        connection.playQueue(YouTubeQueue(pending.endpoint, pending.preloadItem))
+    }
+
     override fun onStart() {
         super.onStart()
         startMusicServiceSafely()
@@ -273,6 +289,7 @@ class MainActivity : ComponentActivity() {
                 serviceConnection,
                 Context.BIND_AUTO_CREATE
             )
+        playPendingYouTubeQueueIfReady()
     }
 
     private fun safeUnbindMusicService() {
@@ -481,22 +498,11 @@ class MainActivity : ComponentActivity() {
                         ) {
                             val notes = releaseNotesState.value
                             if (notes != null && notes.isNotBlank()) {
-                                val lines = notes.lines()
-                                Column(modifier = Modifier.padding(end = 8.dp)) {
-                                    lines.forEach { line ->
-                                        when {
-                                            line.startsWith("# ") -> Text(line.removePrefix("# ").trim(), style = MaterialTheme.typography.titleLarge)
-                                            line.startsWith("## ") -> Text(line.removePrefix("## ").trim(), style = MaterialTheme.typography.titleMedium)
-                                            line.startsWith("### ") -> Text(line.removePrefix("### ").trim(), style = MaterialTheme.typography.titleSmall)
-                                            line.startsWith("- ") -> Row {
-                                                Text("• ", style = MaterialTheme.typography.bodyLarge)
-                                                Text(line.removePrefix("- ").trim(), style = MaterialTheme.typography.bodyLarge)
-                                            }
-                                            else -> Text(line, style = MaterialTheme.typography.bodyMedium)
-                                        }
-                                        Spacer(Modifier.height(6.dp))
-                                    }
-                                }
+                                Markdown(
+                                    content = notes,
+                                    modifier = Modifier
+                                        .fillMaxWidth().padding(end = 8.dp)
+                                )
                             } else {
                                 Text(
                                     text = stringResource(R.string.release_notes_unavailable),
@@ -1670,26 +1676,17 @@ class MainActivity : ComponentActivity() {
                         }
 
                         result.onSuccess { queued ->
-                            coroutineScope.launch {
-                                val timeoutMs = 3000L
-                                var waited = 0L
-                                val step = 100L
-                                while (playerConnection == null && waited < timeoutMs) {
-                                    delay(step)
-                                    waited += step
-                                }
-
-                                if (playerConnection != null) {
-                                    playerConnection?.playQueue(
-                                        YouTubeQueue(
-                                            WatchEndpoint(videoId = queued.firstOrNull()?.id, playlistId = playlistId),
-                                            queued.firstOrNull()?.toMediaMetadata()
-                                        )
-                                    )
-                                } else {
-                                    startMusicServiceSafely()
-                                }
-                            }
+                            val firstItem = queued.firstOrNull()
+                            pendingYouTubeQueue =
+                                PendingYouTubeQueue(
+                                    endpoint = WatchEndpoint(
+                                        videoId = firstItem?.id ?: vid,
+                                        playlistId = playlistId,
+                                    ),
+                                    preloadItem = firstItem?.toMediaMetadata(),
+                                )
+                            startMusicServiceSafely()
+                            playPendingYouTubeQueueIfReady()
                         }.onFailure {
                             reportException(it)
                         }

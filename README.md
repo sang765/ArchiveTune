@@ -110,6 +110,11 @@
         <img src="https://www.openapk.net/images/openapk-badge.png" height="60" alt="Get it on OpenAPK">
       </a>
     </td>
+    <td align="center">
+      <a href="https://m.doyo.cn/app/539242.html">
+        <img src="https://raw.githubusercontent.com/koiverse/ArchiveTune/refs/heads/dev/assets/badge_doyo.png" height="40" alt="Get it on Doyo.cn">
+      </a>
+    </td>
   </tr>
 </table>
 
@@ -147,7 +152,7 @@ We stand on the shoulders of open-source giants:
 - **Metrolist** by [Mostafa Alagamy](https://github.com/mostafaalagamy/Metrolist) For Base framework.
 - **Kizzy** by [dead8309](https://github.com/dead8309/Kizzy) For Discord Integration.
 - **SimpMusic** by [maxrave-dev](https://github.com/maxrave-dev/SimpMusic) For Lyrics API Provider.
-- [BetterLyrics](https://better-lyrics.boidu.dev/) For word-by-word Lyrics API Provider.
+- [BetterLyrics](https://better-lyrics.boidu.dev/) For word-by-word Lyrics API Provider & Artwork Provider.
 - [Material Color Utilities](https://github.com/material-foundation/material-color-utilities)
 - [Read You](https://github.com/Ashinch/ReadYou) and [Seal](https://github.com/JunkFood02/Seal) for Ui Components.
 - The global community of translators and beta testers.

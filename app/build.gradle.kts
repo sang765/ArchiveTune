@@ -174,6 +174,7 @@ dependencies {
 
     implementation(libs.material3)
     implementation(libs.palette)
+    implementation(libs.multiplatform.markdown)
 
     implementation(libs.coil)
     implementation(libs.coil.network.okhttp)
@@ -181,8 +182,10 @@ dependencies {
     implementation(libs.shimmer)
 
     implementation(libs.media3)
+    implementation("androidx.media3:media3-exoplayer-hls:${libs.versions.media3.get()}")
     implementation(libs.media3.session)
     implementation(libs.media3.okhttp)
+    implementation("androidx.media3:media3-ui:${libs.versions.media3.get()}")
     implementation(libs.squigglyslider)
 
     implementation(libs.room.runtime)
@@ -204,6 +207,7 @@ dependencies {
     implementation(project(":betterlyrics"))
     implementation(project(":kizzy"))
     implementation(project(":simpmusic"))
+    implementation(project(":canvas"))
     implementation("com.github.Kyant0:m3color:2025.4")
 
     implementation(libs.ktor.client.core)
