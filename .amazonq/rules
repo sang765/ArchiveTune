@@ -1,0 +1,9 @@
+# Amazon Q Rules Configuration
+# This file defines rules for code quality and commit message validation
+
+# Rule: Prevent commits with [skip ci] in commit message
+# This rule ensures that CI/CD pipeline is not bypassed inappropriately
+commit_message:
+  - pattern: "\\[skip ci\\]"
+    action: "block"
+    message: "Commits with '[skip ci]' are not allowed. Please remove '[skip ci]' from your commit message to ensure proper CI/CD validation."
