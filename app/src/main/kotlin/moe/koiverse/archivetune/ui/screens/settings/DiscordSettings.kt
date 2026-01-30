@@ -205,9 +205,17 @@ fun DiscordSettings(
                 if (isLoggedIn) {
                         OutlinedButton(onClick = { showLogoutConfirm = true }) { Text(stringResource(R.string.action_logout)) }
                     } else {
-                    OutlinedButton(onClick = {
-                        navController.navigate("settings/discord/login")
-                    }) { Text(stringResource(R.string.action_login)) }
+                    Column {
+                        OutlinedButton(onClick = {
+                            navController.navigate("settings/discord/login")
+                        }) { Text(stringResource(R.string.login_with_browser)) }
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        OutlinedButton(onClick = {
+                            navController.navigate("settings/discord/token/login")
+                        }) { Text(stringResource(R.string.login_with_token)) }
+                    }
                 }
             },
         )
@@ -227,6 +235,17 @@ fun DiscordSettings(
                     },
                     dismissButton = {
                         TextButton(onClick = { showLogoutConfirm = false }) { Text(stringResource(R.string.logout_confirm_no)) }
+                    }
+                )
+            }
+            
+            // Token view/edit option for logged-in users
+            if (isLoggedIn) {
+                PreferenceEntry(
+                    title = { Text(stringResource(R.string.view_edit_token)) },
+                    icon = { Icon(painterResource(R.drawable.token), null) },
+                    onClick = { 
+                        navController.navigate("settings/discord/token/view")
                     }
                 )
             }

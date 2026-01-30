@@ -501,10 +501,46 @@
     <string name="discord_paused">활성화된 경우 Rich Presence는 일시 중지된 동안 일시 중지 아이콘과 함께 계속 표시됩니다. 비활성화하면 RPC는 일시 중지 시 사라집니다.</string>
     <string name="show_small_image">일시 중지됨</string>
     <string name="description_show_small_image">작은 이미지 표시</string>
-    <string name="logout_confirm_title">활성화되면 작은 원형 이미지가 Rich Presence 미리 보기에 표시되고 사용 가능한 경우 Discord로 전송됩니다.</string>
-    <string name="logout_confirm_message">로그아웃 확인</string>
-    <string name="logout_confirm_yes">Discord에서 로그아웃하시겠습니까?</string>
-    <string name="logout_confirm_no">로그아웃</string>
+    <string name="logout_confirm_title">로그아웃 확인</string>
+    <string name="logout_confirm_message">Discord에서 로그아웃하시겠습니까?</string>
+    <string name="logout_confirm_yes">로그아웃</string>
+    <string name="logout_confirm_no">취소</string>
+    
+    <!-- Discord Token Login -->
+    <string name="welcome_back">다시 오신 것을 환영합니다</string>
+    <string name="login_with_token">토큰으로 로그인</string>
+    <string name="login_with_browser">브라우저로 로그인</string>
+    <string name="token_login_title">Discord 토큰 로그인</string>
+    <string name="token_login_description">Discord 토큰을 입력하여 로그인</string>
+    <string name="enter_discord_token">Discord 토큰 입력</string>
+    <string name="token_hint">당신의 Discord 토큰</string>
+    <string name="token_validation_failed">토큰 검증 실패</string>
+    <string name="invalid_token_format">유효하지 않은 토큰 형식</string>
+    <string name="token_required">토큰이 필요합니다</string>
+    <string name="token_validation_success">토큰이 유효합니다!</string>
+    <string name="view_edit_token">토큰 보기/편집</string>
+    <string name="token_view_title">Discord 토큰</string>
+    <string name="current_token">현재 토큰</string>
+    <string name="token_masked">••••••••••••••••••••</string>
+    <string name="show_token">토큰 보기</string>
+    <string name="hide_token">토큰 숨기기</string>
+    <string name="copy_token">토큰 복사</string>
+    <string name="edit_token">토큰 편집</string>
+    <string name="token_copied">토큰이 클립보드에 복사되었습니다</string>
+    <string name="token_security_warning">⚠️ 경고: Discord 토큰을 누구와도 공유하지 마세요. 계정에 대한 전체 액세스를 제공합니다.</string>
+    <string name="token_info">Discord 토큰은 안전하게 저장되며 Rich Presence 기능에만 사용됩니다.</string>
+    <string name="save_token">토큰 저장</string>
+    <string name="cancel">취소</string>
+    <string name="validate_token">토큰 검증</string>
+    <string name="validating_token">토큰 검증 중...</string>
+    <string name="token_login_success">로그인 성공!</string>
+    <string name="token_login_failed">로그인 실패</string>
+    <string name="network_error">네트워크 오류: Discord에 연결할 수 없습니다</string>
+    <string name="token_validation_error">토큰 검증 실패: %s</string>
+    <string name="token_updated">토큰이 성공적으로 업데이트되었습니다</string>
+    <string name="token_management">토큰 관리</string>
+    <string name="token_actions">토큰 작업</string>
+    
     <!--Misc settings additions-->
     <string name="experiment_settings">취소</string>
     <string name="show_discord_debug_ui">실험 설정</string>

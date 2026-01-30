@@ -504,6 +504,42 @@
     <string name="logout_confirm_message">Discordからログアウトしてもよろしいですか？。</string>
     <string name="logout_confirm_yes">ログアウト</string>
     <string name="logout_confirm_no">キャンセル</string>
+    
+    <!-- Discord Token Login -->
+    <string name="welcome_back">お帰りなさい</string>
+    <string name="login_with_token">トークンでログイン</string>
+    <string name="login_with_browser">ブラウザでログイン</string>
+    <string name="token_login_title">Discord トークンログイン</string>
+    <string name="token_login_description">Discord トークンを入力してログイン</string>
+    <string name="enter_discord_token">Discord トークンを入力</string>
+    <string name="token_hint">あなたのDiscordトークン</string>
+    <string name="token_validation_failed">トークンの検証に失敗しました</string>
+    <string name="invalid_token_format">無効なトークン形式</string>
+    <string name="token_required">トークンが必要です</string>
+    <string name="token_validation_success">トークンは有効です！</string>
+    <string name="view_edit_token">トークンの表示/編集</string>
+    <string name="token_view_title">Discord トークン</string>
+    <string name="current_token">現在のトークン</string>
+    <string name="token_masked">••••••••••••••••••••</string>
+    <string name="show_token">トークンを表示</string>
+    <string name="hide_token">トークンを非表示</string>
+    <string name="copy_token">トークンをコピー</string>
+    <string name="edit_token">トークンを編集</string>
+    <string name="token_copied">トークンがクリップボードにコピーされました</string>
+    <string name="token_security_warning">⚠️ 警告: Discord トークンを誰とも共有しないでください。アカウントへのフルアクセスが提供されます。</string>
+    <string name="token_info">Discord トークンは安全に保存され、リッチプレゼンス機能にのみ使用されます。</string>
+    <string name="save_token">トークンを保存</string>
+    <string name="cancel">キャンセル</string>
+    <string name="validate_token">トークンを検証</string>
+    <string name="validating_token">トークンを検証中...</string>
+    <string name="token_login_success">ログインに成功しました！</string>
+    <string name="token_login_failed">ログインに失敗しました</string>
+    <string name="network_error">ネットワークエラー: Discordに接続できません</string>
+    <string name="token_validation_error">トークンの検証に失敗しました: %s</string>
+    <string name="token_updated">トークンが正常に更新されました</string>
+    <string name="token_management">トークン管理</string>
+    <string name="token_actions">トークンアクション</string>
+    
     <!--Misc settings additions-->
     <string name="experiment_settings">実験設定</string>
     <string name="show_discord_debug_ui">デバッグ UI を表示</string>

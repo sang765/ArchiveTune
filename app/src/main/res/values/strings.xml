@@ -559,6 +559,42 @@ ArchiveTune will only extract your token, and everything else is stored locally.
     <string name="logout_confirm_message">Are you sure you want to log out of Discord?.</string>
     <string name="logout_confirm_yes">Log out</string>
     <string name="logout_confirm_no">Cancel</string>
+    
+    <!-- Discord Token Login -->
+    <string name="welcome_back">Welcome back</string>
+    <string name="login_with_token">Login with Token</string>
+    <string name="login_with_browser">Login with Browser</string>
+    <string name="token_login_title">Discord Token Login</string>
+    <string name="token_login_description">Enter your Discord token to log in</string>
+    <string name="enter_discord_token">Enter Discord Token</string>
+    <string name="token_hint">Your Discord token</string>
+    <string name="token_validation_failed">Token validation failed</string>
+    <string name="invalid_token_format">Invalid token format</string>
+    <string name="token_required">Token is required</string>
+    <string name="token_validation_success">Token is valid!</string>
+    <string name="view_edit_token">View/Edit Token</string>
+    <string name="token_view_title">Discord Token</string>
+    <string name="current_token">Current Token</string>
+    <string name="token_masked">••••••••••••••••••••</string>
+    <string name="show_token">Show Token</string>
+    <string name="hide_token">Hide Token</string>
+    <string name="copy_token">Copy Token</string>
+    <string name="edit_token">Edit Token</string>
+    <string name="token_copied">Token copied to clipboard</string>
+    <string name="token_security_warning">⚠️ Warning: Never share your Discord token with anyone. It provides full access to your account.</string>
+    <string name="token_info">Your Discord token is securely stored and only used for Rich Presence functionality.</string>
+    <string name="save_token">Save Token</string>
+    <string name="cancel">Cancel</string>
+    <string name="validate_token">Validate Token</string>
+    <string name="validating_token">Validating token...</string>
+    <string name="token_login_success">Login successful!</string>
+    <string name="token_login_failed">Login failed</string>
+    <string name="network_error">Network error: Unable to connect to Discord</string>
+    <string name="token_validation_error">Token validation failed: %s</string>
+    <string name="token_updated">Token updated successfully</string>
+    <string name="token_management">Token Management</string>
+    <string name="token_actions">Token Actions</string>
+    
     <!--Misc settings additions-->
     <string name="experiment_settings">Experimental Settings</string>
     <string name="show_discord_debug_ui">Show Debug UI</string>

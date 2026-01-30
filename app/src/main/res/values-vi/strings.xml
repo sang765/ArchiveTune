@@ -550,6 +550,42 @@ ArchiveTune sẽ chỉ trích xuất token của bạn, và mọi thứ khác đ
     <string name="logout_confirm_message">Bạn có chắc chắn muốn đăng xuất Discord không?.</string>
     <string name="logout_confirm_yes">Đăng xuất</string>
     <string name="logout_confirm_no">Hủy</string>
+    
+    <!-- Discord Token Login -->
+    <string name="welcome_back">Chào mừng trở lại</string>
+    <string name="login_with_token">Đăng nhập bằng Token</string>
+    <string name="login_with_browser">Đăng nhập bằng Trình duyệt</string>
+    <string name="token_login_title">Đăng nhập Discord bằng Token</string>
+    <string name="token_login_description">Nhập token Discord của bạn để đăng nhập</string>
+    <string name="enter_discord_token">Nhập token Discord</string>
+    <string name="token_hint">Token Discord của bạn</string>
+    <string name="token_validation_failed">Xác thực token thất bại</string>
+    <string name="invalid_token_format">Định dạng token không hợp lệ</string>
+    <string name="token_required">Token là bắt buộc</string>
+    <string name="token_validation_success">Token hợp lệ!</string>
+    <string name="view_edit_token">Xem/Chỉnh sửa Token</string>
+    <string name="token_view_title">Token Discord</string>
+    <string name="current_token">Token hiện tại</string>
+    <string name="token_masked">••••••••••••••••••••</string>
+    <string name="show_token">Hiển thị Token</string>
+    <string name="hide_token">Ẩn Token</string>
+    <string name="copy_token">Sao chép Token</string>
+    <string name="edit_token">Chỉnh sửa Token</string>
+    <string name="token_copied">Token đã được sao chép vào clipboard</string>
+    <string name="token_security_warning">⚠️ Cảnh báo: Không bao giờ chia sẻ token Discord của bạn với bất kỳ ai. Nó cung cấp quyền truy cập đầy đủ vào tài khoản của bạn.</string>
+    <string name="token_info">Token Discord của bạn được lưu trữ an toàn và chỉ được sử dụng cho chức năng Rich Presence.</string>
+    <string name="save_token">Lưu Token</string>
+    <string name="cancel">Hủy</string>
+    <string name="validate_token">Xác thực Token</string>
+    <string name="validating_token">Đang xác thực token...</string>
+    <string name="token_login_success">Đăng nhập thành công!</string>
+    <string name="token_login_failed">Đăng nhập thất bại</string>
+    <string name="network_error">Lỗi mạng: Không thể kết nối với Discord</string>
+    <string name="token_validation_error">Xác thực token thất bại: %s</string>
+    <string name="token_updated">Token đã được cập nhật thành công</string>
+    <string name="token_management">Quản lý Token</string>
+    <string name="token_actions">Hành động Token</string>
+    
     <!--Misc settings additions-->
     <string name="experiment_settings">Cài đặt Thử nghiệm</string>
     <string name="show_discord_debug_ui">Hiển thị UI Debug</string>
