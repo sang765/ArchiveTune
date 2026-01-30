@@ -106,6 +106,18 @@
     <string name="discord">불화</string>
     <string name="advanced_login">토큰으로 로그인</string>
     <string name="token_hidden">토큰을 표시하려면 탭하세요.</string>
+
+    <string name="discord_token_login_title">Discord 토큰 로그인</string>
+    <string name="discord_token_login_description">Discord 사용자 토큰을 붙여넣어 웹 로그인을 사용하지 않고 Rich Presence를 활성화하세요.</string>
+    <string name="discord_token_login_option_desc">빠른 로그인: 토큰을 직접 붙여넣기 (고급).</string>
+    <string name="discord_token">Discord 토큰</string>
+    <string name="discord_token_instructions">찾는 방법: Discord 데스크톱/웹 → 개발자 도구 열기 → Application/Storage → Local Storage → https://discord.com → token.</string>
+    <string name="discord_token_warning">경고: 토큰은 비밀번호와 같습니다. 절대 공유하지 마세요.</string>
+    <string name="discord_token_error_empty">토큰은 비어있을 수 없습니다</string>
+    <string name="discord_token_error_invalid">유효하지 않은 토큰</string>
+    <string name="discord_token_validating">토큰 검증 중…</string>
+    <string name="discord_token_saved">토큰이 저장되었습니다</string>
+
     <string name="token_shown">복사하거나 수정하려면 다시 탭하세요.</string>
     <string name="token_adv_login_description">이것은 ADVANCED 로그인 방법입니다. 웹 포털 대신 여기에 로그인 토큰을 직접 입력하거나 업데이트할 수도 있습니다. 예를 들어 이렇게 하면 여러 장치에서 로그인하는 속도가 빨라질 수 있습니다. 앱이 구문 분석하지 못한 유효하지 않은 토큰 형식은 허용되지 않습니다.</string>
     <string name="ytm_sync">YouTube Music 계정과 자동으로 동기화</string>

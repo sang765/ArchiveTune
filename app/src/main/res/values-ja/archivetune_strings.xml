@@ -106,6 +106,18 @@
     <string name="discord">不和</string>
     <string name="advanced_login">トークンを使用してログインする</string>
     <string name="token_hidden">タップしてトークンを表示</string>
+
+    <string name="discord_token_login_title">Discordトークンログイン</string>
+    <string name="discord_token_login_description">DiscordユーザートークンをペーストしてWebログインを使わずにRich Presenceを有効にします。</string>
+    <string name="discord_token_login_option_desc">クイックログイン：トークンを直接ペースト（上級者向け）。</string>
+    <string name="discord_token">Discordトークン</string>
+    <string name="discord_token_instructions">見つける場所：Discord デスクトップ/Web → 開発者ツールを開く → Application/Storage → Local Storage → https://discord.com → token。</string>
+    <string name="discord_token_warning">警告：あなたのトークンはパスワードと同等です。決して共有しないでください。</string>
+    <string name="discord_token_error_empty">トークンは空にできません</string>
+    <string name="discord_token_error_invalid">無効なトークン</string>
+    <string name="discord_token_validating">トークンを検証中…</string>
+    <string name="discord_token_saved">トークンが保存されました</string>
+
     <string name="token_shown">もう一度タップしてコピーまたは編集します</string>
     <string name="token_adv_login_description">これは高度なログイン方法です。 Web ポータルの代わりに、ここでログイン トークンを直接入力または更新することもできます。たとえば、これにより複数のデバイスでのログインが高速化されます。アプリが解析できない無効なトークン形式は受け入れられないことに注意してください</string>
     <string name="ytm_sync">YouTube Music アカウントと自動的に同期します</string>

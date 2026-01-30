@@ -125,6 +125,18 @@
     <string name="discord">Discord</string>
     <string name="advanced_login">Đăng nhập bằng token</string>
     <string name="token_hidden">Nhấn để hiện token</string>
+
+    <string name="discord_token_login_title">Đăng nhập token Discord</string>
+    <string name="discord_token_login_description">Dán token người dùng Discord của bạn để bật Rich Presence mà không cần sử dụng đăng nhập web.</string>
+    <string name="discord_token_login_option_desc">Đăng nhập nhanh: dán token trực tiếp (nâng cao).</string>
+    <string name="discord_token">Token Discord</string>
+    <string name="discord_token_instructions">Tìm ở đâu: Discord Desktop/Web → mở Developer Tools → Application/Storage → Local Storage → https://discord.com → token.</string>
+    <string name="discord_token_warning">Cảnh báo: token của bạn tương đương với mật khẩu. Không bao giờ chia sẻ nó.</string>
+    <string name="discord_token_error_empty">Token không thể để trống</string>
+    <string name="discord_token_error_invalid">Token không hợp lệ</string>
+    <string name="discord_token_validating">Đang xác thực token…</string>
+    <string name="discord_token_saved">Đã lưu token</string>
+
     <string name="token_shown">Nhấn lại để sao chép hoặc chỉnh sửa</string>
     <string name="token_adv_login_description">Đây là phương thức đăng nhập NÂNG CAO. Thay vì cổng web, bạn có thể nhập hoặc cập nhật token đăng nhập ở đây. Ví dụ, điều này có thể tăng tốc đăng nhập trên nhiều thiết bị. Xin lưu ý rằng bất kỳ định dạng token nào không hợp lệ mà ứng dụng không thể phân tích sẽ không được chấp nhận</string>
     <string name="ytm_sync">Tự động đồng bộ với tài khoản YouTube Music của bạn</string>
