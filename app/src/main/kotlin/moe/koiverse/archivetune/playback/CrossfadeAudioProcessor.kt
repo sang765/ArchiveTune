@@ -142,3 +142,23 @@ class CrossfadeAudioProcessor : AudioProcessor {
         return outputBuffer
     }
 }
+    
+    /**
+     * Start fade in effect for smooth play
+     */
+    fun startFadeIn() {
+        if (smoothPlayPauseDurationMs > 0) {
+            isFadingIn = true
+            fadeCurrentSample = 0
+        }
+    }
+    
+    /**
+     * Start fade out effect for smooth pause
+     */
+    fun startFadeOut() {
+        if (smoothPlayPauseDurationMs > 0) {
+            isFadingOut = true
+            fadeCurrentSample = 0
+        }
+    }
