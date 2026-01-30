@@ -25,11 +25,13 @@ object EncryptedPreferenceManager {
     private fun getEncryptedPrefs(context: Context): SharedPreferences {
         return encryptedPrefs ?: synchronized(this) {
             encryptedPrefs ?: try {
-                val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+                val masterKey = MasterKey.Builder(context)
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                    .build()
                 EncryptedSharedPreferences.create(
-                    ENCRYPTED_PREFS_NAME,
-                    masterKeyAlias,
                     context,
+                    ENCRYPTED_PREFS_NAME,
+                    masterKey,
                     EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                     EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
                 ).also { encryptedPrefs = it }

@@ -64,15 +64,19 @@ import moe.koiverse.archivetune.utils.rememberPreference
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+fun DiscordTokenInputScreen(navController: NavController) {
     val context = LocalContext.current
-import moe.koiverse.archivetune.utils.EncryptedPreferenceManager
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
     val snackbarHostState = remember { SnackbarHostState() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    var tokenInput by rememberSaveable { mutableStateOf("") }
+    var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
     val emptyTokenMessage = stringResource(R.string.discord_token_error_empty)
     val invalidTokenMessage = stringResource(R.string.discord_token_error_invalid)
+    val validatingMessage = stringResource(R.string.discord_token_validating)
+    val tokenSavedMessage = stringResource(R.string.discord_token_saved)
     var discordUsername by rememberPreference(DiscordUsernameKey, "")
     var discordName by rememberPreference(DiscordNameKey, "")
     var isValidating by rememberSaveable { mutableStateOf(false) }
@@ -86,7 +90,7 @@ import moe.koiverse.archivetune.utils.EncryptedPreferenceManager
         if (trimmed.isEmpty()) {
             errorMessage = emptyTokenMessage
             return
-                    snackbarHostState.showSnackbar(invalidTokenMessage)
+        }
 
         scope.launch(Dispatchers.IO) {
             isValidating = true
@@ -122,21 +126,16 @@ import moe.koiverse.archivetune.utils.EncryptedPreferenceManager
             }
         }
     }
-            }
-        }
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             Modifier
                 .windowInsetsPadding(
+                    LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Top)
+                )
                 .verticalScroll(rememberScrollState())
                 .imePadding()
         ) {
-                )
-                    EncryptedPreferenceManager.putString(context, EncryptedPreferenceManager.Keys.DISCORD_TOKEN, trimmed)
-                    EncryptedPreferenceManager.putString(context, EncryptedPreferenceManager.Keys.DISCORD_USERNAME, userInfo.username)
-                    EncryptedPreferenceManager.putString(context, EncryptedPreferenceManager.Keys.DISCORD_NAME, userInfo.name)
             Spacer(
                 Modifier.windowInsetsPadding(
                     LocalPlayerAwareWindowInsets.current.only(WindowInsetsSides.Top)
