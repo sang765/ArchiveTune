@@ -25,7 +25,19 @@ class CrossfadeAudioProcessor : AudioProcessor {
             updateCrossfadeSamples()
         }
     
+    @Volatile
+    var smoothPlayPauseDurationMs: Int = 0
+        set(value) {
+            field = value
+            updateFadeSamples()
+        }
+    
     private var crossfadeSamples = 0
+    private var fadeSamples = 0
+    private var isFadingIn = false
+    private var isFadingOut = false
+    private var fadeCurrentSample = 0
+    private var shouldStartFadeIn = false
     private var currentSample = 0
     private var buffer: ByteBuffer = AudioProcessor.EMPTY_BUFFER
     private var outputBuffer: ByteBuffer = AudioProcessor.EMPTY_BUFFER
@@ -38,8 +50,16 @@ class CrossfadeAudioProcessor : AudioProcessor {
         }
     }
 
+    private fun updateFadeSamples() {
+        if (inputAudioFormat != AudioFormat.NOT_SET && smoothPlayPauseDurationMs > 0) {
+            fadeSamples = (inputAudioFormat.sampleRate * smoothPlayPauseDurationMs) / 1000
+        } else {
+            fadeSamples = 0
+        }
+    }
+
     override fun configure(inputAudioFormat: AudioFormat): AudioFormat {
-        if (crossfadeDurationMs == 0) {
+        if (crossfadeDurationMs == 0 && smoothPlayPauseDurationMs == 0) {
             return AudioFormat.NOT_SET
         }
         
@@ -50,11 +70,12 @@ class CrossfadeAudioProcessor : AudioProcessor {
         this.inputAudioFormat = inputAudioFormat
         this.outputAudioFormat = inputAudioFormat
         updateCrossfadeSamples()
+        updateFadeSamples()
         
         return outputAudioFormat
     }
 
-    override fun isActive(): Boolean = crossfadeDurationMs > 0
+    override fun isActive(): Boolean = crossfadeDurationMs > 0 || smoothPlayPauseDurationMs > 0
 
     override fun queueInput(inputBuffer: ByteBuffer) {
         if (!isActive || crossfadeDurationMs == 0) {

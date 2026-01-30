@@ -251,4 +251,12 @@
     <string name="theme_preview_secondary_action">Secondary Action</string>
 
     <string name="copy">Copy</string>
+    
+    <!-- Smooth Play/Pause and Track Transitions -->
+    <string name="smooth_play_pause">Smooth play/pause</string>
+    <string name="smooth_play_pause_desc">Enable smooth fade in/out when playing or pausing music</string>
+    <string name="smooth_play_pause_duration">Fade in/fade out duration</string>
+    <string name="smooth_track_transitions">Smooth track transitions</string>
+    <string name="smooth_track_transitions_desc">Enable smooth crossfade when skipping tracks</string>
+    <string name="smooth_track_transitions_duration">Track transition duration</string>
 </resources>

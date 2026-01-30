@@ -242,6 +242,14 @@
     <string name="theme_preview_trackline">Một thẻ xem trước cao cấp</string>
     <string name="theme_preview_primary_action">Hành động Chính</string>
     <string name="theme_preview_secondary_action">Hành động Phụ</string>
+    
+    <!-- Smooth Play/Pause and Track Transitions -->
+    <string name="smooth_play_pause">Phát/tạm dừng mượt mà</string>
+    <string name="smooth_play_pause_desc">Bật hiệu ứng fade in/out mượt mà khi phát hoặc tạm dừng nhạc</string>
+    <string name="smooth_play_pause_duration">Thời gian fade in/fade out</string>
+    <string name="smooth_track_transitions">Chuyển đổi bài hát mượt mà</string>
+    <string name="smooth_track_transitions_desc">Bật hiệu ứng crossfade mượt mà khi chuyển bài</string>
+    <string name="smooth_track_transitions_duration">Thời gian chuyển đổi bài hát</string>
 
     <string name="copy">Sao chép</string>
 </resources>

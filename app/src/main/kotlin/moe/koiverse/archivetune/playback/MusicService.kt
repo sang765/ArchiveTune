@@ -540,6 +540,13 @@ class MusicService :
             .collectLatest(scope) {
                 crossfadeProcessor.crossfadeDurationMs = it
             }
+        
+        dataStore.data
+            .map { (it[SmoothPlayPauseDurationKey] ?: 0) }
+            .distinctUntilChanged()
+            .collectLatest(scope) {
+                crossfadeProcessor.smoothPlayPauseDurationMs = it
+            }
 
         dataStore.data
             .map(::readEqSettingsFromPrefs)

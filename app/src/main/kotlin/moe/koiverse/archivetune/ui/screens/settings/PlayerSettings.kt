@@ -282,6 +282,44 @@ fun PlayerSettings(
             onCheckedChange = onSeekExtraSeconds
         )
 
+        SwitchPreference(
+            title = { Text(stringResource(R.string.smooth_play_pause)) },
+            description = stringResource(R.string.smooth_play_pause_desc),
+            icon = { Icon(painterResource(R.drawable.play), null) },
+            checked = smoothPlayPause,
+            onCheckedChange = onSmoothPlayPauseChange
+        )
+
+        if (smoothPlayPause) {
+            SliderPreference(
+                title = { Text(stringResource(R.string.smooth_play_pause_duration)) },
+                icon = { Icon(painterResource(R.drawable.timer), null) },
+                value = smoothPlayPauseDuration.toFloat(),
+                onValueChange = { onSmoothPlayPauseDurationChange(it.toInt()) },
+                valueRange = 100f..1000f,
+                steps = 17
+            )
+        }
+
+        SwitchPreference(
+            title = { Text(stringResource(R.string.smooth_track_transitions)) },
+            description = stringResource(R.string.smooth_track_transitions_desc),
+            icon = { Icon(painterResource(R.drawable.skip_next), null) },
+            checked = smoothTrackTransitions,
+            onCheckedChange = onSmoothTrackTransitionsChange
+        )
+
+        if (smoothTrackTransitions) {
+            SliderPreference(
+                title = { Text(stringResource(R.string.smooth_track_transitions_duration)) },
+                icon = { Icon(painterResource(R.drawable.timer), null) },
+                value = smoothTrackTransitionsDuration.toFloat(),
+                onValueChange = { onSmoothTrackTransitionsDurationChange(it.toInt()) },
+                valueRange = 200f..2000f,
+                steps = 17
+            )
+        }
+
         PreferenceGroupTitle(
             title = stringResource(R.string.queue)
         )
