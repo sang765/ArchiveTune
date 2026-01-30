@@ -4,12 +4,26 @@ on:
   pull_request:
     branches:
       - "**"
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: 'Force build even with [skip ci]'
+        required: false
+        default: 'false'
+        type: boolean
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+        with:
+          fetch-depth: 0
+
+      - name: Check for [skip ci] bypass
+        id: check_skip
+        run: |
+          echo "force_build=${{ github.event.inputs.force_build || 'false' }}" >> $GITHUB_OUTPUT
       - uses: actions/checkout@v6
 
       - name: Set up JDK 21
