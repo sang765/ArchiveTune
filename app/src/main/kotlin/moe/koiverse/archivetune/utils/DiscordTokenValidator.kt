@@ -53,6 +53,38 @@ object DiscordTokenValidator {
                 // Call KizzyRPC to verify token validity
                 val userInfoResult = KizzyRPC.getUserInfo(token)
                 
+                userInfoResult.fold(
+                    onSuccess = { userInfo ->
+                        // Token is valid and we have user info
+                        Result.success(userInfo)
+                    },
+                    onFailure = { error ->
+                        // Handle specific error cases
+                        val errorMessage = when (error) {
+                            is java.net.SocketException -> "Network error: Unable to connect to Discord"
+                            is java.net.UnknownHostException -> "Network error: No internet connection"
+                            is java.net.ConnectException -> "Network error: Connection refused"
+                            is IllegalArgumentException -> "Invalid token: ${error.message}"
+                            else -> "Token validation failed: ${error.message}"
+                        }
+                        Result.failure(Exception(errorMessage))
+                    }
+                )
+            }
+        } catch (e: Exception) {
+            // Handle any unexpected exceptions
+            Timber.tag("DiscordTokenValidator").w(e, "Token validation failed")
+            Result.failure(Exception("Token validation failed: ${e.message}"))
+        }
+    }
+        return try {
+            // First validate the format
+            if (!isValidTokenFormat(token)) {
+                Result.failure(Exception("Invalid token format"))
+            } else {
+                // Call KizzyRPC to verify token validity
+                val userInfoResult = KizzyRPC.getUserInfo(token)
+                
                 userInfoResult.onSuccess { userInfo ->
                     // Token is valid and we have user info
                     Result.success(userInfo)
