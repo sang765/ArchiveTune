@@ -524,13 +524,12 @@
     <string name="token_masked">••••••••••••••••••••</string>
     <string name="show_token">토큰 보기</string>
     <string name="hide_token">토큰 숨기기</string>
-    <string name="copy_token">토큰 복사</string>
+    <string name="copy_token_to_clipboard">토큰 복사</string>
     <string name="edit_token">토큰 편집</string>
     <string name="token_copied">토큰이 클립보드에 복사되었습니다</string>
     <string name="token_security_warning">⚠️ 경고: Discord 토큰을 누구와도 공유하지 마세요. 계정에 대한 전체 액세스를 제공합니다.</string>
     <string name="token_info">Discord 토큰은 안전하게 저장되며 Rich Presence 기능에만 사용됩니다.</string>
     <string name="save_token">토큰 저장</string>
-    <string name="cancel">취소</string>
     <string name="validate_token">토큰 검증</string>
     <string name="validating_token">토큰 검증 중...</string>
     <string name="token_login_success">로그인 성공!</string>

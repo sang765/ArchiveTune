@@ -523,13 +523,12 @@
     <string name="token_masked">••••••••••••••••••••</string>
     <string name="show_token">トークンを表示</string>
     <string name="hide_token">トークンを非表示</string>
-    <string name="copy_token">トークンをコピー</string>
+    <string name="copy_token_to_clipboard">トークンをコピー</string>
     <string name="edit_token">トークンを編集</string>
     <string name="token_copied">トークンがクリップボードにコピーされました</string>
     <string name="token_security_warning">⚠️ 警告: Discord トークンを誰とも共有しないでください。アカウントへのフルアクセスが提供されます。</string>
     <string name="token_info">Discord トークンは安全に保存され、リッチプレゼンス機能にのみ使用されます。</string>
     <string name="save_token">トークンを保存</string>
-    <string name="cancel">キャンセル</string>
     <string name="validate_token">トークンを検証</string>
     <string name="validating_token">トークンを検証中...</string>
     <string name="token_login_success">ログインに成功しました！</string>

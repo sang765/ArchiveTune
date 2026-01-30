@@ -178,7 +178,7 @@ fun DiscordTokenViewScreen(
                         }) {
                             Icon(
                                 imageVector = Icons.Default.ContentCopy,
-                                contentDescription = stringResource(R.string.copy_token)
+                                contentDescription = stringResource(R.string.copy_token_to_clipboard)
                             )
                         }
                     }
@@ -205,7 +205,7 @@ fun DiscordTokenViewScreen(
                             },
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text(stringResource(R.string.copy_token))
+                            Text(stringResource(R.string.copy_token_to_clipboard))
                         }
                     }
                 }
@@ -388,7 +388,7 @@ fun DiscordTokenViewScreen(
                     TextButton(
                         onClick = { showEditDialog = false }
                     ) {
-                        Text(stringResource(R.string.cancel))
+                        Text(stringResource(android.R.string.cancel))
                     }
                     
                     Button(

@@ -569,13 +569,12 @@ ArchiveTune sẽ chỉ trích xuất token của bạn, và mọi thứ khác đ
     <string name="token_masked">••••••••••••••••••••</string>
     <string name="show_token">Hiển thị Token</string>
     <string name="hide_token">Ẩn Token</string>
-    <string name="copy_token">Sao chép Token</string>
+    <string name="copy_token_to_clipboard">Sao chép Token</string>
     <string name="edit_token">Chỉnh sửa Token</string>
     <string name="token_copied">Token đã được sao chép vào clipboard</string>
     <string name="token_security_warning">⚠️ Cảnh báo: Không bao giờ chia sẻ token Discord của bạn với bất kỳ ai. Nó cung cấp quyền truy cập đầy đủ vào tài khoản của bạn.</string>
     <string name="token_info">Token Discord của bạn được lưu trữ an toàn và chỉ được sử dụng cho chức năng Rich Presence.</string>
     <string name="save_token">Lưu Token</string>
-    <string name="cancel">Hủy</string>
     <string name="validate_token">Xác thực Token</string>
     <string name="validating_token">Đang xác thực token...</string>
     <string name="token_login_success">Đăng nhập thành công!</string>
