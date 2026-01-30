@@ -50,6 +50,16 @@ class ApkDownloadManager(
     }
     
     fun startDownload(downloadUrl: String, fileName: String = "ArchiveTune_update.apk") {
+        progressMonitoringJob?.cancel()
+        downloadReceiver?.let { receiver ->
+            try {
+                context.unregisterReceiver(receiver)
+            } catch (e: Exception) {
+                // Ignore if receiver was not registered or already unregistered.
+            }
+        }
+        downloadReceiver = null
+
         try {
             val destinationFile = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName)
             
