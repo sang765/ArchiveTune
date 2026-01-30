@@ -157,7 +157,7 @@ class ApkDownloadManager(
                 if (status == DownloadManager.STATUS_SUCCESSFUL) {
                     coroutineScope.launch {
                         withContext(Dispatchers.Main) {
-                            _downloadProgress.value = DownloadProgress(isCompleted = true)
+                            _downloadProgress.value = _downloadProgress.value.copy(isDownloading = false, isCompleted = true)
                         }
                     }
                     installApk(fileName)
