@@ -1,4 +1,5 @@
 package moe.koiverse.archivetune.ui.screens.settings
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -49,36 +51,58 @@ import androidx.navigation.NavController
 import com.my.kizzy.rpc.KizzyRPC
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.constants.DiscordNameKey
 import moe.koiverse.archivetune.constants.DiscordTokenKey
 import moe.koiverse.archivetune.constants.DiscordUsernameKey
 import moe.koiverse.archivetune.ui.component.IconButton
+import moe.koiverse.archivetune.ui.component.LocalPlayerAwareWindowInsets
 import moe.koiverse.archivetune.ui.utils.backToMain
+import moe.koiverse.archivetune.utils.EncryptedPreferenceManager
 import moe.koiverse.archivetune.utils.rememberPreference
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DiscordTokenInputScreen(navController: NavController) {
+    val context = LocalContext.current
 import moe.koiverse.archivetune.utils.EncryptedPreferenceManager
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
+    val snackbarHostState = remember { SnackbarHostState() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     val emptyTokenMessage = stringResource(R.string.discord_token_error_empty)
     val invalidTokenMessage = stringResource(R.string.discord_token_error_invalid)
-    val tokenSavedMessage = stringResource(R.string.discord_token_saved)
-    val validatingMessage = stringResource(R.string.discord_token_validating)
-
-    var discordToken by rememberPreference(DiscordTokenKey, "")
     var discordUsername by rememberPreference(DiscordUsernameKey, "")
     var discordName by rememberPreference(DiscordNameKey, "")
+    var isValidating by rememberSaveable { mutableStateOf(false) }
 
-    var tokenInput by rememberSaveable { mutableStateOf("") }
-    var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
-    var discordToken by remember { mutableStateOf(EncryptedPreferenceManager.getString(context, EncryptedPreferenceManager.Keys.DISCORD_TOKEN)) }
-    var discordUsername by remember { mutableStateOf(EncryptedPreferenceManager.getString(context, EncryptedPreferenceManager.Keys.DISCORD_USERNAME)) }
-    var discordName by remember { mutableStateOf(EncryptedPreferenceManager.getString(context, EncryptedPreferenceManager.Keys.DISCORD_NAME)) }
+    fun cancel() {
+        navController.navigateUp()
+    }
+
+    fun save() {
+        val trimmed = tokenInput.trim()
+        if (trimmed.isEmpty()) {
+            errorMessage = emptyTokenMessage
+            return
+                    snackbarHostState.showSnackbar(invalidTokenMessage)
+
+        scope.launch(Dispatchers.IO) {
+            isValidating = true
+            errorMessage = null
+
+            runCatching {
+                val rpc = KizzyRPC(trimmed)
+                val userInfo = rpc.getUserInfo()
+                
+                withContext(Dispatchers.Main) {
+                    // Save to encrypted preferences
+                    EncryptedPreferenceManager.putString(context, EncryptedPreferenceManager.Keys.DISCORD_TOKEN, trimmed)
+                    EncryptedPreferenceManager.putString(context, EncryptedPreferenceManager.Keys.DISCORD_USERNAME, userInfo.username)
+                    EncryptedPreferenceManager.putString(context, EncryptedPreferenceManager.Keys.DISCORD_NAME, userInfo.name)
+                    
+                    isValidating = false
                     focusManager.clearFocus()
                     keyboardController?.hide()
 
@@ -98,14 +122,17 @@ import moe.koiverse.archivetune.utils.EncryptedPreferenceManager
             }
         }
     }
+            }
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             Modifier
                 .windowInsetsPadding(
-                    LocalPlayerAwareWindowInsets.current.only(
-                        WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
-                    )
+                .verticalScroll(rememberScrollState())
+                .imePadding()
+        ) {
                 )
                     EncryptedPreferenceManager.putString(context, EncryptedPreferenceManager.Keys.DISCORD_TOKEN, trimmed)
                     EncryptedPreferenceManager.putString(context, EncryptedPreferenceManager.Keys.DISCORD_USERNAME, userInfo.username)
