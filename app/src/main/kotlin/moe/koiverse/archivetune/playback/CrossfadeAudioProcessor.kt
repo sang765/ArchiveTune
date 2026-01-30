@@ -25,16 +25,38 @@ class CrossfadeAudioProcessor : AudioProcessor {
             updateCrossfadeSamples()
         }
     
+    @Volatile
+    var playPauseFadeDurationMs: Int = 0
+        set(value) {
+            field = value
+            updatePlayPauseFadeSamples()
+        }
+    
+    @Volatile
+    var isFadingIn = false
+    @Volatile
+    var isFadingOut = false
+    
     private var crossfadeSamples = 0
+    private var playPauseFadeSamples = 0
     private var currentSample = 0
+    private var fadeCurrentSample = 0
     private var buffer: ByteBuffer = AudioProcessor.EMPTY_BUFFER
     private var outputBuffer: ByteBuffer = AudioProcessor.EMPTY_BUFFER
     
     private fun updateCrossfadeSamples() {
         if (inputAudioFormat != AudioFormat.NOT_SET && crossfadeDurationMs > 0) {
             crossfadeSamples = (inputAudioFormat.sampleRate * crossfadeDurationMs) / 1000
+    
+    private fun updatePlayPauseFadeSamples() {
+        if (inputAudioFormat != AudioFormat.NOT_SET && playPauseFadeDurationMs > 0) {
+            playPauseFadeSamples = (inputAudioFormat.sampleRate * playPauseFadeDurationMs) / 1000
         } else {
-            crossfadeSamples = 0
+            playPauseFadeSamples = 0
+        }
+    }
+        } else {
+        if (crossfadeDurationMs == 0 && playPauseFadeDurationMs == 0) {
         }
     }
 
@@ -47,12 +69,13 @@ class CrossfadeAudioProcessor : AudioProcessor {
             return AudioFormat.NOT_SET
         }
         
+        updatePlayPauseFadeSamples()
         this.inputAudioFormat = inputAudioFormat
         this.outputAudioFormat = inputAudioFormat
         updateCrossfadeSamples()
-        
+    override fun isActive(): Boolean = crossfadeDurationMs > 0 || playPauseFadeDurationMs > 0
         return outputAudioFormat
-    }
+        if (!isActive || (crossfadeDurationMs == 0 && playPauseFadeDurationMs == 0 && !isEnding && !isFadingIn && !isFadingOut)) {
 
     override fun isActive(): Boolean = crossfadeDurationMs > 0
 
@@ -63,7 +86,25 @@ class CrossfadeAudioProcessor : AudioProcessor {
         
         val remaining = inputBuffer.remaining()
         if (remaining == 0) return
-        
+        // Handle play/pause fade effects
+        if ((isFadingIn || isFadingOut) && playPauseFadeDurationMs > 0 && fadeCurrentSample < playPauseFadeSamples) {
+            val samplesThisPass = min(playPauseFadeSamples - fadeCurrentSample, remaining / 2)
+            for (i in 0 until samplesThisPass) {
+                val sample = inputBuffer.short
+                val factor = if (isFadingIn) {
+                    (fadeCurrentSample + i).toFloat() / playPauseFadeSamples
+                } else { // fading out
+                    1.0f - (fadeCurrentSample + i).toFloat() / playPauseFadeSamples
+                }
+                val fadedSample = (sample * factor).toInt().toShort()
+                buffer.putShort(fadedSample)
+                fadeCurrentSample++
+            }
+            if (fadeCurrentSample >= playPauseFadeSamples) {
+                isFadingIn = false
+                isFadingOut = false
+            }
+        } else if (isEnding && currentSample < crossfadeSamples) {
         buffer = replaceOutputBuffer(remaining)
         
         // Simple fade processing (this is a basic implementation)
@@ -95,7 +136,10 @@ class CrossfadeAudioProcessor : AudioProcessor {
     override fun isEnded(): Boolean {
         return isEnding && buffer === AudioProcessor.EMPTY_BUFFER
     }
+        fadeCurrentSample = 0
 
+        isFadingIn = false
+        isFadingOut = false
     override fun flush() {
         buffer = AudioProcessor.EMPTY_BUFFER
         currentSample = 0
@@ -117,6 +161,18 @@ class CrossfadeAudioProcessor : AudioProcessor {
             outputBuffer = ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder())
         } else {
             outputBuffer.clear()
+    
+    fun startFadeIn() {
+        fadeCurrentSample = 0
+        isFadingIn = true
+        isFadingOut = false
+    }
+    
+    fun startFadeOut() {
+        fadeCurrentSample = 0
+        isFadingOut = true
+        isFadingIn = false
+    }
         }
         return outputBuffer
     }

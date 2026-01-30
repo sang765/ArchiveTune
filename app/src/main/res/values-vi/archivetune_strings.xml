@@ -180,6 +180,13 @@
     <string name="views">Lượt xem</string>
     <string name="likes">Lượt thích</string>
     <string name="dislikes">Lượt không thích</string>
+    
+    <!-- Smooth audio transitions -->
+    <string name="smooth_play_pause">Phát/tạm dừng mượt mà</string>
+    <string name="smooth_play_pause_desc">Áp dụng hiệu ứng fade in/out khi phát hoặc tạm dừng nhạc</string>
+    <string name="smooth_track_transitions">Chuyển đổi bài hát mượt mà</string>
+    <string name="smooth_track_transitions_desc">Áp dụng hiệu ứng crossfade khi chuyển bài</string>
+    <string name="fade_duration">Thời gian fade (ms)</string>
     <string name="subscribe">Đăng ký</string>
     <string name="subscribed">Đã đăng ký</string>
     <string name="playlist_not_found">Không tìm thấy danh sách phát</string>

@@ -301,6 +301,17 @@ fun PlayerSettings(
             checked = permanentShuffle,
             onCheckedChange = onPermanentShuffleChange
         )
+        if (smoothTrackTransitions) {
+            SliderPreference(
+                title = { Text(stringResource(R.string.fade_duration)) },
+                icon = { Icon(painterResource(R.drawable.timer), null) },
+                value = smoothTrackTransitionsDuration.toFloat(),
+                onValueChange = { onSmoothTrackTransitionsDurationChange(it.toInt()) },
+                valueRange = 100f..3000f,
+                steps = 28
+            )
+        }
+
 
         SwitchPreference(
             title = { Text(stringResource(R.string.auto_load_more)) },

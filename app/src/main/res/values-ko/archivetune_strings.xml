@@ -180,4 +180,11 @@
     <string name="settings_section_player_content">플레이어 &amp; 콘텐츠</string>
     <string name="settings_section_storage">저장소 &amp; 데이터</string>
     <string name="settings_section_system">시스템 &amp; 정보</string>
+    
+    <!-- Smooth audio transitions -->
+    <string name="smooth_play_pause">부드러운 재생/일시정지</string>
+    <string name="smooth_play_pause_desc">음악을 재생하거나 일시정지할 때 페이드 인/아웃 효과 적용</string>
+    <string name="smooth_track_transitions">부드러운 트랙 전환</string>
+    <string name="smooth_track_transitions_desc">트랙을 건너뛸 때 크로스페이드 효과 적용</string>
+    <string name="fade_duration">페이드 지속시간 (ms)</string>
 </resources>

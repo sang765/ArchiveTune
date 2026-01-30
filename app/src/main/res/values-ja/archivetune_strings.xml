@@ -241,4 +241,11 @@
     <string name="theme_preview_primary_action">主要な行動</string>
     <string name="theme_preview_secondary_action">二次的行動</string>
     <string name="copy">コピー</string>
+    
+    <!-- Smooth audio transitions -->
+    <string name="smooth_play_pause">スムーズな再生/一時停止</string>
+    <string name="smooth_play_pause_desc">音楽の再生または一時停止時にフェードイン/アウト効果を適用</string>
+    <string name="smooth_track_transitions">スムーズなトラック遷移</string>
+    <string name="smooth_track_transitions_desc">トラックをスキップする際にクロスフェード効果を適用</string>
+    <string name="fade_duration">フェード時間 (ms)</string>
 </resources>
