@@ -198,17 +198,19 @@ fun DiscordTokenLoginScreen(
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "${stringResource(R.string.welcome_back)}, ${userInfo.name}",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        if (userInfo.username.isNotEmpty()) {
+                        userInfo?.let { user ->
                             Text(
-                                text = "@${userInfo.username}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                                text = "${stringResource(R.string.welcome_back)}, ${user.name}",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
                             )
+                            if (user.username.isNotEmpty()) {
+                                Text(
+                                    text = "@${user.username}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                                )
+                            }
                         }
                     }
                 }
