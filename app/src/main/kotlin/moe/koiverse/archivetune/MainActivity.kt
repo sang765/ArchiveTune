@@ -559,14 +559,14 @@ class MainActivity : ComponentActivity() {
             val customThemeColor = remember(customThemeColorValue, customThemeSeedPalette) {
                 if (customThemeColorValue.startsWith("#")) {
                     try {
-                                            "Downloading..."
+                        val colorString = customThemeColorValue.removePrefix("#")
                         Color(android.graphics.Color.parseColor("#$colorString"))
                     } catch (e: Exception) {
                         DefaultThemeColor
-                            } else if (downloadProgress.error != null) {
-                                Text(text = "Download Failed")
-                            } else if (downloadProgress.isCompleted) {
-                                Text(text = "Installing...")
+                    }
+                } else {
+                    customThemeSeedPalette?.primary ?: DefaultThemeColor
+                }
             }
 
             var themeColor by rememberSaveable(stateSaver = ColorSaver) {
