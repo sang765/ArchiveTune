@@ -96,10 +96,11 @@ class ApkDownloadManager(
                     }
                 }
                 
-                context.registerReceiver(
+                androidx.core.content.ContextCompat.registerReceiver(
+                    context,
                     downloadReceiver,
                     IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
-                    Context.RECEIVER_NOT_EXPORTED
+                    androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED
                 )
                 
                 // Start progress monitoring
