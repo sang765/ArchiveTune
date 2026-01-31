@@ -1568,15 +1568,17 @@ class MusicService :
                              reason == Player.MEDIA_ITEM_TRANSITION_REASON_USER
     
     if (isManualTransition) {
-        val smoothEnabled = dataStore.get(SmoothTrackTransitionsKey, false)
-        val applyToManual = dataStore.get(ApplyTransitionToManualSkipKey, true)
-        
-        if (smoothEnabled && applyToManual) {
-            val fadeDuration = dataStore.get(TrackTransitionFadeDurationKey, 500)
-            crossfadeProcessor.crossfadeDurationMs = fadeDuration
-        } else if (smoothEnabled) {
-            // Smooth transitions enabled but not for manual skips
-            crossfadeProcessor.crossfadeDurationMs = 0
+        scope.launch {
+            val smoothEnabled = dataStore.data.map { it[SmoothTrackTransitionsKey] ?: false }.first()
+            val applyToManual = dataStore.data.map { it[ApplyTransitionToManualSkipKey] ?: true }.first()
+
+            if (smoothEnabled && applyToManual) {
+                val fadeDuration = dataStore.data.map { it[TrackTransitionFadeDurationKey] ?: 500 }.first()
+                crossfadeProcessor.crossfadeDurationMs = fadeDuration
+            } else if (smoothEnabled) {
+                // Smooth transitions enabled but not for manual skips
+                crossfadeProcessor.crossfadeDurationMs = 0
+            }
         }
     }
 
