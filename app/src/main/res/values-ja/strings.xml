@@ -389,6 +389,16 @@
     <string name="auto_skip_next_on_error">エラー発生時は次の曲に自動スキップ</string>
     <string name="auto_skip_next_on_error_desc">連続再生エクスペリエンス</string>
     <string name="stop_music_on_task_clear">タスククリア時に音楽を停止</string>
+    <string name="playback_transitions">再生トランジション</string>
+    <string name="smooth_play_pause">スムーズな再生/一時停止</string>
+    <string name="smooth_play_pause_desc">再生または一時停止時にオーディオをフェードイン/アウト</string>
+    <string name="play_pause_fade_duration">フェードイン/フェードアウトの長さ</string>
+    <string name="smooth_track_transitions">スムーズなトラック切り替え</string>
+    <string name="smooth_track_transitions_desc">スキップ時にトラック間をクロスフェード</string>
+    <string name="track_transition_fade_duration">切り替えの長さ</string>
+    <string name="apply_to_manual_skip">スキップボタンに適用</string>
+    <string name="apply_to_manual_skip_desc">次へ/前へボタンとスワイプジェスチャーにスムーズな切り替えを有効化</string>
+    <string name="milliseconds">ミリ秒</string>
     <string name="artist_separators">アーティスト区切り記号</string>
     <string name="artist_separators_desc">複数のアーティストを分割する記号</string>
     <string name="add_symbol">記号を追加</string>

@@ -87,7 +87,10 @@ import moe.koiverse.archivetune.constants.PlayerButtonsStyle
 import moe.koiverse.archivetune.constants.PlayerDesignStyle
 import moe.koiverse.archivetune.constants.PlayerHorizontalPadding
 import moe.koiverse.archivetune.constants.SliderStyle
-import moe.koiverse.archivetune.extensions.togglePlayPause
+import moe.koiverse.archivetune.constants.SmoothPlayPauseKey
+import moe.koiverse.archivetune.constants.PlayPauseFadeDurationKey
+import moe.koiverse.archivetune.extensions.togglePlayPauseWithFade
+import moe.koiverse.archivetune.utils.rememberPreference
 import moe.koiverse.archivetune.extensions.toggleRepeatMode
 import moe.koiverse.archivetune.models.MediaMetadata
 import moe.koiverse.archivetune.playback.PlayerConnection
@@ -666,7 +669,10 @@ fun PlayerPlaybackControls(
                                 playerConnection.player.seekTo(0, 0)
                                 playerConnection.player.playWhenReady = true
                             } else {
-                                playerConnection.player.togglePlayPause()
+                                val smoothPlayPause by rememberPreference(SmoothPlayPauseKey, defaultValue = false)
+                                val fadeDuration by rememberPreference(PlayPauseFadeDurationKey, defaultValue = 300)
+                                val currentFadeDuration = if (smoothPlayPause) fadeDuration else 0
+                                playerConnection.player.togglePlayPauseWithFade(currentFadeDuration)
                             }
                         },
                         colors = IconButtonDefaults.filledIconButtonColors(
@@ -780,7 +786,10 @@ fun PlayerPlaybackControls(
                                     playerConnection.player.seekTo(0, 0)
                                     playerConnection.player.playWhenReady = true
                                 } else {
-                                    playerConnection.player.togglePlayPause()
+                                    val smoothPlayPause by rememberPreference(SmoothPlayPauseKey, defaultValue = false)
+                                    val fadeDuration by rememberPreference(PlayPauseFadeDurationKey, defaultValue = 300)
+                                    val currentFadeDuration = if (smoothPlayPause) fadeDuration else 0
+                                    playerConnection.player.togglePlayPauseWithFade(currentFadeDuration)
                                 }
                             },
                         contentAlignment = Alignment.Center
@@ -942,7 +951,10 @@ fun PlayerPlaybackControls(
                                 playerConnection.player.seekTo(0, 0)
                                 playerConnection.player.playWhenReady = true
                             } else {
-                                playerConnection.player.togglePlayPause()
+                                val smoothPlayPause by rememberPreference(SmoothPlayPauseKey, defaultValue = false)
+                                val fadeDuration by rememberPreference(PlayPauseFadeDurationKey, defaultValue = 300)
+                                val currentFadeDuration = if (smoothPlayPause) fadeDuration else 0
+                                playerConnection.player.togglePlayPauseWithFade(currentFadeDuration)
                             }
                         },
                         shape = RoundedCornerShape(28.dp),
@@ -1091,7 +1103,10 @@ fun PlayerPlaybackControls(
                                 playerConnection.player.seekTo(0, 0)
                                 playerConnection.player.playWhenReady = true
                             } else {
-                                playerConnection.player.togglePlayPause()
+                                val smoothPlayPause by rememberPreference(SmoothPlayPauseKey, defaultValue = false)
+                                val fadeDuration by rememberPreference(PlayPauseFadeDurationKey, defaultValue = 300)
+                                val currentFadeDuration = if (smoothPlayPause) fadeDuration else 0
+                                playerConnection.player.togglePlayPauseWithFade(currentFadeDuration)
                             }
                         },
                 ) {

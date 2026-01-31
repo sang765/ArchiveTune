@@ -63,7 +63,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.constants.MiniPlayerHeight
-import moe.koiverse.archivetune.extensions.togglePlayPause
+import moe.koiverse.archivetune.constants.SmoothPlayPauseKey
+import moe.koiverse.archivetune.constants.PlayPauseFadeDurationKey
+import moe.koiverse.archivetune.extensions.togglePlayPauseWithFade
 
 import moe.koiverse.archivetune.models.MediaMetadata
 import moe.koiverse.archivetune.playback.PlayerConnection
@@ -72,6 +74,7 @@ import kotlin.math.roundToInt
 import moe.koiverse.archivetune.LocalPlayerConnection
 import moe.koiverse.archivetune.LocalDatabase
 import moe.koiverse.archivetune.db.entities.ArtistEntity
+import moe.koiverse.archivetune.utils.rememberPreference
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 
@@ -255,7 +258,10 @@ fun MiniPlayerPlayPauseButton(
                         playerConnection.player.seekTo(0, 0)
                         playerConnection.player.playWhenReady = true
                     } else {
-                        playerConnection.player.togglePlayPause()
+                        val smoothPlayPause by rememberPreference(SmoothPlayPauseKey, defaultValue = false)
+                        val fadeDuration by rememberPreference(PlayPauseFadeDurationKey, defaultValue = 300)
+                        val currentFadeDuration = if (smoothPlayPause) fadeDuration else 0
+                        playerConnection.player.togglePlayPauseWithFade(currentFadeDuration)
                     }
                 }
         ) {

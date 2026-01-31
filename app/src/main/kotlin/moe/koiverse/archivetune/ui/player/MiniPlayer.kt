@@ -78,7 +78,9 @@ import moe.koiverse.archivetune.constants.ThumbnailCornerRadius
 import moe.koiverse.archivetune.constants.UseNewMiniPlayerDesignKey
 import moe.koiverse.archivetune.constants.CropThumbnailToSquareKey
 import moe.koiverse.archivetune.db.entities.ArtistEntity
-import moe.koiverse.archivetune.extensions.togglePlayPause
+import moe.koiverse.archivetune.constants.SmoothPlayPauseKey
+import moe.koiverse.archivetune.constants.PlayPauseFadeDurationKey
+import moe.koiverse.archivetune.extensions.togglePlayPauseWithFade
 import moe.koiverse.archivetune.models.MediaMetadata
 import moe.koiverse.archivetune.utils.rememberPreference
 import kotlinx.coroutines.launch
@@ -309,7 +311,10 @@ private fun LegacyMiniPlayer(
                         playerConnection.player.seekTo(0, 0)
                         playerConnection.player.playWhenReady = true
                     } else {
-                        playerConnection.player.togglePlayPause()
+                        val smoothPlayPause by rememberPreference(SmoothPlayPauseKey, defaultValue = false)
+                        val fadeDuration by rememberPreference(PlayPauseFadeDurationKey, defaultValue = 300)
+                        val currentFadeDuration = if (smoothPlayPause) fadeDuration else 0
+                        playerConnection.player.togglePlayPauseWithFade(currentFadeDuration)
                     }
                 },
             ) {

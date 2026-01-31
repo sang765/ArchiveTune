@@ -7,14 +7,113 @@ import androidx.media3.common.Player.REPEAT_MODE_ALL
 import androidx.media3.common.Player.REPEAT_MODE_OFF
 import androidx.media3.common.Player.REPEAT_MODE_ONE
 import androidx.media3.common.Timeline
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import moe.koiverse.archivetune.models.MediaMetadata
 import java.util.ArrayDeque
+import kotlin.math.roundToInt
 
 fun Player.togglePlayPause() {
     if (!playWhenReady && playbackState == Player.STATE_IDLE) {
         prepare()
     }
     playWhenReady = !playWhenReady
+}
+
+fun Player.togglePlayPauseWithFade(fadeDurationMs: Int, scope: CoroutineScope) {
+    if (!playWhenReady && playbackState == Player.STATE_IDLE) {
+        prepare()
+    }
+    
+    if (fadeDurationMs <= 0) {
+        playWhenReady = !playWhenReady
+        return
+    }
+    
+    val currentVolume = volume
+    val targetState = !playWhenReady
+    
+    if (targetState) {
+        // Fade in: Set volume to 0, start playing, then fade to 1
+        volume = 0f
+        playWhenReady = true
+        scope.launch(Dispatchers.Main) {
+            val steps = 20
+            val stepDuration = fadeDurationMs / steps
+            val volumeStep = 1f / steps
+            for (i in 1..steps) {
+                if (!isActive) break
+                volume = (volumeStep * i).coerceAtMost(1f)
+                delay(stepDuration.toLong())
+            }
+            volume = currentVolume.coerceIn(0f, 1f)
+        }
+    } else {
+        // Fade out: Fade to 0, then pause
+        scope.launch(Dispatchers.Main) {
+            val steps = 20
+            val stepDuration = fadeDurationMs / steps
+            val volumeStep = currentVolume / steps
+            for (i in 1..steps) {
+                if (!isActive) break
+                volume = (currentVolume - volumeStep * i).coerceAtLeast(0f)
+                delay(stepDuration.toLong())
+            }
+            volume = currentVolume
+            playWhenReady = false
+        }
+    }
+}
+
+/**
+ * Extension function to toggle play/pause with smooth fade effect using player's internal scope
+ */
+fun Player.togglePlayPauseWithFade(fadeDurationMs: Int) {
+    if (!playWhenReady && playbackState == Player.STATE_IDLE) {
+        prepare()
+    }
+    
+    if (fadeDurationMs <= 0) {
+        playWhenReady = !playWhenReady
+        return
+    }
+    
+    val currentVolume = volume
+    val targetState = !playWhenReady
+    
+    if (targetState) {
+        // Fade in: Set volume to 0, start playing, then fade to 1
+        volume = 0f
+        playWhenReady = true
+        // Use a simple coroutine without explicit scope
+        kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.Main) {
+            val steps = 20
+            val stepDuration = fadeDurationMs / steps
+            val volumeStep = 1f / steps
+            for (i in 1..steps) {
+                volume = (volumeStep * i).coerceAtMost(1f)
+                kotlinx.coroutines.delay(stepDuration.toLong())
+            }
+            volume = currentVolume.coerceIn(0f, 1f)
+        }
+    } else {
+        // Fade out: Fade to 0, then pause
+        kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.Main) {
+            val steps = 20
+            val stepDuration = fadeDurationMs / steps
+            val volumeStep = currentVolume / steps
+            for (i in 1..steps) {
+                volume = (currentVolume - volumeStep * i).coerceAtLeast(0f)
+                kotlinx.coroutines.delay(stepDuration.toLong())
+            }
+            volume = currentVolume
+            playWhenReady = false
+        }
+    }
 }
 
 fun Player.toggleRepeatMode() {

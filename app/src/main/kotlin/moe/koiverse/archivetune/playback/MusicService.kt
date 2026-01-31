@@ -72,6 +72,9 @@ import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.constants.AudioNormalizationKey
 import moe.koiverse.archivetune.constants.AudioOffload
 import moe.koiverse.archivetune.constants.AudioCrossfadeDurationKey
+import moe.koiverse.archivetune.constants.SmoothTrackTransitionsKey
+import moe.koiverse.archivetune.constants.TrackTransitionFadeDurationKey
+import moe.koiverse.archivetune.constants.ApplyTransitionToManualSkipKey
 import moe.koiverse.archivetune.constants.AudioQualityKey
 import moe.koiverse.archivetune.constants.AutoLoadMoreKey
 import moe.koiverse.archivetune.constants.AutoDownloadOnLikeKey
@@ -538,10 +541,28 @@ class MusicService :
             }
         
         dataStore.data
-            .map { (it[AudioCrossfadeDurationKey] ?: 0) * 1000 }
+            .map { (it[TrackTransitionFadeDurationKey] ?: 500) }
             .distinctUntilChanged()
             .collectLatest(scope) {
                 crossfadeProcessor.crossfadeDurationMs = it
+            }
+        
+        dataStore.data
+            .map { it[SmoothTrackTransitionsKey] ?: false }
+            .distinctUntilChanged()
+            .collectLatest(scope) { smoothEnabled ->
+                // When smooth track transitions is disabled, set crossfade to 0
+                if (!smoothEnabled) {
+                    crossfadeProcessor.crossfadeDurationMs = 0
+                } else {
+                    // When enabled, restore the configured duration
+                    scope.launch {
+                        dataStore.data.collect { prefs ->
+                            val duration = prefs[TrackTransitionFadeDurationKey] ?: 500
+                            crossfadeProcessor.crossfadeDurationMs = duration
+                        }
+                    }
+                }
             }
 
         dataStore.data
@@ -1554,6 +1575,29 @@ class MusicService :
     currentMediaMetadata.value = mediaItem?.metadata ?: player.currentMetadata
 
     scrobbleManager?.onSongStop()
+
+    // Handle smooth transitions for manual track changes
+    val isManualTransition = reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK || 
+                             reason == Player.MEDIA_ITEM_TRANSITION_REASON_USER
+    
+    if (isManualTransition) {
+        val smoothEnabled = dataStore.get(SmoothTrackTransitionsKey, false)
+        val applyToManual = dataStore.get(ApplyTransitionToManualSkipKey, true)
+        
+        if (smoothEnabled && applyToManual) {
+            val fadeDuration = dataStore.get(TrackTransitionFadeDurationKey, 500)
+            crossfadeProcessor.crossfadeDurationMs = fadeDuration
+        } else if (smoothEnabled) {
+            // Smooth transitions enabled but not for manual skips
+            crossfadeProcessor.crossfadeDurationMs = 0
+        }
+    }
+
+    // Handle repeat mode compatibility
+    // For REPEAT_MODE_ONE, disable crossfade to avoid interference with track restart
+    if (player.repeatMode == REPEAT_MODE_ONE) {
+        crossfadeProcessor.crossfadeDurationMs = 0
+    }
 
     // Clear automix when user manually seeks to a different song
     // This ensures recommendations are refreshed based on the new context

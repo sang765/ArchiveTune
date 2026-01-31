@@ -390,6 +390,16 @@
     <string name="auto_skip_next_on_error">오디오 정규화</string>
     <string name="auto_skip_next_on_error_desc">오류 발생 시 다음 노래로 자동 건너뛰기</string>
     <string name="stop_music_on_task_clear">연속 재생 경험</string>
+    <string name="playback_transitions">재생 전환</string>
+    <string name="smooth_play_pause">부드러운 재생/일시정지</string>
+    <string name="smooth_play_pause_desc">재생 또는 일시정지 시 오디오 페이드 인/아웃</string>
+    <string name="play_pause_fade_duration">페이드 인/페이드 아웃 지속 시간</string>
+    <string name="smooth_track_transitions">부드러운 트랙 전환</string>
+    <string name="smooth_track_transitions_desc">건너뛸 때 트랙 간 크로스페이드</string>
+    <string name="track_transition_fade_duration">전환 지속 시간</string>
+    <string name="apply_to_manual_skip">건너뛰기 버튼에 적용</string>
+    <string name="apply_to_manual_skip_desc">다음/이전 버튼 및 스와이프 제스처에 부드러운 전환 활성화</string>
+    <string name="milliseconds">밀리초</string>
     <string name="artist_separators">아티스트 구분 기호</string>
     <string name="artist_separators_desc">여러 아티스트를 분리하는 데 사용되는 기호</string>
     <string name="add_symbol">기호 추가</string>

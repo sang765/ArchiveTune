@@ -113,7 +113,9 @@ import moe.koiverse.archivetune.constants.QueueEditLockKey
 import moe.koiverse.archivetune.constants.SimilarContent
 import moe.koiverse.archivetune.extensions.metadata
 import moe.koiverse.archivetune.extensions.move
-import moe.koiverse.archivetune.extensions.togglePlayPause
+import moe.koiverse.archivetune.constants.SmoothPlayPauseKey
+import moe.koiverse.archivetune.constants.PlayPauseFadeDurationKey
+import moe.koiverse.archivetune.extensions.togglePlayPauseWithFade
 import moe.koiverse.archivetune.extensions.toggleRepeatMode
 import moe.koiverse.archivetune.models.MediaMetadata
 import moe.koiverse.archivetune.ui.component.ActionPromptDialog
@@ -708,7 +710,7 @@ fun Queue(
                                                     }
                                                 } else {
                                                     if (index == currentWindowIndex) {
-                                                        playerConnection.player.togglePlayPause()
+                                                        playerConnection.player.togglePlayPauseWithFade(currentFadeDuration)
                                                     } else {
                                                         playerConnection.player.seekToDefaultPosition(
                                                             window.firstPeriodIndex,

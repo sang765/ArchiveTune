@@ -335,6 +335,93 @@ fun SliderPreference(
 }
 
 @Composable
+fun DurationSliderPreference(
+    modifier: Modifier = Modifier,
+    title: @Composable () -> Unit,
+    icon: (@Composable () -> Unit)? = null,
+    value: Int,
+    onValueChange: (Int) -> Unit,
+    valueRange: IntRange,
+    unit: String,
+    defaultValue: Int = valueRange.first,
+    isEnabled: Boolean = true,
+) {
+    var showDialog by remember {
+        mutableStateOf(false)
+    }
+
+    var sliderValue by remember {
+        mutableFloatStateOf(value.toFloat())
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = title,
+            text = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "${sliderValue.roundToInt()} $unit",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+
+                    Slider(
+                        value = sliderValue,
+                        onValueChange = { sliderValue = it },
+                        valueRange = valueRange.first.toFloat()..valueRange.last.toFloat(),
+                        steps = valueRange.last - valueRange.first - 1,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        onValueChange.invoke(sliderValue.roundToInt())
+                    }
+                ) {
+                    Text(stringResource(android.R.string.ok))
+                }
+            },
+            dismissButton = {
+                Row {
+                    TextButton(
+                        onClick = {
+                            sliderValue = defaultValue.toFloat()
+                        }
+                    ) {
+                        Text(stringResource(R.string.reset))
+                    }
+                    TextButton(
+                        onClick = {
+                            sliderValue = value.toFloat()
+                            showDialog = false
+                        }
+                    ) {
+                        Text(stringResource(android.R.string.cancel))
+                    }
+                }
+            }
+        )
+    }
+
+    PreferenceEntry(
+        modifier = modifier,
+        title = title,
+        description = "$value $unit",
+        icon = icon,
+        onClick = { 
+            sliderValue = value.toFloat()
+            showDialog = true 
+        },
+        isEnabled = isEnabled,
+    )
+}
+
+@Composable
 fun PreferenceGroupTitle(
     title: String,
     modifier: Modifier = Modifier,
