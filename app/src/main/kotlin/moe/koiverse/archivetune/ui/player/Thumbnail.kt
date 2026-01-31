@@ -500,10 +500,10 @@ fun Thumbnail(
                                             )
                                         } else {
                                             AsyncImage(
-                                                model = if (cropThumbnailToSquare && upscaleCroppedThumbnail) {
+                                                val imageModel = if (cropThumbnailToSquare && upscaleCroppedThumbnail) {
                                                     ImageRequest.Builder(context)
                                                         .data(item.mediaMetadata.artworkUri?.toString())
-                                                        .size(2048, 2048)
+                                                        .size(PLAYER_THUMBNAIL_UPSCALE_SIZE, PLAYER_THUMBNAIL_UPSCALE_SIZE)
                                                         .allowHardware(false)
                                                         .build()
                                                 } else {
