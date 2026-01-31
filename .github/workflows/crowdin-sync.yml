@@ -1,0 +1,99 @@
+name: Sync Translations from Crowdin
+
+on:
+  workflow_dispatch:
+    inputs:
+      languages:
+        description: 'Languages to sync (comma-separated, e.g., ja,ko,vi)'
+        required: false
+        default: 'ja,ko,vi'
+        type: string
+  push:
+    branches: ['dev']
+    paths:
+      - 'app/src/main/res/values/strings.xml'
+      - 'app/src/main/res/values/archivetune_strings.xml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync-translations:
+    if: github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install google-cloud-translate lxml
+
+      - name: Download translations from Crowdin
+        uses: crowdin/github-action@v1
+        with:
+          upload_sources: false
+          upload_translations: false
+          download_translations: true
+          download_language: ${{ github.event.inputs.languages || 'ja,ko,vi' }}
+          create_pull_request: false
+          localization_branch_name: crowdin-sync
+          pull_request_title: 'chore: sync translations from Crowdin'
+          pull_request_body: 'This PR contains updated translations from Crowdin.'
+          commit_message: 'chore: sync translations from Crowdin [ci skip]'
+          config: crowdin.yml
+        env:
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_TOKEN }}
+
+      - name: Run machine translation fallback
+        env:
+          GOOGLE_TRANSLATE_API_KEY: ${{ secrets.GOOGLE_TRANSLATE_API_KEY }}
+          LANGUAGES: ${{ github.event.inputs.languages || 'ja,ko,vi' }}
+        run: |
+          python .github/scripts/mt_fallback.py
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit translation updates
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add app/src/main/res/values-*/
+          git commit -m "chore: sync translations from Crowdin + MT fallback [ci skip]" \
+            -m "Synced translations for: ja, ko, vi" \
+            -m "Includes machine translation fallback for missing strings"
+
+      - name: Push to dev branch
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          git push origin HEAD:dev
+
+      - name: Workflow Summary
+        if: always()
+        run: |
+          echo "## Translation Sync Summary 🌐" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Languages processed:** ${{ github.event.inputs.languages || 'ja,ko,vi' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.check_changes.outputs.has_changes }}" == "true" ]; then
+            echo "✅ **Status:** Changes committed and pushed to dev branch" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ **Status:** No changes detected" >> $GITHUB_STEP_SUMMARY
+          fi

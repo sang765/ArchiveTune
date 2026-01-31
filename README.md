@@ -135,6 +135,9 @@ ArchiveTune belongs to everyone. Help us localize the experience for your region
   </a>
 </div>
 
+> [!NOTE]  
+> ArchiveTune uses an automated translation workflow that syncs translations from Crowdin for Japanese, Korean, and Vietnamese. The workflow also uses Google Translate as a fallback for missing strings. See [`.github/workflows/TRANSLATION_WORKFLOW.md`](.github/workflows/TRANSLATION_WORKFLOW.md) for details.
+
 ### ✨ Project Contributors
 <a href="https://github.com/koiverse/ArchiveTune/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=koiverse/ArchiveTune" />
