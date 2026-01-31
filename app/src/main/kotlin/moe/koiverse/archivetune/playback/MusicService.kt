@@ -1594,6 +1594,10 @@ class MusicService :
             }
         }
     }
+        }
+    }
+        }
+    }
     // Auto-load more from queue if available
     if (dataStore.get(AutoLoadMoreKey, true) &&
         reason != Player.MEDIA_ITEM_TRANSITION_REASON_REPEAT &&
