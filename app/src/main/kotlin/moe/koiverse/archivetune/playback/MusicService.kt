@@ -555,13 +555,8 @@ class MusicService :
                 if (!smoothEnabled) {
                     crossfadeProcessor.crossfadeDurationMs = 0
                 } else {
-                    // When enabled, restore the configured duration
-                    scope.launch {
-                        dataStore.data.collect { prefs ->
-                            val duration = prefs[TrackTransitionFadeDurationKey] ?: 500
-                            crossfadeProcessor.crossfadeDurationMs = duration
-                        }
-                    }
+                    // When enabled, restore the configured duration (use current setting)
+                    crossfadeProcessor.crossfadeDurationMs = dataStore.get(TrackTransitionFadeDurationKey, 500)
                 }
             }
 
