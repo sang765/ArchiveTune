@@ -69,6 +69,7 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.Player.STATE_BUFFERING
 import coil3.compose.AsyncImage
+import coil3.compose.ImageRequest
 import moe.koiverse.archivetune.LocalDatabase
 import moe.koiverse.archivetune.LocalPlayerConnection
 import moe.koiverse.archivetune.R
@@ -77,6 +78,7 @@ import moe.koiverse.archivetune.constants.SwipeSensitivityKey
 import moe.koiverse.archivetune.constants.ThumbnailCornerRadius
 import moe.koiverse.archivetune.constants.UseNewMiniPlayerDesignKey
 import moe.koiverse.archivetune.constants.CropThumbnailToSquareKey
+import moe.koiverse.archivetune.constants.UpscaleCroppedThumbnailKey
 import moe.koiverse.archivetune.db.entities.ArtistEntity
 import moe.koiverse.archivetune.extensions.togglePlayPause
 import moe.koiverse.archivetune.models.MediaMetadata
@@ -376,6 +378,7 @@ private fun LegacyMiniMediaInfo(
     modifier: Modifier = Modifier,
 ) {
     val cropThumbnailToSquare by rememberPreference(CropThumbnailToSquareKey, false)
+    val upscaleCroppedThumbnail by rememberPreference(UpscaleCroppedThumbnailKey, false)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier,
@@ -388,7 +391,15 @@ private fun LegacyMiniMediaInfo(
         ) {
             // Blurred background for thumbnail
             AsyncImage(
-                model = mediaMetadata.thumbnailUrl,
+                model = if (cropThumbnailToSquare && upscaleCroppedThumbnail) {
+                    ImageRequest.Builder(context)
+                        .data(mediaMetadata.thumbnailUrl)
+                        .size(1024, 1024)
+                        .allowHardware(false)
+                        .build()
+                } else {
+                    mediaMetadata.thumbnailUrl
+                },
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds,
                 modifier = Modifier
@@ -405,7 +416,15 @@ private fun LegacyMiniMediaInfo(
 
             // Main thumbnail
             AsyncImage(
-                model = mediaMetadata.thumbnailUrl,
+                model = if (cropThumbnailToSquare && upscaleCroppedThumbnail) {
+                    ImageRequest.Builder(context)
+                        .data(mediaMetadata.thumbnailUrl)
+                        .size(1024, 1024)
+                        .allowHardware(false)
+                        .build()
+                } else {
+                    mediaMetadata.thumbnailUrl
+                },
                 contentDescription = null,
                 contentScale = if (cropThumbnailToSquare) ContentScale.Crop else ContentScale.Fit,
                 modifier = Modifier

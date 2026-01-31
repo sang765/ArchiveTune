@@ -93,6 +93,7 @@ import moe.koiverse.archivetune.constants.HidePlayerThumbnailKey
 import moe.koiverse.archivetune.constants.ArchiveTuneCanvasKey
 import moe.koiverse.archivetune.constants.ThumbnailCornerRadiusKey
 import moe.koiverse.archivetune.constants.CropThumbnailToSquareKey
+import moe.koiverse.archivetune.constants.UpscaleCroppedThumbnailKey
 import moe.koiverse.archivetune.constants.DisableBlurKey
 import moe.koiverse.archivetune.ui.component.DefaultDialog
 import moe.koiverse.archivetune.ui.component.EnumListPreference
@@ -542,6 +543,20 @@ fun AppearanceSettings(
             checked = cropThumbnailToSquare,
             onCheckedChange = onCropThumbnailToSquareChange
         )
+
+        AnimatedVisibility(cropThumbnailToSquare) {
+            val (upscaleCroppedThumbnail, onUpscaleCroppedThumbnailChange) = rememberPreference(
+                UpscaleCroppedThumbnailKey,
+                defaultValue = false
+            )
+            SwitchPreference(
+                title = { Text(stringResource(R.string.upscale_cropped_thumbnail)) },
+                description = stringResource(R.string.upscale_cropped_thumbnail_desc),
+                icon = { Icon(painterResource(R.drawable.image), null) },
+                checked = upscaleCroppedThumbnail,
+                onCheckedChange = onUpscaleCroppedThumbnailChange
+            )
+        }
 
 
         EnumListPreference(

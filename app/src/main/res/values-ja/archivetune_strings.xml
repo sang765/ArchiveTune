@@ -56,6 +56,8 @@
     <string name="hide_player_thumbnail_desc">プレーヤーでアルバムのアートワークをアプリのロゴに置き換える</string>
     <string name="crop_thumbnail_to_square">サムネイルを1:1にトリミング</string>
     <string name="crop_thumbnail_to_square_desc">YouTubeサムネイルを16:9ではなく正方形で表示</string>
+    <string name="upscale_cropped_thumbnail">トリミングされたサムネイルをアップスケール</string>
+    <string name="upscale_cropped_thumbnail_desc">1:1にトリミングする際に高解像度の画像を要求して品質を改善</string>
     <string name="already_in_playlist">すでにプレイリストにあります:</string>
     <plurals name="n_element">
         <item quantity="other">%d 要素</item>

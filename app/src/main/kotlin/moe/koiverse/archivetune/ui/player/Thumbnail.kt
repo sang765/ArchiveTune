@@ -74,6 +74,7 @@ import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
+import coil3.compose.ImageRequest
 import androidx.compose.material3.Icon
 import moe.koiverse.archivetune.LocalPlayerConnection
 import moe.koiverse.archivetune.R
@@ -87,6 +88,7 @@ import moe.koiverse.archivetune.constants.SwipeThumbnailKey
 import moe.koiverse.archivetune.constants.ArchiveTuneCanvasKey
 import moe.koiverse.archivetune.constants.ThumbnailCornerRadiusKey
 import moe.koiverse.archivetune.constants.CropThumbnailToSquareKey
+import moe.koiverse.archivetune.constants.UpscaleCroppedThumbnailKey
 import moe.koiverse.archivetune.constants.HidePlayerThumbnailKey
 import moe.koiverse.archivetune.extensions.metadata
 import moe.koiverse.archivetune.innertube.YouTube
@@ -128,6 +130,7 @@ fun Thumbnail(
         defaultValue = 16f
     )
     val cropThumbnailToSquare by rememberPreference(CropThumbnailToSquareKey, false)
+    val upscaleCroppedThumbnail by rememberPreference(UpscaleCroppedThumbnailKey, false)
     val canSkipPrevious by playerConnection.canSkipPrevious.collectAsState()
     val canSkipNext by playerConnection.canSkipNext.collectAsState()
     
@@ -465,7 +468,15 @@ fun Thumbnail(
                                     } else {
                                         // Blurred
                                         AsyncImage(
-                                            model = item.mediaMetadata.artworkUri?.toString(),
+                                            model = if (cropThumbnailToSquare && upscaleCroppedThumbnail) {
+                                                ImageRequest.Builder(context)
+                                                    .data(item.mediaMetadata.artworkUri?.toString())
+                                                    .size(2048, 2048)
+                                                    .allowHardware(false)
+                                                    .build()
+                                            } else {
+                                                item.mediaMetadata.artworkUri?.toString()
+                                            },
                                             contentDescription = null,
                                             contentScale = ContentScale.FillBounds,
                                             modifier = Modifier
@@ -488,7 +499,15 @@ fun Thumbnail(
                                             )
                                         } else {
                                             AsyncImage(
-                                                model = item.mediaMetadata.artworkUri?.toString(),
+                                                model = if (cropThumbnailToSquare && upscaleCroppedThumbnail) {
+                                                    ImageRequest.Builder(context)
+                                                        .data(item.mediaMetadata.artworkUri?.toString())
+                                                        .size(2048, 2048)
+                                                        .allowHardware(false)
+                                                        .build()
+                                                } else {
+                                                    item.mediaMetadata.artworkUri?.toString()
+                                                },
                                                 contentDescription = null,
                                                 contentScale = if (cropThumbnailToSquare) ContentScale.Crop else ContentScale.Fit,
                                                 modifier = Modifier
