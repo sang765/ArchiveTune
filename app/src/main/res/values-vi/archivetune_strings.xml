@@ -129,6 +129,7 @@
     <string name="discord_token_login_title">Đăng nhập token Discord</string>
     <string name="discord_token_login_description">Dán token người dùng Discord của bạn để bật Rich Presence mà không cần sử dụng đăng nhập web.</string>
     <string name="discord_token_login_option_desc">Đăng nhập nhanh: dán token trực tiếp (nâng cao).</string>
+    <string name="discord_token_login_option_desc_logged_in">Nhấn để xem, sao chép và chỉnh sửa token của bạn</string>
     <string name="discord_token">Token Discord</string>
     <string name="discord_token_instructions">Tìm ở đâu: Discord Desktop/Web → mở Developer Tools → Application/Storage → Local Storage → https://discord.com → token.</string>
     <string name="discord_token_warning">Cảnh báo: token của bạn tương đương với mật khẩu. Không bao giờ chia sẻ nó.</string>

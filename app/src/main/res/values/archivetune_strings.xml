@@ -129,6 +129,7 @@
     <string name="discord_token_login_title">Discord token login</string>
     <string name="discord_token_login_description">Paste your Discord user token to enable Rich Presence without using the web login.</string>
     <string name="discord_token_login_option_desc">Quick login: paste your token directly (advanced).</string>
+    <string name="discord_token_login_option_desc_logged_in">Click to view, copy and edit your token</string>
     <string name="discord_token">Discord token</string>
     <string name="discord_token_instructions">Where to find it: Discord Desktop/Web → open Developer Tools → Application/Storage → Local Storage → https://discord.com → token.</string>
     <string name="discord_token_warning">Warning: your token is equivalent to your password. Never share it.</string>

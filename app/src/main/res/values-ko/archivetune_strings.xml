@@ -110,6 +110,7 @@
     <string name="discord_token_login_title">Discord 토큰 로그인</string>
     <string name="discord_token_login_description">Discord 사용자 토큰을 붙여넣어 웹 로그인을 사용하지 않고 Rich Presence를 활성화하세요.</string>
     <string name="discord_token_login_option_desc">빠른 로그인: 토큰을 직접 붙여넣기 (고급).</string>
+    <string name="discord_token_login_option_desc_logged_in">토큰을 보거나 복사하거나 편집하려면 클릭하세요</string>
     <string name="discord_token">Discord 토큰</string>
     <string name="discord_token_instructions">찾는 방법: Discord 데스크톱/웹 → 개발자 도구 열기 → Application/Storage → Local Storage → https://discord.com → token.</string>
     <string name="discord_token_warning">경고: 토큰은 비밀번호와 같습니다. 절대 공유하지 마세요.</string>

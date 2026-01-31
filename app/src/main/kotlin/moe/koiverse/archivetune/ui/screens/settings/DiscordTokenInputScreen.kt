@@ -76,7 +76,7 @@ fun DiscordTokenInputScreen(navController: NavController) {
     var discordUsername by rememberPreference(DiscordUsernameKey, "")
     var discordName by rememberPreference(DiscordNameKey, "")
 
-    var tokenInput by rememberSaveable { mutableStateOf("") }
+    var tokenInput by rememberSaveable { mutableStateOf(discordToken) }
     var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
     var isValidating by remember { mutableStateOf(false) }
 
@@ -88,11 +88,26 @@ fun DiscordTokenInputScreen(navController: NavController) {
         navController.navigateUp()
     }
 
+    val isAlreadyLoggedIn = discordToken.isNotEmpty()
+    val actionButtonText = if (isAlreadyLoggedIn) stringResource(R.string.save) else stringResource(R.string.action_login)
+
     fun save() {
         val trimmed = tokenInput.trim()
+
+        // Allow clearing token if user wants to logout
         if (trimmed.isEmpty()) {
-            errorMessage = emptyTokenMessage
-            scope.launch { snackbarHostState.showSnackbar(emptyTokenMessage) }
+            if (discordToken.isNotEmpty()) {
+                // Clear existing token
+                discordToken = ""
+                discordUsername = ""
+                discordName = ""
+                focusManager.clearFocus()
+                keyboardController?.hide()
+                navController.navigateUp()
+            } else {
+                errorMessage = emptyTokenMessage
+                scope.launch { snackbarHostState.showSnackbar(emptyTokenMessage) }
+            }
             return
         }
 
@@ -239,7 +254,7 @@ fun DiscordTokenInputScreen(navController: NavController) {
                             color = MaterialTheme.colorScheme.onPrimary,
                         )
                     } else {
-                        Text(stringResource(R.string.action_login))
+                        Text(actionButtonText)
                     }
                 }
             }
@@ -248,7 +263,9 @@ fun DiscordTokenInputScreen(navController: NavController) {
         }
 
         TopAppBar(
-            title = { Text(stringResource(R.string.advanced_login)) },
+            title = { Text(
+                if (isAlreadyLoggedIn) stringResource(R.string.edit) else stringResource(R.string.advanced_login)
+            ) },
             navigationIcon = {
                 IconButton(
                     onClick = navController::navigateUp,

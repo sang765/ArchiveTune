@@ -110,6 +110,7 @@
     <string name="discord_token_login_title">Discordトークンログイン</string>
     <string name="discord_token_login_description">DiscordユーザートークンをペーストしてWebログインを使わずにRich Presenceを有効にします。</string>
     <string name="discord_token_login_option_desc">クイックログイン：トークンを直接ペースト（上級者向け）。</string>
+    <string name="discord_token_login_option_desc_logged_in">トークンを表示、コピー、編集するにはタップしてください</string>
     <string name="discord_token">Discordトークン</string>
     <string name="discord_token_instructions">見つける場所：Discord デスクトップ/Web → 開発者ツールを開く → Application/Storage → Local Storage → https://discord.com → token。</string>
     <string name="discord_token_warning">警告：あなたのトークンはパスワードと同等です。決して共有しないでください。</string>
