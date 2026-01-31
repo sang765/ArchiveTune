@@ -418,7 +418,7 @@ private fun LegacyMiniMediaInfo(
             // Main thumbnail
             AsyncImage(
                 model = if (cropThumbnailToSquare && upscaleCroppedThumbnail) {
-                    ImageRequest.Builder(context)
+                    ImageRequest.Builder(LocalContext.current)
                         .data(mediaMetadata.thumbnailUrl)
                         .size(1024, 1024)
                         .allowHardware(false)
