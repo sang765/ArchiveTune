@@ -624,6 +624,7 @@ fun PlayerPlaybackControls(
     playerConnection: PlayerConnection,
     currentSongLiked: Boolean
 ) {
+    val scope = rememberCoroutineScope()
     val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsState()
 
     when (playerDesignStyle) {
@@ -672,7 +673,7 @@ fun PlayerPlaybackControls(
                                 val smoothPlayPause by rememberPreference(SmoothPlayPauseKey, defaultValue = false)
                                 val fadeDuration by rememberPreference(PlayPauseFadeDurationKey, defaultValue = 300)
                                 val currentFadeDuration = if (smoothPlayPause) fadeDuration else 0
-                                playerConnection.player.togglePlayPauseWithFade(currentFadeDuration)
+                                playerConnection.player.togglePlayPauseWithFade(currentFadeDuration, scope)
                             }
                         },
                         colors = IconButtonDefaults.filledIconButtonColors(
@@ -789,7 +790,7 @@ fun PlayerPlaybackControls(
                                     val smoothPlayPause by rememberPreference(SmoothPlayPauseKey, defaultValue = false)
                                     val fadeDuration by rememberPreference(PlayPauseFadeDurationKey, defaultValue = 300)
                                     val currentFadeDuration = if (smoothPlayPause) fadeDuration else 0
-                                    playerConnection.player.togglePlayPauseWithFade(currentFadeDuration)
+                                    playerConnection.player.togglePlayPauseWithFade(currentFadeDuration, scope)
                                 }
                             },
                         contentAlignment = Alignment.Center
@@ -954,7 +955,7 @@ fun PlayerPlaybackControls(
                                 val smoothPlayPause by rememberPreference(SmoothPlayPauseKey, defaultValue = false)
                                 val fadeDuration by rememberPreference(PlayPauseFadeDurationKey, defaultValue = 300)
                                 val currentFadeDuration = if (smoothPlayPause) fadeDuration else 0
-                                playerConnection.player.togglePlayPauseWithFade(currentFadeDuration)
+                                playerConnection.player.togglePlayPauseWithFade(currentFadeDuration, scope)
                             }
                         },
                         shape = RoundedCornerShape(28.dp),
@@ -1106,7 +1107,7 @@ fun PlayerPlaybackControls(
                                 val smoothPlayPause by rememberPreference(SmoothPlayPauseKey, defaultValue = false)
                                 val fadeDuration by rememberPreference(PlayPauseFadeDurationKey, defaultValue = 300)
                                 val currentFadeDuration = if (smoothPlayPause) fadeDuration else 0
-                                playerConnection.player.togglePlayPauseWithFade(currentFadeDuration)
+                                playerConnection.player.togglePlayPauseWithFade(currentFadeDuration, scope)
                             }
                         },
                 ) {
