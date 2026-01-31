@@ -90,7 +90,7 @@ fun Player.togglePlayPauseWithFade(fadeDurationMs: Int) {
         volume = 0f
         playWhenReady = true
         // Use a simple coroutine without explicit scope
-        kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.Main) {
+        CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
             val steps = 20
             val stepDuration = fadeDurationMs / steps
             val volumeStep = 1f / steps
@@ -102,7 +102,7 @@ fun Player.togglePlayPauseWithFade(fadeDurationMs: Int) {
         }
     } else {
         // Fade out: Fade to 0, then pause
-        kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.Main) {
+        CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
             val steps = 20
             val stepDuration = fadeDurationMs / steps
             val volumeStep = currentVolume / steps

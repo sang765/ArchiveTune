@@ -314,7 +314,7 @@ private fun LegacyMiniPlayer(
                         val smoothPlayPause by rememberPreference(SmoothPlayPauseKey, defaultValue = false)
                         val fadeDuration by rememberPreference(PlayPauseFadeDurationKey, defaultValue = 300)
                         val currentFadeDuration = if (smoothPlayPause) fadeDuration else 0
-                        playerConnection.player.togglePlayPauseWithFade(currentFadeDuration)
+                        playerConnection.player.togglePlayPauseWithFade(currentFadeDuration, coroutineScope)
                     }
                 },
             ) {

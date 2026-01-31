@@ -710,7 +710,16 @@ fun Queue(
                                                     }
                                                 } else {
                                                     if (index == currentWindowIndex) {
-                                                        playerConnection.player.togglePlayPauseWithFade(currentFadeDuration)
+                                                        playerConnection.player.togglePlayPauseWithFade(currentFadeDuration, coroutineScope)
+                                                    val fadeDuration by rememberPreference(PlayPauseFadeDurationKey, defaultValue = 300)
+                                                    val currentFadeDuration = if (smoothPlayPause) fadeDuration else 0
+                                                    playerConnection.player.togglePlayPauseWithFade(currentFadeDuration)
+                                                    val fadeDuration by rememberPreference(PlayPauseFadeDurationKey, defaultValue = 300)
+                                                    val currentFadeDuration = if (smoothPlayPause) fadeDuration else 0
+                                                    playerConnection.player.togglePlayPauseWithFade(currentFadeDuration)
+                                                    val fadeDuration by rememberPreference(PlayPauseFadeDurationKey, defaultValue = 300)
+                                                    val currentFadeDuration = if (smoothPlayPause) fadeDuration else 0
+                                                    playerConnection.player.togglePlayPauseWithFade(currentFadeDuration)
                                                     } else {
                                                         playerConnection.player.seekToDefaultPosition(
                                                             window.firstPeriodIndex,

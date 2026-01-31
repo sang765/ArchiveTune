@@ -555,17 +555,9 @@ class MusicService :
                 if (!smoothEnabled) {
                     crossfadeProcessor.crossfadeDurationMs = 0
                 } else {
-                    // When enabled, restore the configured duration (use current setting)
-                    crossfadeProcessor.crossfadeDurationMs = dataStore.get(TrackTransitionFadeDurationKey, 500)
-                }
-            }
-
-        dataStore.data
-            .map(::readEqSettingsFromPrefs)
-            .distinctUntilChanged()
-            .collectLatest(scope) { settings ->
-                desiredEqSettings.value = settings
-                applyEqSettingsToEffects(settings)
+                    // When enabled, restore the configured duration
+                    val duration = dataStore.get(TrackTransitionFadeDurationKey, 500)
+                    crossfadeProcessor.crossfadeDurationMs = duration
             }
 
         combine(
@@ -1588,18 +1580,20 @@ class MusicService :
         }
     }
 
-    // Handle repeat mode compatibility
-    // For REPEAT_MODE_ONE, disable crossfade to avoid interference with track restart
-    if (player.repeatMode == REPEAT_MODE_ONE) {
-        crossfadeProcessor.crossfadeDurationMs = 0
-    }
+    if (isManualTransition) {
+        scope.launch {
+            val smoothEnabled = dataStore.data.map { it[SmoothTrackTransitionsKey] ?: false }.first()
+            val applyToManual = dataStore.data.map { it[ApplyTransitionToManualSkipKey] ?: true }.first()
 
-    // Clear automix when user manually seeks to a different song
-    // This ensures recommendations are refreshed based on the new context
-    if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK && dataStore.get(AutoLoadMoreKey, true)) {
-        clearAutomix()
+            if (smoothEnabled && applyToManual) {
+                val fadeDuration = dataStore.data.map { it[TrackTransitionFadeDurationKey] ?: 500 }.first()
+                crossfadeProcessor.crossfadeDurationMs = fadeDuration
+            } else if (smoothEnabled) {
+                // Smooth transitions enabled but not for manual skips
+                crossfadeProcessor.crossfadeDurationMs = 0
+            }
+        }
     }
-
     // Auto-load more from queue if available
     if (dataStore.get(AutoLoadMoreKey, true) &&
         reason != Player.MEDIA_ITEM_TRANSITION_REASON_REPEAT &&
