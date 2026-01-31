@@ -31,6 +31,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -81,6 +82,13 @@ fun DiscordTokenInputScreen(navController: NavController) {
     var isValidating by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // Sync tokenInput with discordToken whenever it changes (e.g., after login via WebView)
+    LaunchedEffect(discordToken) {
+        if (tokenInput != discordToken) {
+            tokenInput = discordToken
+        }
+    }
 
     fun cancel() {
         focusManager.clearFocus()
