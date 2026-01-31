@@ -418,7 +418,7 @@ private fun LegacyMiniMediaInfo(
 
             // Main thumbnail
             AsyncImage(
-                val imageModel = if (cropThumbnailToSquare && upscaleCroppedThumbnail) {
+                model = if (cropThumbnailToSquare && upscaleCroppedThumbnail) {
                     ImageRequest.Builder(LocalContext.current)
                         .data(mediaMetadata.thumbnailUrl)
                         .size(MINI_PLAYER_UPSCALE_SIZE, MINI_PLAYER_UPSCALE_SIZE)
