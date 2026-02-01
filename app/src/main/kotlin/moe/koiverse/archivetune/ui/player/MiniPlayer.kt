@@ -76,6 +76,8 @@ import moe.koiverse.archivetune.LocalDatabase
 import moe.koiverse.archivetune.LocalPlayerConnection
 import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.constants.MiniPlayerHeight
+import moe.koiverse.archivetune.constants.MINI_PLAYER_UPSCALE_SIZE
+import moe.koiverse.archivetune.constants.PLAYER_THUMBNAIL_UPSCALE_SIZE
 import moe.koiverse.archivetune.constants.SwipeSensitivityKey
 import moe.koiverse.archivetune.constants.ThumbnailCornerRadius
 import moe.koiverse.archivetune.constants.UseNewMiniPlayerDesignKey
@@ -393,7 +395,7 @@ private fun LegacyMiniMediaInfo(
                 model = if (cropThumbnailToSquare && upscaleCroppedThumbnail) {
                     ImageRequest.Builder(LocalContext.current)
                         .data(mediaMetadata.thumbnailUrl)
-                        .size(1024, 1024)
+                        .size(PLAYER_THUMBNAIL_UPSCALE_SIZE, PLAYER_THUMBNAIL_UPSCALE_SIZE)
                         .allowHardware(false)
                         .build()
                 } else {

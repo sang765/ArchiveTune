@@ -84,6 +84,7 @@ import moe.koiverse.archivetune.canvas.CanvasArtwork
 import moe.koiverse.archivetune.constants.PlayerBackgroundStyle
 import moe.koiverse.archivetune.constants.PlayerBackgroundStyleKey
 import moe.koiverse.archivetune.constants.PlayerHorizontalPadding
+import moe.koiverse.archivetune.constants.PLAYER_THUMBNAIL_UPSCALE_SIZE
 import moe.koiverse.archivetune.constants.SeekExtraSeconds
 import moe.koiverse.archivetune.constants.SwipeThumbnailKey
 import moe.koiverse.archivetune.constants.ArchiveTuneCanvasKey

@@ -45,3 +45,7 @@ val BottomSheetSoftAnimationSpec = spring<Dp>(
 	dampingRatio = Spring.DampingRatioNoBouncy,
 	stiffness = Spring.StiffnessLow
 )
+
+// Upscale sizes for thumbnails
+const val MINI_PLAYER_UPSCALE_SIZE = 1024
+const val PLAYER_THUMBNAIL_UPSCALE_SIZE = 1024
