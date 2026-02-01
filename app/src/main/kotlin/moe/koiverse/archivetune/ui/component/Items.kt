@@ -1196,7 +1196,7 @@ fun ItemThumbnail(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxSize()
-                        .let { if (shouldCropSquare) it.aspectRatio(1f) else it }
+                        .let { if (shouldCropSquare) it.aspectRatio(1f) else it.aspectRatio(16f/9f) }
                 )
             } else {
                 Box(
@@ -1293,7 +1293,7 @@ fun LocalThumbnail(
             model = request,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize().let { if (shouldCropSquare) it.aspectRatio(1f) else it }
+            modifier = Modifier.fillMaxSize().let { if (shouldCropSquare) it.aspectRatio(1f) else it.aspectRatio(16f/9f) }
         )
 
         AnimatedVisibility(
