@@ -86,6 +86,7 @@ import moe.koiverse.archivetune.constants.UpscaleCroppedThumbnailKey
 import moe.koiverse.archivetune.db.entities.ArtistEntity
 import moe.koiverse.archivetune.extensions.togglePlayPause
 import moe.koiverse.archivetune.models.MediaMetadata
+import moe.koiverse.archivetune.ui.utils.getHighestQualityYouTubeThumbnail
 import moe.koiverse.archivetune.utils.rememberPreference
 import moe.koiverse.archivetune.utils.restartDiscordPresenceIfRunning
 import kotlinx.coroutines.launch
@@ -380,6 +381,9 @@ private fun LegacyMiniMediaInfo(
 ) {
     val cropThumbnailToSquare by rememberPreference(CropThumbnailToSquareKey, false)
     val upscaleCroppedThumbnail by rememberPreference(UpscaleCroppedThumbnailKey, false)
+    val highQualityThumbnailUrl = remember(mediaMetadata.thumbnailUrl) {
+        mediaMetadata.thumbnailUrl?.getHighestQualityYouTubeThumbnail()
+    }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier,
@@ -394,12 +398,12 @@ private fun LegacyMiniMediaInfo(
             AsyncImage(
                 model = if (cropThumbnailToSquare && upscaleCroppedThumbnail) {
                     ImageRequest.Builder(LocalContext.current)
-                        .data(mediaMetadata.thumbnailUrl)
+                        .data(highQualityThumbnailUrl)
                         .size(PLAYER_THUMBNAIL_UPSCALE_SIZE, PLAYER_THUMBNAIL_UPSCALE_SIZE)
                         .allowHardware(false)
                         .build()
                 } else {
-                    mediaMetadata.thumbnailUrl
+                    highQualityThumbnailUrl
                 },
                 contentDescription = null,
                 contentScale = ContentScale.FillBounds,
@@ -419,12 +423,12 @@ private fun LegacyMiniMediaInfo(
             AsyncImage(
                 model = if (cropThumbnailToSquare && upscaleCroppedThumbnail) {
                     ImageRequest.Builder(LocalContext.current)
-                        .data(mediaMetadata.thumbnailUrl)
+                        .data(highQualityThumbnailUrl)
                         .size(MINI_PLAYER_UPSCALE_SIZE, MINI_PLAYER_UPSCALE_SIZE)
                         .allowHardware(false)
                         .build()
                 } else {
-                    mediaMetadata.thumbnailUrl
+                    highQualityThumbnailUrl
                 },
                 contentDescription = null,
                 contentScale = if (cropThumbnailToSquare) ContentScale.Crop else ContentScale.Fit,

@@ -94,6 +94,7 @@ import moe.koiverse.archivetune.constants.UpscaleCroppedThumbnailKey
 import moe.koiverse.archivetune.constants.HidePlayerThumbnailKey
 import moe.koiverse.archivetune.extensions.metadata
 import moe.koiverse.archivetune.innertube.YouTube
+import moe.koiverse.archivetune.ui.utils.getHighestQualityYouTubeThumbnail
 import moe.koiverse.archivetune.utils.restartDiscordPresenceIfRunning
 import moe.koiverse.archivetune.utils.rememberEnumPreference
 import moe.koiverse.archivetune.utils.rememberPreference
@@ -328,6 +329,9 @@ fun Thumbnail(
                             var skipMultiplier by remember { mutableStateOf(1) }
                             var lastTapTime by remember { mutableLongStateOf(0L) }
                             val itemMetadata = remember(item) { item.metadata }
+                            val highQualityThumbnailUrl = remember(item.mediaMetadata.artworkUri) {
+                                item.mediaMetadata.artworkUri?.toString()?.getHighestQualityYouTubeThumbnail()
+                            }
                             val storefront =
                                 remember {
                                     val country = Locale.getDefault().country
@@ -467,12 +471,12 @@ fun Thumbnail(
                                         AsyncImage(
                                             model = if (cropThumbnailToSquare && upscaleCroppedThumbnail) {
                                                 ImageRequest.Builder(context)
-                                                    .data(item.mediaMetadata.artworkUri?.toString())
+                                                    .data(highQualityThumbnailUrl)
                                                     .size(2048, 2048)
                                                     .allowHardware(false)
                                                     .build()
                                             } else {
-                                                item.mediaMetadata.artworkUri?.toString()
+                                                highQualityThumbnailUrl
                                             },
                                             contentDescription = null,
                                             contentScale = ContentScale.FillBounds,
@@ -498,12 +502,12 @@ fun Thumbnail(
                                             AsyncImage(
                                                 model = if (cropThumbnailToSquare && upscaleCroppedThumbnail) {
                                                     ImageRequest.Builder(context)
-                                                        .data(item.mediaMetadata.artworkUri?.toString())
+                                                        .data(highQualityThumbnailUrl)
                                                         .size(PLAYER_THUMBNAIL_UPSCALE_SIZE, PLAYER_THUMBNAIL_UPSCALE_SIZE)
                                                         .allowHardware(false)
                                                         .build()
                                                 } else {
-                                                    item.mediaMetadata.artworkUri?.toString()
+                                                    highQualityThumbnailUrl
                                                 },
                                                 contentDescription = null,
                                                 contentScale = if (cropThumbnailToSquare) ContentScale.Crop else ContentScale.Fit,
