@@ -35,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -88,6 +89,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toUri
 import android.content.Intent
 import android.net.Uri
+import com.yalantis.ucrop.UCrop
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
@@ -272,7 +274,7 @@ fun OnlinePlaylistScreen(
     }
 
     // Helper function to save bitmap to temp URI
-    private fun saveBitmapToTempUri(bitmap: android.graphics.Bitmap): Uri {
+    fun saveBitmapToTempUri(bitmap: android.graphics.Bitmap): Uri {
         val tempFile = java.io.File(context.cacheDir, "temp_cover_${System.currentTimeMillis()}.jpg")
         java.io.FileOutputStream(tempFile).use { out ->
             bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, out)
@@ -285,7 +287,7 @@ fun OnlinePlaylistScreen(
     }
 
     // Handle cover image cropped
-    private fun handleCoverCropped(croppedUri: Uri) {
+    fun handleCoverCropped(croppedUri: Uri) {
         coroutineScope.launch {
             isUploadingCover = true
             try {
@@ -304,9 +306,9 @@ fun OnlinePlaylistScreen(
                             onSuccess = {
                                 snackbarHostState.showSnackbar(context.getString(R.string.cover_updated))
                             },
-                            onFailure = {
-                                // Local cover was saved even if upload failed
-                                snackbarHostState.showSnackbar(context.getString(R.string.cover_updated))
+                            onFailure = { e ->
+                                // Show distinct failure message for upload errors
+                                snackbarHostState.showSnackbar(context.getString(R.string.cover_upload_failed) + ": ${e.message}")
                             }
                         )
                     } else {
@@ -325,7 +327,7 @@ fun OnlinePlaylistScreen(
     }
 
     // Launch image picker after phone verification
-    private fun launchImagePicker() {
+    fun launchImagePicker() {
         if (playlist?.isEditable == true) {
             coroutineScope.launch {
                 isCheckingVerification = true
@@ -355,19 +357,22 @@ fun OnlinePlaylistScreen(
         }
     }
 
-    // Launch crop intent
-    private fun launchCrop(uri: Uri) {
-        val cropIntent = android.content.Intent(android.content.Intent.ACTION_CROP).apply {
-            setDataAndType(uri, "image/*")
-            putExtra(android.content.Intent.EXTRA_SCALE, true)
-            putExtra(android.content.Intent.EXTRA_CROP, true)
-            putExtra("aspectX", 1)
-            putExtra("aspectY", 1)
-            putExtra("outputX", 1024)
-            putExtra("outputY", 1024)
-            putExtra("return-data", true)
+    // Launch crop intent using uCrop
+    fun launchCrop(uri: Uri) {
+        try {
+            val destinationUri = Uri.fromFile(java.io.File(context.cacheDir, "cropped_cover_${System.currentTimeMillis()}.jpg"))
+            val uCropIntent = com.yalantis.ucrop.UCrop.of(uri, destinationUri)
+                .withAspectRatio(1f, 1f)
+                .withMaxResultSize(1024, 1024)
+                .getIntent(context)
+            cropLauncher.launch(uCropIntent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Fallback to simple image selection if uCrop fails
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(context.getString(R.string.cover_upload_failed))
+            }
         }
-        cropLauncher.launch(cropIntent)
     }
 
     // Handle selected image for cropping

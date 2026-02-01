@@ -71,6 +71,7 @@ fun PlaylistMenu(
     playlist: Playlist,
     coroutineScope: CoroutineScope,
     onDismiss: () -> Unit,
+    onChangeCover: (() -> Unit)? = null,
     autoPlaylist: Boolean? = false,
     downloadPlaylist: Boolean? = false,
     songList: List<Song>? = emptyList(),
@@ -492,7 +493,7 @@ fun PlaylistMenu(
                     },
                     modifier = Modifier.clickable {
                         onDismiss()
-                        // The cover change will be handled by clicking on the thumbnail in the playlist screen
+                        onChangeCover?.invoke()
                     }
                 )
             }

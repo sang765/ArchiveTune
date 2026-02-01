@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
 import android.provider.MediaStore
+import com.yalantis.ucrop.UCrop
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
@@ -32,19 +33,13 @@ object ImageUtils {
         lifecycleOwner: LifecycleOwner,
         onImageSelected: (Uri?) -> Unit,
     ): ActivityResultLauncher<ActivityResultContracts.PickVisualMedia> {
-        val launcher = ActivityResultContracts.PickVisualMedia { uri ->
+        return lifecycleOwner.registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
             onImageSelected(uri)
         }
-        lifecycleOwner.lifecycleScope.launch {
-            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Launcher is ready to use
-            }
-        }
-        return launcher
     }
 
     /**
-     * Creates an image cropper launcher using the system ACTION_CROP intent.
+     * Creates an image cropper launcher using uCrop library.
      * Crops to 1:1 aspect ratio.
      */
     fun createImageCropperLauncher(
@@ -52,38 +47,26 @@ object ImageUtils {
         onCropComplete: (Uri?) -> Unit,
         onCropCancelled: () -> Unit,
     ): ActivityResultLauncher<Uri> {
-        return ActivityResultContracts.GetContent().let { getContentLauncher ->
-            ActivityResultContracts.StartActivityForResult().let { activityResultLauncher ->
-                object : ActivityResultLauncher<Uri>() {
-                    override fun launch(input: Uri) {
-                        val cropIntent = createCropIntent(input)
-                        activityResultLauncher.launch(cropIntent)
-                    }
-
-                    override fun getContract() = activityResultLauncher.contract
-                }
+        return lifecycleOwner.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == android.app.Activity.RESULT_OK && result.data != null) {
+                val resultUri = UCrop.getOutput(result.data!!)
+                onCropComplete(resultUri)
+            } else if (result.resultCode == android.app.Activity.RESULT_CANCELED) {
+                onCropCancelled()
             }
         }
     }
 
     /**
-     * Creates an Android Intent for cropping images to 1:1 aspect ratio.
+     * Creates an Android Intent for cropping images using uCrop.
      */
-    private fun createCropIntent(sourceUri: Uri): android.content.Intent {
-        val cropIntent = android.content.Intent(android.content.Intent.ACTION_CROP).apply {
-            setDataAndType(sourceUri, "image/*")
-            putExtra(android.content.Intent.EXTRA_SCALE, true)
-            putExtra(android.content.Intent.EXTRA_CROP, true)
-            // Force 1:1 aspect ratio
-            putExtra("aspectX", 1)
-            putExtra("aspectY", 1)
-            // Output size
-            putExtra("outputX", MAX_IMAGE_SIZE)
-            putExtra("outputY", MAX_IMAGE_SIZE)
-            // Return data in intent
-            putExtra("return-data", true)
-        }
-        return cropIntent
+    fun createCropIntent(context: Context, sourceUri: Uri): android.content.Intent {
+        val outputUri = Uri.fromFile(File(context.cacheDir, "cropped_${System.currentTimeMillis()}.jpg"))
+        
+        return UCrop.of(sourceUri, outputUri)
+            .withAspectRatio(1f, 1f)
+            .withMaxResultSize(1024, 1024)
+            .getIntent(context)
     }
 
     /**
@@ -102,16 +85,17 @@ object ImageUtils {
         val outputFile = File(coversDir, "$playlistId.jpg")
 
         try {
-            val inputStream = context.contentResolver.openInputStream(uri)
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-            inputStream?.close()
-
-            // Compress and save
-            FileOutputStream(outputFile).use { out ->
-                bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, out)
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                val bitmap = BitmapFactory.decodeStream(inputStream)
+                if (bitmap != null) {
+                    FileOutputStream(outputFile).use { out ->
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, out)
+                    }
+                    bitmap.recycle()
+                } else {
+                    throw Exception("Failed to decode bitmap from input stream")
+                }
             }
-            bitmap.recycle()
-
             outputFile.absolutePath
         } catch (e: Exception) {
             e.printStackTrace()
@@ -129,10 +113,14 @@ object ImageUtils {
         try {
             context.contentResolver.openInputStream(uri)?.use { inputStream ->
                 val bitmap = BitmapFactory.decodeStream(inputStream)
-                val outputStream = java.io.ByteArrayOutputStream()
-                bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, outputStream)
-                bitmap.recycle()
-                outputStream.toByteArray()
+                if (bitmap != null) {
+                    val outputStream = java.io.ByteArrayOutputStream()
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, outputStream)
+                    bitmap.recycle()
+                    outputStream.toByteArray()
+                } else {
+                    ByteArray(0)
+                }
             } ?: ByteArray(0)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -177,27 +165,33 @@ object ImageUtils {
         maxSizeBytes: Int = 2 * 1024 * 1024,
     ): ByteArray = withContext(Dispatchers.IO) {
         try {
-            val inputStream = context.contentResolver.openInputStream(uri)
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-            inputStream?.close()
+            context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                val bitmap = BitmapFactory.decodeStream(inputStream)
+                if (bitmap == null) {
+                    return@withContext ByteArray(0)
+                }
 
-            // Scale down if needed
-            val scaledBitmap = scaleBitmap(bitmap, MAX_IMAGE_SIZE)
+                // Scale down if needed
+                val scaledBitmap = scaleBitmap(bitmap, MAX_IMAGE_SIZE)
+                val needsRecycleOriginal = scaledBitmap !== bitmap
 
-            val outputStream = java.io.ByteArrayOutputStream()
-            var quality = JPEG_QUALITY
+                val outputStream = java.io.ByteArrayOutputStream()
+                var quality = JPEG_QUALITY
 
-            // Compress until we meet the size requirement
-            do {
-                outputStream.reset()
-                scaledBitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
-                quality -= 10
-            } while (outputStream.size() > maxSizeBytes && quality > 10)
+                // Compress until we meet the size requirement
+                do {
+                    outputStream.reset()
+                    scaledBitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
+                    quality -= 10
+                } while (outputStream.size() > maxSizeBytes && quality > 10)
 
-            scaledBitmap.recycle()
-            bitmap.recycle()
+                scaledBitmap.recycle()
+                if (needsRecycleOriginal) {
+                    bitmap.recycle()
+                }
 
-            outputStream.toByteArray()
+                outputStream.toByteArray()
+            } ?: ByteArray(0)
         } catch (e: Exception) {
             e.printStackTrace()
             ByteArray(0)

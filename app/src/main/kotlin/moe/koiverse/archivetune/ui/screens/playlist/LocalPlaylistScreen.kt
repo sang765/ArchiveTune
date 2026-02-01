@@ -96,6 +96,7 @@ import androidx.compose.ui.util.fastSumBy
 import androidx.compose.ui.zIndex
 import androidx.core.net.toUri
 import android.net.Uri
+import com.yalantis.ucrop.UCrop
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -208,6 +209,8 @@ fun LocalPlaylistScreen(
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var isUploadingCover by remember { mutableStateOf(false) }
 
+    val coroutineScope = rememberCoroutineScope()
+
     // Image picker launcher
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
@@ -222,7 +225,9 @@ fun LocalPlaylistScreen(
         if (result.resultCode == android.app.Activity.RESULT_OK) {
             result.data?.data?.let { croppedUri ->
                 handleCoverCropped(croppedUri)
-            } ?: result.data?.extras?.getParcelable<android.graphics.Bitmap>("data")?.let { bitmap ->
+            } ?: androidx.core.os.BuildCompat.isAtLeastT().let {
+                result.data?.extras?.getParcelable("data", android.graphics.Bitmap::class.java)
+            }?.let { bitmap ->
                 val uri = saveBitmapToTempUri(bitmap)
                 handleCoverCropped(uri)
             }
@@ -240,8 +245,6 @@ fun LocalPlaylistScreen(
             onDismiss = { showAssignTagsDialog = false }
         )
     }
-
-    val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
     // System bars padding
@@ -552,7 +555,7 @@ fun LocalPlaylistScreen(
     }
 
     // Helper function to save bitmap to temp URI
-    private fun saveBitmapToTempUri(bitmap: android.graphics.Bitmap): Uri {
+    fun saveBitmapToTempUri(bitmap: android.graphics.Bitmap): Uri {
         val tempFile = File(context.cacheDir, "temp_cover_${System.currentTimeMillis()}.jpg")
         FileOutputStream(tempFile).use { out ->
             bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, out)
@@ -565,7 +568,7 @@ fun LocalPlaylistScreen(
     }
 
     // Handle cover image cropped
-    private fun handleCoverCropped(croppedUri: Uri) {
+    fun handleCoverCropped(croppedUri: Uri) {
         coroutineScope.launch {
             isUploadingCover = true
             try {
@@ -587,25 +590,28 @@ fun LocalPlaylistScreen(
     }
 
     // Launch image picker
-    private fun launchImagePicker() {
+    fun launchImagePicker() {
         imagePickerLauncher.launch(
             ActivityResultContracts.PickVisualMedia.ImageOnly
         )
     }
 
-    // Launch crop intent
-    private fun launchCrop(uri: Uri) {
-        val cropIntent = android.content.Intent(android.content.Intent.ACTION_CROP).apply {
-            setDataAndType(uri, "image/*")
-            putExtra(android.content.Intent.EXTRA_SCALE, true)
-            putExtra(android.content.Intent.EXTRA_CROP, true)
-            putExtra("aspectX", 1)
-            putExtra("aspectY", 1)
-            putExtra("outputX", 1024)
-            putExtra("outputY", 1024)
-            putExtra("return-data", true)
+    // Launch crop intent using uCrop
+    fun launchCrop(uri: Uri) {
+        try {
+            val destinationUri = Uri.fromFile(File(context.cacheDir, "cropped_cover_${System.currentTimeMillis()}.jpg"))
+            val uCropIntent = com.yalantis.ucrop.UCrop.of(uri, destinationUri)
+                .withAspectRatio(1f, 1f)
+                .withMaxResultSize(1024, 1024)
+                .getIntent(context)
+            cropLauncher.launch(uCropIntent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            // Fallback to simple image selection if uCrop fails
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(context.getString(R.string.cover_upload_failed))
+            }
         }
-        cropLauncher.launch(cropIntent)
     }
 
     Box(
