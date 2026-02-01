@@ -480,6 +480,24 @@ fun PlaylistMenu(
             }
         }
 
+        if (editable && autoPlaylist != true) {
+            item {
+                ListItem(
+                    headlineContent = { Text(text = stringResource(R.string.change_playlist_cover)) },
+                    leadingContent = {
+                        Icon(
+                            painter = painterResource(R.drawable.image),
+                            contentDescription = null,
+                        )
+                    },
+                    modifier = Modifier.clickable {
+                        onDismiss()
+                        // The cover change will be handled by clicking on the thumbnail in the playlist screen
+                    }
+                )
+            }
+        }
+
         if (autoPlaylist != true && downloadPlaylist != true) {
             item {
                 ListItem(

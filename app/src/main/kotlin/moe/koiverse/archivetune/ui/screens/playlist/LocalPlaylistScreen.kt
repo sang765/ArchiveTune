@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -94,10 +95,14 @@ import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.util.fastSumBy
 import androidx.compose.ui.zIndex
 import androidx.core.net.toUri
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.exoplayer.offline.DownloadRequest
+import moe.koiverse.archivetune.utils.ImageUtils
 import androidx.media3.exoplayer.offline.DownloadService
 import androidx.navigation.NavController
 import androidx.palette.graphics.Palette
@@ -160,6 +165,8 @@ import moe.koiverse.archivetune.viewmodels.LocalPlaylistViewModel
 import com.valentinilk.shimmer.shimmer
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
+import java.io.File
+import java.io.FileOutputStream
 import java.time.LocalDateTime
 
 @SuppressLint("RememberReturnType")
@@ -195,6 +202,36 @@ fun LocalPlaylistScreen(
     var locked by rememberPreference(PlaylistEditLockKey, defaultValue = true)
     val (disableBlur) = rememberPreference(DisableBlurKey, false)
     var showAssignTagsDialog by remember { mutableStateOf(false) }
+
+    // Cover editing state variables
+    var showChangeCoverDialog by remember { mutableStateOf(false) }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var isUploadingCover by remember { mutableStateOf(false) }
+
+    // Image picker launcher
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let { selectedImageUri = it }
+    }
+
+    // Crop launcher
+    val cropLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            result.data?.data?.let { croppedUri ->
+                handleCoverCropped(croppedUri)
+            } ?: result.data?.extras?.getParcelable<android.graphics.Bitmap>("data")?.let { bitmap ->
+                val uri = saveBitmapToTempUri(bitmap)
+                handleCoverCropped(uri)
+            }
+        } else if (result.resultCode == android.app.Activity.RESULT_CANCELED) {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(context.getString(R.string.crop_cancelled))
+            }
+        }
+    }
 
     if (showAssignTagsDialog && playlist != null) {
         AssignTagsDialog(
@@ -488,6 +525,14 @@ fun LocalPlaylistScreen(
         }
     }
 
+    // Handle selected image for cropping
+    LaunchedEffect(selectedImageUri) {
+        selectedImageUri?.let { uri ->
+            launchCrop(uri)
+            selectedImageUri = null
+        }
+    }
+
     // Calculate gradient opacity based on scroll position
     val gradientAlpha by remember {
         derivedStateOf {
@@ -504,6 +549,63 @@ fun LocalPlaylistScreen(
         derivedStateOf {
             !disableBlur && !selection && !showTopBarTitle
         }
+    }
+
+    // Helper function to save bitmap to temp URI
+    private fun saveBitmapToTempUri(bitmap: android.graphics.Bitmap): Uri {
+        val tempFile = File(context.cacheDir, "temp_cover_${System.currentTimeMillis()}.jpg")
+        FileOutputStream(tempFile).use { out ->
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, out)
+        }
+        return androidx.core.content.FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            tempFile
+        )
+    }
+
+    // Handle cover image cropped
+    private fun handleCoverCropped(croppedUri: Uri) {
+        coroutineScope.launch {
+            isUploadingCover = true
+            try {
+                val playlistId = playlist?.id ?: return@launch
+                val localPath = ImageUtils.saveImageToInternalStorage(context, croppedUri, playlistId)
+                if (localPath.isNotEmpty()) {
+                    database.updatePlaylistThumbnail(playlistId, localPath)
+                    snackbarHostState.showSnackbar(context.getString(R.string.cover_updated))
+                } else {
+                    snackbarHostState.showSnackbar(context.getString(R.string.cover_upload_failed))
+                }
+            } catch (e: Exception) {
+                snackbarHostState.showSnackbar(context.getString(R.string.cover_upload_failed))
+            } finally {
+                isUploadingCover = false
+                selectedImageUri = null
+            }
+        }
+    }
+
+    // Launch image picker
+    private fun launchImagePicker() {
+        imagePickerLauncher.launch(
+            ActivityResultContracts.PickVisualMedia.ImageOnly
+        )
+    }
+
+    // Launch crop intent
+    private fun launchCrop(uri: Uri) {
+        val cropIntent = android.content.Intent(android.content.Intent.ACTION_CROP).apply {
+            setDataAndType(uri, "image/*")
+            putExtra(android.content.Intent.EXTRA_SCALE, true)
+            putExtra(android.content.Intent.EXTRA_CROP, true)
+            putExtra("aspectX", 1)
+            putExtra("aspectY", 1)
+            putExtra("outputX", 1024)
+            putExtra("outputY", 1024)
+            putExtra("return-data", true)
+        }
+        cropLauncher.launch(cropIntent)
     }
 
     Box(
@@ -654,6 +756,11 @@ fun LocalPlaylistScreen(
                                         Surface(
                                             modifier = Modifier
                                                 .size(240.dp)
+                                                .then(
+                                                    if (editable) {
+                                                        Modifier.clickable { launchImagePicker() }
+                                                    } else Modifier
+                                                )
                                                 .shadow(
                                                     elevation = 24.dp,
                                                     shape = RoundedCornerShape(16.dp),
@@ -668,12 +775,36 @@ fun LocalPlaylistScreen(
                                                 contentScale = ContentScale.Crop,
                                                 modifier = Modifier.fillMaxSize()
                                             )
+                                            // Edit icon overlay
+                                            if (editable) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .align(Alignment.BottomEnd)
+                                                        .padding(8.dp)
+                                                        .size(40.dp)
+                                                        .clip(CircleShape)
+                                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        painter = painterResource(R.drawable.edit),
+                                                        contentDescription = stringResource(R.string.change_playlist_cover),
+                                                        modifier = Modifier.size(20.dp),
+                                                        tint = MaterialTheme.colorScheme.onPrimary
+                                                    )
+                                                }
+                                            }
                                         }
                                     } else if (playlist.thumbnails.size > 1) {
                                         // Grid of 4 thumbnails
                                         Surface(
                                             modifier = Modifier
                                                 .size(240.dp)
+                                                .then(
+                                                    if (editable) {
+                                                        Modifier.clickable { launchImagePicker() }
+                                                    } else Modifier
+                                                )
                                                 .shadow(
                                                     elevation = 24.dp,
                                                     shape = RoundedCornerShape(16.dp),
@@ -698,6 +829,25 @@ fun LocalPlaylistScreen(
                                                             .size(120.dp)
                                                     )
                                                 }
+                                                // Edit icon overlay
+                                                if (editable) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .align(Alignment.BottomEnd)
+                                                            .padding(8.dp)
+                                                            .size(40.dp)
+                                                            .clip(CircleShape)
+                                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        Icon(
+                                                            painter = painterResource(R.drawable.edit),
+                                                            contentDescription = stringResource(R.string.change_playlist_cover),
+                                                            modifier = Modifier.size(20.dp),
+                                                            tint = MaterialTheme.colorScheme.onPrimary
+                                                        )
+                                                    }
+                                                }
                                             }
                                         }
                                     } else {
@@ -705,6 +855,11 @@ fun LocalPlaylistScreen(
                                         Surface(
                                             modifier = Modifier
                                                 .size(240.dp)
+                                                .then(
+                                                    if (editable) {
+                                                        Modifier.clickable { launchImagePicker() }
+                                                    } else Modifier
+                                                )
                                                 .shadow(
                                                     elevation = 16.dp,
                                                     shape = RoundedCornerShape(16.dp)
@@ -722,6 +877,25 @@ fun LocalPlaylistScreen(
                                                     modifier = Modifier.size(80.dp),
                                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                                 )
+                                            }
+                                            // Edit icon overlay
+                                            if (editable) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .align(Alignment.BottomEnd)
+                                                        .padding(8.dp)
+                                                        .size(40.dp)
+                                                        .clip(CircleShape)
+                                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Icon(
+                                                        painter = painterResource(R.drawable.edit),
+                                                        contentDescription = stringResource(R.string.change_playlist_cover),
+                                                        modifier = Modifier.size(20.dp),
+                                                        tint = MaterialTheme.colorScheme.onPrimary
+                                                    )
+                                                }
                                             }
                                         }
                                     }

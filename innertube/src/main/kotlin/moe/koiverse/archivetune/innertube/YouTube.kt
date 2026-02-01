@@ -1123,5 +1123,13 @@ object YouTube {
 
     const val MAX_GET_QUEUE_SIZE = 1000
 
+    suspend fun checkPhoneVerification(): Result<Boolean> = runCatching {
+        innerTube.checkPhoneVerification().getOrThrow()
+    }
+
+    suspend fun uploadPlaylistThumbnail(playlistId: String, imageData: ByteArray): Result<Unit> = runCatching {
+        innerTube.uploadPlaylistThumbnail(playlistId, imageData).getOrThrow()
+    }
+
     private val VISITOR_DATA_REGEX = Regex("^Cg[t|s]")
 }

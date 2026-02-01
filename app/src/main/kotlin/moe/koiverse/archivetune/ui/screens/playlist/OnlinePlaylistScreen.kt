@@ -3,6 +3,7 @@ package moe.koiverse.archivetune.ui.screens.playlist
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -82,10 +83,15 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.zIndex
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
+import android.content.Intent
+import android.net.Uri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.navigation.NavController
-import androidx.palette.graphics.Palette
-import coil3.compose.AsyncImage
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+import moe.koiverse.archivetune.utils.ImageUtils
 import coil3.imageLoader
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
@@ -107,9 +113,13 @@ import moe.koiverse.archivetune.extensions.toMediaItem
 import moe.koiverse.archivetune.extensions.togglePlayPause
 import moe.koiverse.archivetune.innertube.models.SongItem
 import moe.koiverse.archivetune.innertube.models.WatchEndpoint
+import moe.koiverse.archivetune.innertube.YouTube
+import java.io.File
+import java.io.FileOutputStream
 import moe.koiverse.archivetune.models.toMediaMetadata
 import moe.koiverse.archivetune.playback.queues.YouTubeQueue
 import moe.koiverse.archivetune.ui.component.DraggableScrollbar
+import moe.koiverse.archivetune.ui.component.DefaultDialog
 import moe.koiverse.archivetune.ui.component.IconButton
 import moe.koiverse.archivetune.ui.component.LocalMenuState
 import moe.koiverse.archivetune.ui.component.YouTubeListItem
@@ -152,6 +162,13 @@ fun OnlinePlaylistScreen(
     val hideExplicit by rememberPreference(key = HideExplicitKey, defaultValue = false)
     val (disableBlur) = rememberPreference(DisableBlurKey, false)
 
+    // Cover editing state variables
+    var showPhoneVerificationDialog by remember { mutableStateOf(false) }
+    var showChangeCoverDialog by remember { mutableStateOf(false) }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var isCheckingVerification by remember { mutableStateOf(false) }
+    var isUploadingCover by remember { mutableStateOf(false) }
+
     // System bars padding
     val systemBarsTopPadding = WindowInsets.systemBars.asPaddingValues().calculateTopPadding()
 
@@ -184,6 +201,36 @@ fun OnlinePlaylistScreen(
         }
     }
 
+    // Phone verification dialog
+    if (showPhoneVerificationDialog) {
+        DefaultDialog(
+            onDismiss = { showPhoneVerificationDialog = false },
+            title = {
+                Text(text = stringResource(R.string.phone_verification_required))
+            },
+            text = {
+                Text(text = stringResource(R.string.phone_verification_required_desc))
+            },
+            buttons = {
+                TextButton(
+                    onClick = {
+                        showPhoneVerificationDialog = false
+                        // Open YouTube phone verification page
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://myaccount.google.com/phone-number"))
+                        context.startActivity(intent)
+                    }
+                ) {
+                    Text(text = stringResource(R.string.verify_phone_number))
+                }
+                TextButton(
+                    onClick = { showPhoneVerificationDialog = false }
+                ) {
+                    Text(text = stringResource(android.R.string.cancel))
+                }
+            }
+        )
+    }
+
     if (isSearching) {
         BackHandler {
             isSearching = false
@@ -198,6 +245,138 @@ fun OnlinePlaylistScreen(
             .toMutableStateList()
 
     val showTopBarTitle by remember { derivedStateOf { lazyListState.firstVisibleItemIndex > 0 } }
+
+    // Image picker launcher
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let { selectedImageUri = it }
+    }
+
+    // Crop launcher
+    val cropLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            result.data?.data?.let { croppedUri ->
+                handleCoverCropped(croppedUri)
+            } ?: result.data?.extras?.getParcelable<android.graphics.Bitmap>("data")?.let { bitmap ->
+                val uri = saveBitmapToTempUri(bitmap)
+                handleCoverCropped(uri)
+            }
+        } else if (result.resultCode == android.app.Activity.RESULT_CANCELED) {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(context.getString(R.string.crop_cancelled))
+            }
+        }
+    }
+
+    // Helper function to save bitmap to temp URI
+    private fun saveBitmapToTempUri(bitmap: android.graphics.Bitmap): Uri {
+        val tempFile = java.io.File(context.cacheDir, "temp_cover_${System.currentTimeMillis()}.jpg")
+        java.io.FileOutputStream(tempFile).use { out ->
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, out)
+        }
+        return androidx.core.content.FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            tempFile
+        )
+    }
+
+    // Handle cover image cropped
+    private fun handleCoverCropped(croppedUri: Uri) {
+        coroutineScope.launch {
+            isUploadingCover = true
+            try {
+                val playlistId = playlist?.id ?: return@launch
+                
+                // Save locally first
+                val localPath = ImageUtils.saveImageToInternalStorage(context, croppedUri, playlistId)
+                if (localPath.isNotEmpty()) {
+                    // Update local database with local path
+                    database.updatePlaylistThumbnail(playlistId, localPath)
+                    
+                    // Upload to YouTube if editable
+                    if (playlist?.isEditable == true) {
+                        val imageData = ImageUtils.loadImageAsByteArray(context, croppedUri)
+                        YouTube.uploadPlaylistThumbnail(playlistId, imageData).fold(
+                            onSuccess = {
+                                snackbarHostState.showSnackbar(context.getString(R.string.cover_updated))
+                            },
+                            onFailure = {
+                                // Local cover was saved even if upload failed
+                                snackbarHostState.showSnackbar(context.getString(R.string.cover_updated))
+                            }
+                        )
+                    } else {
+                        snackbarHostState.showSnackbar(context.getString(R.string.cover_updated))
+                    }
+                } else {
+                    snackbarHostState.showSnackbar(context.getString(R.string.cover_upload_failed))
+                }
+            } catch (e: Exception) {
+                snackbarHostState.showSnackbar(context.getString(R.string.cover_upload_failed))
+            } finally {
+                isUploadingCover = false
+                selectedImageUri = null
+            }
+        }
+    }
+
+    // Launch image picker after phone verification
+    private fun launchImagePicker() {
+        if (playlist?.isEditable == true) {
+            coroutineScope.launch {
+                isCheckingVerification = true
+                YouTube.checkPhoneVerification().fold(
+                    onSuccess = { isVerified ->
+                        if (isVerified) {
+                            imagePickerLauncher.launch(
+                                ActivityResultContracts.PickVisualMedia.ImageOnly
+                            )
+                        } else {
+                            showPhoneVerificationDialog = true
+                        }
+                    },
+                    onFailure = {
+                        // If check fails, assume verified and allow picker
+                        imagePickerLauncher.launch(
+                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                        )
+                    }
+                )
+                isCheckingVerification = false
+            }
+        } else {
+            imagePickerLauncher.launch(
+                ActivityResultContracts.PickVisualMedia.ImageOnly
+            )
+        }
+    }
+
+    // Launch crop intent
+    private fun launchCrop(uri: Uri) {
+        val cropIntent = android.content.Intent(android.content.Intent.ACTION_CROP).apply {
+            setDataAndType(uri, "image/*")
+            putExtra(android.content.Intent.EXTRA_SCALE, true)
+            putExtra(android.content.Intent.EXTRA_CROP, true)
+            putExtra("aspectX", 1)
+            putExtra("aspectY", 1)
+            putExtra("outputX", 1024)
+            putExtra("outputY", 1024)
+            putExtra("return-data", true)
+        }
+        cropLauncher.launch(cropIntent)
+    }
+
+    // Handle selected image for cropping
+    LaunchedEffect(selectedImageUri) {
+        selectedImageUri?.let { uri ->
+            launchCrop(uri)
+            selectedImageUri = null
+        }
+    }
 
     // Gradient colors state for playlist cover
     var gradientColors by remember { mutableStateOf<List<Color>>(emptyList()) }
@@ -531,6 +710,11 @@ fun OnlinePlaylistScreen(
                                     Surface(
                                         modifier =
                                             Modifier.size(240.dp)
+                                                .then(
+                                                    if (playlist.isEditable) {
+                                                        Modifier.clickable { launchImagePicker() }
+                                                    } else Modifier
+                                                )
                                                 .shadow(
                                                     elevation = 24.dp,
                                                     shape = RoundedCornerShape(16.dp),
@@ -549,6 +733,25 @@ fun OnlinePlaylistScreen(
                                             contentScale = ContentScale.Crop,
                                             modifier = Modifier.fillMaxSize()
                                         )
+                                        // Edit icon overlay
+                                        if (playlist.isEditable) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .align(Alignment.BottomEnd)
+                                                    .padding(8.dp)
+                                                    .size(40.dp)
+                                                    .clip(CircleShape)
+                                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(R.drawable.edit),
+                                                    contentDescription = stringResource(R.string.change_playlist_cover),
+                                                    modifier = Modifier.size(20.dp),
+                                                    tint = MaterialTheme.colorScheme.onPrimary
+                                                )
+                                            }
+                                        }
                                     }
                                 }
 

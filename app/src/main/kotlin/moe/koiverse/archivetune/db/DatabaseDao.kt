@@ -1646,4 +1646,7 @@ interface DatabaseDao {
             addTagToPlaylist(playlistId, tagId)
         }
     }
+
+    @Query("UPDATE playlist SET thumbnailUrl = :thumbnailUrl WHERE id = :playlistId")
+    fun updatePlaylistThumbnail(playlistId: String, thumbnailUrl: String)
 }

@@ -634,4 +634,53 @@ class InnerTube {
         }
 
 
+    suspend fun checkPhoneVerification(
+        client: YouTubeClient = YouTubeClient.WEB_REMIX,
+    ): Result<Boolean> = runCatching {
+        // Check phone verification status via account settings
+        val response = httpClient.post("https://music.youtube.com/youtubei/v1/account/settings") {
+            parameter("key", "AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX3")
+            contentType(ContentType.Application.Json)
+            setBody(
+                mapOf(
+                    "context" to client.toContext(locale, visitorData, dataSyncId),
+                    "capabilities" to mapOf(
+                        "phoneNumber" to mapOf(
+                            "hasVerification" to true
+                        )
+                    )
+                )
+            )
+        }
+        val responseText = response.bodyAsText()
+        // Check if phone is verified in the response
+        responseText.contains("hasVerification\":true") ||
+        responseText.contains("phoneNumberVerified") ||
+        !responseText.contains("needsPhoneVerification")
+    }
+
+    suspend fun uploadPlaylistThumbnail(
+        playlistId: String,
+        imageData: ByteArray,
+        client: YouTubeClient = YouTubeClient.WEB_REMIX,
+    ): Result<Unit> = runCatching {
+        // YouTube thumbnail upload endpoint
+        val boundary = "----Boundary-${System.currentTimeMillis()}"
+        val response = httpClient.post("https://music.youtube.com/youtubei/v1/playlist/update_thumbnail") {
+            parameter("key", "AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX3")
+            contentType(ContentType.parse("multipart/form-data; boundary=$boundary"))
+            setBody(
+                "--$boundary\r\n" +
+                "Content-Disposition: form-data; name=\"playlistId\"\r\n\r\n$playlistId\r\n" +
+                "--$boundary\r\n" +
+                "Content-Disposition: form-data; name=\"image\"; filename=\"thumbnail.jpg\"\r\n" +
+                "Content-Type: image/jpeg\r\n\r\n"
+            ).plus(imageData).plus("\r\n--$boundary--")
+        }
+        if (!response.status.isSuccess()) {
+            throw Exception("Failed to upload thumbnail: ${response.status}")
+        }
+    }
+
+
 }
