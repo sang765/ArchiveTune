@@ -249,8 +249,8 @@
     <string name="phone_verification_required">Yêu cầu xác minh số điện thoại</string>
     <string name="phone_verification_required_desc">Để tải lên ảnh bìa danh sách phát tùy chỉnh lên YouTube, bạn cần xác minh số điện thoại của mình trên YouTube. Vui lòng xác minh số điện thoại và thử lại.</string>
     <string name="verify_phone_number">Xác minh số điện thoại</string>
-    <string name="uploading_cover">Đang tải lên ảnh bìa...</string>
+    <string name="uploading_cover">Đang tải lên ảnh bìa danh sách phát...</string>
     <string name="cover_updated">Đã cập nhật ảnh bìa danh sách phát</string>
-    <string name="cover_upload_failed">Không thể tải lên ảnh bìa</string>
+    <string name="cover_upload_failed">Không thể tải lên ảnh bìa danh sách phát</string>
     <string name="crop_cancelled">Đã hủy cắt ảnh</string>
 </resources>
