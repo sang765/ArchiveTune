@@ -592,7 +592,9 @@ fun LocalPlaylistScreen(
     // Launch image picker
     fun launchImagePicker() {
         imagePickerLauncher.launch(
-            ActivityResultContracts.PickVisualMedia.ImageOnly
+            ActivityResultContracts.PickVisualMedia.PickVisualMediaRequest(
+                ActivityResultContracts.PickVisualMedia.ImageOnly
+            )
         )
     }
 

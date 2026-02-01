@@ -260,11 +260,13 @@ fun OnlinePlaylistScreen(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == android.app.Activity.RESULT_OK) {
-            result.data?.data?.let { croppedUri ->
-                handleCoverCropped(croppedUri)
-            } ?: result.data?.extras?.getParcelable<android.graphics.Bitmap>("data")?.let { bitmap ->
-                val uri = saveBitmapToTempUri(bitmap)
-                handleCoverCropped(uri)
+            result.data?.let { data ->
+                UCrop.getOutput(data)?.let { croppedUri ->
+                    handleCoverCropped(croppedUri)
+                } ?: data.extras?.getParcelable<android.graphics.Bitmap>("data")?.let { bitmap ->
+                    val uri = saveBitmapToTempUri(bitmap)
+                    handleCoverCropped(uri)
+                }
             }
         } else if (result.resultCode == android.app.Activity.RESULT_CANCELED) {
             coroutineScope.launch {
@@ -335,7 +337,9 @@ fun OnlinePlaylistScreen(
                     onSuccess = { isVerified ->
                         if (isVerified) {
                             imagePickerLauncher.launch(
-                                ActivityResultContracts.PickVisualMedia.ImageOnly
+                                ActivityResultContracts.PickVisualMedia.PickVisualMediaRequest(
+                                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                                )
                             )
                         } else {
                             showPhoneVerificationDialog = true
@@ -344,7 +348,9 @@ fun OnlinePlaylistScreen(
                     onFailure = {
                         // If check fails, assume verified and allow picker
                         imagePickerLauncher.launch(
-                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                            ActivityResultContracts.PickVisualMedia.PickVisualMediaRequest(
+                                ActivityResultContracts.PickVisualMedia.ImageOnly
+                            )
                         )
                     }
                 )
@@ -352,7 +358,9 @@ fun OnlinePlaylistScreen(
             }
         } else {
             imagePickerLauncher.launch(
-                ActivityResultContracts.PickVisualMedia.ImageOnly
+                ActivityResultContracts.PickVisualMedia.PickVisualMediaRequest(
+                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                )
             )
         }
     }
