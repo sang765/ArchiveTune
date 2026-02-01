@@ -20,6 +20,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import io.ktor.utils.io.core.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import java.net.Proxy
@@ -636,28 +637,29 @@ class InnerTube {
 
     suspend fun checkPhoneVerification(
         client: YouTubeClient = YouTubeClient.WEB_REMIX,
-    ): Result<Boolean> = withRetry {
-        // Check phone verification status via account settings
-        val response = httpClient.post("https://music.youtube.com/youtubei/v1/account/settings") {
-            parameter("key", "AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX3")
-            contentType(ContentType.Application.Json)
-            setBody(
-                mapOf(
-                    "context" to client.toContext(locale, visitorData, dataSyncId),
-                    "capabilities" to mapOf(
-                        "phoneNumber" to mapOf(
-                            "hasVerification" to true
+    ): Result<Boolean> = runCatching {
+        withRetry {
+            // Check phone verification status via account settings
+            val response = httpClient.post("https://music.youtube.com/youtubei/v1/account/settings") {
+                ytClient(client, setLogin = true)
+                setBody(
+                    mapOf(
+                        "context" to client.toContext(locale, visitorData, dataSyncId),
+                        "capabilities" to mapOf(
+                            "phoneNumber" to mapOf(
+                                "hasVerification" to true
+                            )
                         )
                     )
                 )
-            )
+            }
+            val responseText = response.bodyAsText()
+            // Check if phone is verified in the response
+            val isVerified = responseText.contains("hasVerification\":true") ||
+                responseText.contains("phoneNumberVerified") ||
+                !responseText.contains("needsPhoneVerification")
+            isVerified
         }
-        val responseText = response.bodyAsText()
-        // Check if phone is verified in the response
-        val isVerified = responseText.contains("hasVerification\":true") ||
-            responseText.contains("phoneNumberVerified") ||
-            !responseText.contains("needsPhoneVerification")
-        Result.success(isVerified)
     }
 
     suspend fun uploadPlaylistThumbnail(
@@ -666,23 +668,19 @@ class InnerTube {
         client: YouTubeClient = YouTubeClient.WEB_REMIX,
     ): Result<Unit> = runCatching {
         withRetry {
-            // YouTube thumbnail upload endpoint
-            val boundary = "----Boundary-${System.currentTimeMillis()}"
-            val body = buildString {
-                append("--$boundary\r\n")
-                append("Content-Disposition: form-data; name=\"playlistId\"\r\n\r\n")
-                append("$playlistId\r\n")
-                append("--$boundary\r\n")
-                append("Content-Disposition: form-data; name=\"image\"; filename=\"thumbnail.jpg\"\r\n")
-                append("Content-Type: image/jpeg\r\n\r\n")
-            }.toByteArray()
-            
-            val fullBody = body + imageData + "\r\n--$boundary--\r\n".toByteArray()
-            
             val response = httpClient.post("https://music.youtube.com/youtubei/v1/playlist/update_thumbnail") {
-                parameter("key", "AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX3")
-                contentType(ContentType.parse("multipart/form-data; boundary=$boundary"))
-                setBody(fullBody)
+                ytClient(client, setLogin = true)
+                setBody(MultiPartFormDataContent(formData {
+                    append("playlistId", playlistId)
+                    append(
+                        "image",
+                        imageData,
+                        headers = Headers.build {
+                            append(HttpHeaders.ContentDisposition, "form-data; name=\"image\"; filename=\"thumbnail.jpg\"")
+                            append(HttpHeaders.ContentType, "image/jpeg")
+                        }
+                    )
+                }))
             }
             if (!response.status.isSuccess()) {
                 throw Exception("Failed to upload thumbnail: ${response.status}")

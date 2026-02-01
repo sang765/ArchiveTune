@@ -210,7 +210,7 @@ fun OnlinePlaylistScreen(
             title = {
                 Text(text = stringResource(R.string.phone_verification_required))
             },
-            text = {
+            content = {
                 Text(text = stringResource(R.string.phone_verification_required_desc))
             },
             buttons = {
