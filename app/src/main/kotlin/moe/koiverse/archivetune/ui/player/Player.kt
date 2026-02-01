@@ -220,6 +220,9 @@ fun BottomSheetPlayer(
     val (overwriteColors, _) = rememberPreference(OverwriteColorsKey, defaultValue = false)
     val (doNotApplyToPlayer, _) = rememberPreference(DoNotApplyToPlayerKey, defaultValue = false)
     val (showCodecOnPlayer) = rememberPreference(booleanPreferencesKey("show_codec_on_player"), false)
+    
+    // Collect dynamic theme context as state to observe changes
+    val dynamicContext by DynamicThemeManager.context.collectAsState()
 
     val playerButtonsStyle by rememberEnumPreference(
         key = PlayerButtonsStyleKey,
@@ -324,19 +327,18 @@ fun BottomSheetPlayer(
         }
     }
     
-    LaunchedEffect(mediaMetadata?.id, playerBackground, isPlaying, dynamicColorDuringPlayback, overwriteColors, doNotApplyToPlayer) {
+    LaunchedEffect(mediaMetadata?.id, playerBackground, isPlaying, dynamicColorDuringPlayback, overwriteColors, doNotApplyToPlayer, dynamicContext) {
         // Check if we should use tab colors instead of player colors
         val shouldUseTabColors = overwriteColors && !doNotApplyToPlayer
         
         if (shouldUseTabColors) {
-            val context = DynamicThemeManager.context.value
-            if (context.isOnTabWithColors && context.extractedColors.isNotEmpty()) {
+            if (dynamicContext.isOnTabWithColors && dynamicContext.extractedColors.isNotEmpty()) {
                 // Use tab colors if we're on a tab with colors and overwrite is enabled
                 // Check if we should respect playback state
                 if (dynamicColorDuringPlayback && !isPlaying) {
                     gradientColors = defaultGradientColors
                 } else {
-                    gradientColors = context.extractedColors
+                    gradientColors = dynamicContext.extractedColors
                 }
                 return@LaunchedEffect
             }

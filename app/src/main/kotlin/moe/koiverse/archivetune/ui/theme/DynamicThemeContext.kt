@@ -4,11 +4,7 @@ import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import moe.koiverse.archivetune.constants.DoNotApplyToPlayerKey
-import moe.koiverse.archivetune.constants.DynamicColorDuringPlaybackKey
-import moe.koiverse.archivetune.constants.DynamicColorFromAlbumPlaylistKey
-import moe.koiverse.archivetune.constants.DynamicColorFromArtistKey
-import moe.koiverse.archivetune.constants.OverwriteColorsKey
+import kotlinx.coroutines.flow.update
 
 /**
  * Enum representing the current screen context for dynamic theme application
@@ -40,7 +36,7 @@ object DynamicThemeManager {
     val context: StateFlow<DynamicThemeContext> = _context.asStateFlow()
 
     /**
-     * Updates the current theme context with new values
+     * Updates the current theme context with new values using atomic update
      */
     fun updateContext(
         screen: ThemeScreen? = null,
@@ -48,12 +44,14 @@ object DynamicThemeManager {
         isPlaying: Boolean? = null,
         isOnTabWithColors: Boolean? = null
     ) {
-        _context.value = _context.value.copy(
-            currentScreen = screen ?: _context.value.currentScreen,
-            extractedColors = colors ?: _context.value.extractedColors,
-            isPlaying = isPlaying ?: _context.value.isPlaying,
-            isOnTabWithColors = isOnTabWithColors ?: _context.value.isOnTabWithColors
-        )
+        _context.update { current ->
+            current.copy(
+                currentScreen = screen ?: current.currentScreen,
+                extractedColors = colors ?: current.extractedColors,
+                isPlaying = isPlaying ?: current.isPlaying,
+                isOnTabWithColors = isOnTabWithColors ?: current.isOnTabWithColors
+            )
+        }
     }
 
     /**

@@ -256,13 +256,12 @@ fun OnlinePlaylistScreen(
             }
         } else {
             gradientColors = emptyList()
-            if (!dynamicColorFromAlbumPlaylist) {
-                DynamicThemeManager.updateContext(
-                    screen = ThemeScreen.PLAYLIST,
-                    colors = emptyList(),
-                    isOnTabWithColors = false
-                )
-            }
+            // Always reset theme context when colors are cleared
+            DynamicThemeManager.updateContext(
+                screen = ThemeScreen.PLAYLIST,
+                colors = emptyList(),
+                isOnTabWithColors = false
+            )
         }
     }
 

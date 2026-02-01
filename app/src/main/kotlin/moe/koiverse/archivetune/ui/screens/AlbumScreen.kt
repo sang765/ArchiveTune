@@ -202,13 +202,12 @@ fun AlbumScreen(
             }
         } else {
             gradientColors = emptyList()
-            if (!dynamicColorFromAlbumPlaylist) {
-                DynamicThemeManager.updateContext(
-                    screen = ThemeScreen.ALBUM,
-                    colors = emptyList(),
-                    isOnTabWithColors = false
-                )
-            }
+            // Always reset theme context when colors are cleared
+            DynamicThemeManager.updateContext(
+                screen = ThemeScreen.ALBUM,
+                colors = emptyList(),
+                isOnTabWithColors = false
+            )
         }
     }
 

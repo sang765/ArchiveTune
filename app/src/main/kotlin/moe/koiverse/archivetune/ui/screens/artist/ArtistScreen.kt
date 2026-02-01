@@ -221,13 +221,12 @@ fun ArtistScreen(
             }
         } else {
             gradientColors = emptyList()
-            if (!dynamicColorFromArtist) {
-                DynamicThemeManager.updateContext(
-                    screen = ThemeScreen.ARTIST,
-                    colors = emptyList(),
-                    isOnTabWithColors = false
-                )
-            }
+            // Always reset theme context when colors are cleared
+            DynamicThemeManager.updateContext(
+                screen = ThemeScreen.ARTIST,
+                colors = emptyList(),
+                isOnTabWithColors = false
+            )
         }
     }
 
