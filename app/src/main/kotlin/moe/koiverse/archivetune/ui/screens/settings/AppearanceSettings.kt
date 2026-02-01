@@ -58,8 +58,13 @@ import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.constants.ChipSortTypeKey
 import moe.koiverse.archivetune.constants.DarkModeKey
 import moe.koiverse.archivetune.constants.DefaultOpenTabKey
+import moe.koiverse.archivetune.constants.DoNotApplyToPlayerKey
+import moe.koiverse.archivetune.constants.DynamicColorDuringPlaybackKey
+import moe.koiverse.archivetune.constants.DynamicColorFromAlbumPlaylistKey
+import moe.koiverse.archivetune.constants.DynamicColorFromArtistKey
 import moe.koiverse.archivetune.constants.DynamicThemeKey
 import moe.koiverse.archivetune.constants.GridItemSize
+import moe.koiverse.archivetune.constants.OverwriteColorsKey
 import moe.koiverse.archivetune.constants.GridItemsSizeKey
 import moe.koiverse.archivetune.constants.LibraryFilter
 import moe.koiverse.archivetune.constants.LyricsClickKey
@@ -119,6 +124,26 @@ fun AppearanceSettings(
     val (dynamicTheme, onDynamicThemeChange) = rememberPreference(
         DynamicThemeKey,
         defaultValue = true
+    )
+    val (dynamicColorFromArtist, onDynamicColorFromArtistChange) = rememberPreference(
+        DynamicColorFromArtistKey,
+        defaultValue = true
+    )
+    val (dynamicColorFromAlbumPlaylist, onDynamicColorFromAlbumPlaylistChange) = rememberPreference(
+        DynamicColorFromAlbumPlaylistKey,
+        defaultValue = true
+    )
+    val (dynamicColorDuringPlayback, onDynamicColorDuringPlaybackChange) = rememberPreference(
+        DynamicColorDuringPlaybackKey,
+        defaultValue = true
+    )
+    val (overwriteColors, onOverwriteColorsChange) = rememberPreference(
+        OverwriteColorsKey,
+        defaultValue = false
+    )
+    val (doNotApplyToPlayer, onDoNotApplyToPlayerChange) = rememberPreference(
+        DoNotApplyToPlayerKey,
+        defaultValue = false
     )
     val (darkMode, onDarkModeChange) = rememberEnumPreference(
         DarkModeKey,
@@ -399,6 +424,52 @@ fun AppearanceSettings(
             checked = dynamicTheme,
             onCheckedChange = onDynamicThemeChange,
         )
+
+        AnimatedVisibility(visible = dynamicTheme) {
+            Column {
+                SwitchPreference(
+                    title = { Text(stringResource(R.string.dynamic_color_from_artist)) },
+                    checked = dynamicColorFromArtist,
+                    onCheckedChange = onDynamicColorFromArtistChange,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+
+                SwitchPreference(
+                    title = { Text(stringResource(R.string.dynamic_color_from_album_playlist)) },
+                    checked = dynamicColorFromAlbumPlaylist,
+                    onCheckedChange = onDynamicColorFromAlbumPlaylistChange,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+
+                SwitchPreference(
+                    title = { Text(stringResource(R.string.dynamic_color_during_playback)) },
+                    description = stringResource(R.string.dynamic_color_during_playback_desc),
+                    checked = dynamicColorDuringPlayback,
+                    onCheckedChange = onDynamicColorDuringPlaybackChange,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+
+                SwitchPreference(
+                    title = { Text(stringResource(R.string.overwrite_colors)) },
+                    description = stringResource(R.string.overwrite_colors_desc),
+                    checked = overwriteColors,
+                    onCheckedChange = onOverwriteColorsChange,
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+
+                AnimatedVisibility(visible = overwriteColors) {
+                    Column {
+                        SwitchPreference(
+                            title = { Text(stringResource(R.string.do_not_apply_to_player)) },
+                            description = stringResource(R.string.do_not_apply_to_player_desc),
+                            checked = doNotApplyToPlayer,
+                            onCheckedChange = onDoNotApplyToPlayerChange,
+                            modifier = Modifier.padding(start = 32.dp)
+                        )
+                    }
+                }
+            }
+        }
 
         AnimatedVisibility(visible = !dynamicTheme || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             PreferenceEntry(

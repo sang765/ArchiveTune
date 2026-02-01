@@ -41,6 +41,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -120,7 +121,10 @@ import moe.koiverse.archivetune.ui.component.shimmer.TextPlaceholder
 import moe.koiverse.archivetune.ui.menu.SelectionMediaMetadataMenu
 import moe.koiverse.archivetune.ui.menu.YouTubePlaylistMenu
 import moe.koiverse.archivetune.ui.menu.YouTubeSongMenu
+import moe.koiverse.archivetune.constants.DynamicColorFromAlbumPlaylistKey
+import moe.koiverse.archivetune.ui.theme.DynamicThemeManager
 import moe.koiverse.archivetune.ui.theme.PlayerColorExtractor
+import moe.koiverse.archivetune.ui.theme.ThemeScreen
 import moe.koiverse.archivetune.ui.utils.ItemWrapper
 import moe.koiverse.archivetune.ui.utils.backToMain
 import moe.koiverse.archivetune.utils.rememberPreference
@@ -151,6 +155,10 @@ fun OnlinePlaylistScreen(
     var selection by remember { mutableStateOf(false) }
     val hideExplicit by rememberPreference(key = HideExplicitKey, defaultValue = false)
     val (disableBlur) = rememberPreference(DisableBlurKey, false)
+    val (dynamicColorFromAlbumPlaylist, _) = rememberPreference(
+        DynamicColorFromAlbumPlaylistKey,
+        defaultValue = true
+    )
 
     // System bars padding
     val systemBarsTopPadding = WindowInsets.systemBars.asPaddingValues().calculateTopPadding()
@@ -205,9 +213,9 @@ fun OnlinePlaylistScreen(
     val surfaceColor = MaterialTheme.colorScheme.surface
 
     // Extract gradient colors from playlist cover
-    LaunchedEffect(playlist?.thumbnail) {
+    LaunchedEffect(playlist?.thumbnail, dynamicColorFromAlbumPlaylist) {
         val thumbnailUrl = playlist?.thumbnail
-        if (thumbnailUrl != null) {
+        if (thumbnailUrl != null && dynamicColorFromAlbumPlaylist) {
             val request =
                 ImageRequest.Builder(context)
                     .data(thumbnailUrl)
@@ -237,10 +245,31 @@ fun OnlinePlaylistScreen(
                             fallbackColor = fallbackColor
                         )
                     gradientColors = extractedColors
+                    
+                    // Update theme context with playlist colors
+                    DynamicThemeManager.updateContext(
+                        screen = ThemeScreen.PLAYLIST,
+                        colors = extractedColors,
+                        isOnTabWithColors = true
+                    )
                 }
             }
         } else {
             gradientColors = emptyList()
+            if (!dynamicColorFromAlbumPlaylist) {
+                DynamicThemeManager.updateContext(
+                    screen = ThemeScreen.PLAYLIST,
+                    colors = emptyList(),
+                    isOnTabWithColors = false
+                )
+            }
+        }
+    }
+
+    // Reset context when leaving the screen
+    DisposableEffect(Unit) {
+        onDispose {
+            DynamicThemeManager.resetContext()
         }
     }
 

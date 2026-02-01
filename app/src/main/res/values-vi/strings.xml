@@ -216,6 +216,14 @@
     <string name="appearance">Giao diện</string>
     <string name="theme">Giao diện</string>
     <string name="enable_dynamic_theme">Bật giao diện động</string>
+    <string name="dynamic_color_from_artist">Màu động từ tab Nghệ sĩ</string>
+    <string name="dynamic_color_from_album_playlist">Màu động từ Albums, Playlists và Singles</string>
+    <string name="dynamic_color_during_playback">Màu động khi phát/tạm dừng</string>
+    <string name="dynamic_color_during_playback_desc">Khi tạm dừng, màu sẽ trở về mặc định hoặc màu tab</string>
+    <string name="overwrite_colors">Ghi đè màu sắc</string>
+    <string name="overwrite_colors_desc">Ưu tiên màu tab khi đang xem tab đó</string>
+    <string name="do_not_apply_to_player">Không áp dụng màu cho trình phát</string>
+    <string name="do_not_apply_to_player_desc">Màu tab sẽ không ảnh hưởng đến màu trình phát ngay cả khi ở tab đó</string>
     <string name="use_system_font">Sử dụng font hệ thống</string>
     <string name="use_system_font_desc">Sử dụng font thiết bị thay vì font ứng dụng</string>
     <!-- Color Palette -->

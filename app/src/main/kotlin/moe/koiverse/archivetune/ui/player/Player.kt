@@ -134,8 +134,12 @@ import moe.koiverse.archivetune.constants.PlayerCustomBlurKey
 import moe.koiverse.archivetune.constants.PlayerCustomContrastKey
 import moe.koiverse.archivetune.constants.PlayerCustomBrightnessKey
 import moe.koiverse.archivetune.constants.DisableBlurKey
+import moe.koiverse.archivetune.constants.DoNotApplyToPlayerKey
+import moe.koiverse.archivetune.constants.DynamicColorDuringPlaybackKey
+import moe.koiverse.archivetune.constants.OverwriteColorsKey
 import moe.koiverse.archivetune.constants.PlayerButtonsStyle
 import moe.koiverse.archivetune.constants.PlayerButtonsStyleKey
+import moe.koiverse.archivetune.ui.theme.DynamicThemeManager
 import moe.koiverse.archivetune.ui.theme.PlayerBackgroundColorUtils
 import moe.koiverse.archivetune.ui.theme.PlayerColorExtractor
 import moe.koiverse.archivetune.ui.theme.PlayerSliderColors
@@ -212,6 +216,9 @@ fun BottomSheetPlayer(
     val (playerCustomBrightness) = rememberPreference(PlayerCustomBrightnessKey, 1f)
     
     val (disableBlur) = rememberPreference(DisableBlurKey, false)
+    val (dynamicColorDuringPlayback, _) = rememberPreference(DynamicColorDuringPlaybackKey, defaultValue = true)
+    val (overwriteColors, _) = rememberPreference(OverwriteColorsKey, defaultValue = false)
+    val (doNotApplyToPlayer, _) = rememberPreference(DoNotApplyToPlayerKey, defaultValue = false)
     val (showCodecOnPlayer) = rememberPreference(booleanPreferencesKey("show_codec_on_player"), false)
 
     val playerButtonsStyle by rememberEnumPreference(
@@ -317,49 +324,71 @@ fun BottomSheetPlayer(
         }
     }
     
-    LaunchedEffect(mediaMetadata?.id, playerBackground) {
+    LaunchedEffect(mediaMetadata?.id, playerBackground, isPlaying, dynamicColorDuringPlayback, overwriteColors, doNotApplyToPlayer) {
+        // Check if we should use tab colors instead of player colors
+        val shouldUseTabColors = overwriteColors && !doNotApplyToPlayer
+        
+        if (shouldUseTabColors) {
+            val context = DynamicThemeManager.context.value
+            if (context.isOnTabWithColors && context.extractedColors.isNotEmpty()) {
+                // Use tab colors if we're on a tab with colors and overwrite is enabled
+                // Check if we should respect playback state
+                if (dynamicColorDuringPlayback && !isPlaying) {
+                    gradientColors = defaultGradientColors
+                } else {
+                    gradientColors = context.extractedColors
+                }
+                return@LaunchedEffect
+            }
+        }
+
         if (playerBackground == PlayerBackgroundStyle.GRADIENT || playerBackground == PlayerBackgroundStyle.COLORING || playerBackground == PlayerBackgroundStyle.BLUR_GRADIENT || playerBackground == PlayerBackgroundStyle.GLOW || playerBackground == PlayerBackgroundStyle.GLOW_ANIMATED) {
             val currentMetadata = mediaMetadata
             if (currentMetadata != null && currentMetadata.thumbnailUrl != null) {
-                // Check cache first
-                val cachedColors = gradientColorsCache[currentMetadata.id]
-                if (cachedColors != null) {
-                    gradientColors = cachedColors
+                // Check if playback-based color change is enabled and we're paused
+                if (dynamicColorDuringPlayback && !isPlaying) {
+                    gradientColors = defaultGradientColors
                 } else {
-                    val request = ImageRequest.Builder(context)
-                        .data(currentMetadata.thumbnailUrl)
-                        .size(PlayerColorExtractor.Config.IMAGE_SIZE, PlayerColorExtractor.Config.IMAGE_SIZE)
-                        .allowHardware(false)
-                        .build()
+                    // Check cache first
+                    val cachedColors = gradientColorsCache[currentMetadata.id]
+                    if (cachedColors != null) {
+                        gradientColors = cachedColors
+                    } else {
+                        val request = ImageRequest.Builder(context)
+                            .data(currentMetadata.thumbnailUrl)
+                            .size(PlayerColorExtractor.Config.IMAGE_SIZE, PlayerColorExtractor.Config.IMAGE_SIZE)
+                            .allowHardware(false)
+                            .build()
 
-                    val result = runCatching {
-                        withContext(Dispatchers.IO) {
-                            context.imageLoader.execute(request)
-                        }
-                    }.getOrNull()
-
-                    if (result != null) {
-                        val bitmap = result.image?.toBitmap()
-                        if (bitmap != null) {
-                            val palette = withContext(Dispatchers.Default) {
-                                Palette.from(bitmap)
-                                    .maximumColorCount(PlayerColorExtractor.Config.MAX_COLOR_COUNT)
-                                    .resizeBitmapArea(PlayerColorExtractor.Config.BITMAP_AREA)
-                                    .generate()
+                        val result = runCatching {
+                            withContext(Dispatchers.IO) {
+                                context.imageLoader.execute(request)
                             }
+                        }.getOrNull()
 
-                            val extractedColors = PlayerColorExtractor.extractGradientColors(
-                                palette = palette,
-                                fallbackColor = fallbackColor
-                            )
+                        if (result != null) {
+                            val bitmap = result.image?.toBitmap()
+                            if (bitmap != null) {
+                                val palette = withContext(Dispatchers.Default) {
+                                    Palette.from(bitmap)
+                                        .maximumColorCount(PlayerColorExtractor.Config.MAX_COLOR_COUNT)
+                                        .resizeBitmapArea(PlayerColorExtractor.Config.BITMAP_AREA)
+                                        .generate()
+                                }
 
-                            gradientColorsCache[currentMetadata.id] = extractedColors
-                            gradientColors = extractedColors
+                                val extractedColors = PlayerColorExtractor.extractGradientColors(
+                                    palette = palette,
+                                    fallbackColor = fallbackColor
+                                )
+
+                                gradientColorsCache[currentMetadata.id] = extractedColors
+                                gradientColors = extractedColors
+                            } else {
+                                gradientColors = defaultGradientColors
+                            }
                         } else {
                             gradientColors = defaultGradientColors
                         }
-                    } else {
-                        gradientColors = defaultGradientColors
                     }
                 }
             } else {
@@ -368,6 +397,11 @@ fun BottomSheetPlayer(
         } else {
             gradientColors = emptyList()
         }
+    }
+
+    // Update playing state in theme context
+    LaunchedEffect(isPlaying) {
+        DynamicThemeManager.updateContext(isPlaying = isPlaying)
     }
 
     val changeBound = state.expandedBound / 3

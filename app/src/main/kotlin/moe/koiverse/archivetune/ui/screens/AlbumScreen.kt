@@ -37,6 +37,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -112,8 +113,12 @@ import moe.koiverse.archivetune.ui.component.shimmer.TextPlaceholder
 import moe.koiverse.archivetune.ui.menu.AlbumMenu
 import moe.koiverse.archivetune.ui.menu.SelectionSongMenu
 import moe.koiverse.archivetune.ui.menu.SongMenu
+import moe.koiverse.archivetune.constants.DynamicColorFromAlbumPlaylistKey
 import moe.koiverse.archivetune.ui.menu.YouTubeAlbumMenu
+import moe.koiverse.archivetune.ui.theme.DynamicThemeContext
+import moe.koiverse.archivetune.ui.theme.DynamicThemeManager
 import moe.koiverse.archivetune.ui.theme.PlayerColorExtractor
+import moe.koiverse.archivetune.ui.theme.ThemeScreen
 import moe.koiverse.archivetune.ui.utils.ItemWrapper
 import moe.koiverse.archivetune.ui.utils.backToMain
 import moe.koiverse.archivetune.utils.makeTimeString
@@ -144,6 +149,10 @@ fun AlbumScreen(
     val otherVersions by viewModel.otherVersions.collectAsState()
     val hideExplicit by rememberPreference(key = HideExplicitKey, defaultValue = false)
     val (disableBlur) = rememberPreference(DisableBlurKey, false)
+    val (dynamicColorFromAlbumPlaylist, _) = rememberPreference(
+        DynamicColorFromAlbumPlaylistKey,
+        defaultValue = true
+    )
 
     // System bars padding
     val systemBarsTopPadding = WindowInsets.systemBars.asPaddingValues().calculateTopPadding()
@@ -154,9 +163,9 @@ fun AlbumScreen(
     val surfaceColor = MaterialTheme.colorScheme.surface
 
     // Extract gradient colors from album cover
-    LaunchedEffect(albumWithSongs?.album?.thumbnailUrl) {
+    LaunchedEffect(albumWithSongs?.album?.thumbnailUrl, dynamicColorFromAlbumPlaylist) {
         val thumbnailUrl = albumWithSongs?.album?.thumbnailUrl
-        if (thumbnailUrl != null) {
+        if (thumbnailUrl != null && dynamicColorFromAlbumPlaylist) {
             val request = ImageRequest.Builder(context)
                 .data(thumbnailUrl)
                 .size(Size(PlayerColorExtractor.Config.IMAGE_SIZE, PlayerColorExtractor.Config.IMAGE_SIZE))
@@ -182,10 +191,31 @@ fun AlbumScreen(
                         fallbackColor = fallbackColor
                     )
                     gradientColors = extractedColors
+                    
+                    // Update theme context with album colors
+                    DynamicThemeManager.updateContext(
+                        screen = ThemeScreen.ALBUM,
+                        colors = extractedColors,
+                        isOnTabWithColors = true
+                    )
                 }
             }
         } else {
             gradientColors = emptyList()
+            if (!dynamicColorFromAlbumPlaylist) {
+                DynamicThemeManager.updateContext(
+                    screen = ThemeScreen.ALBUM,
+                    colors = emptyList(),
+                    isOnTabWithColors = false
+                )
+            }
+        }
+    }
+
+    // Reset context when leaving the screen
+    DisposableEffect(Unit) {
+        onDispose {
+            DynamicThemeManager.resetContext()
         }
     }
 

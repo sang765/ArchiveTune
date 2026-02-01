@@ -9,6 +9,11 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 val DynamicThemeKey = booleanPreferencesKey("dynamicTheme")
+val DynamicColorFromArtistKey = booleanPreferencesKey("dynamicColorFromArtist")
+val DynamicColorFromAlbumPlaylistKey = booleanPreferencesKey("dynamicColorFromAlbumPlaylist")
+val DynamicColorDuringPlaybackKey = booleanPreferencesKey("dynamicColorDuringPlayback")
+val OverwriteColorsKey = booleanPreferencesKey("overwriteColors")
+val DoNotApplyToPlayerKey = booleanPreferencesKey("doNotApplyToPlayer")
 val CustomThemeColorKey = stringPreferencesKey("customThemeColor")
 val DarkModeKey = stringPreferencesKey("darkMode")
 val PureBlackKey = booleanPreferencesKey("pureBlack")
