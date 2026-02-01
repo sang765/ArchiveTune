@@ -243,7 +243,7 @@
     <string name="copy">コピー</string>
     <string name="change_playlist_cover">プレイリストカバーを変更</string>
     <string name="select_image">画像を選択</string>
-    <string name="phone_verification_required">電話番号の確認が必要です</string>
+    <string name="phone_verification_required">電話番号の認証が必要です</string>
     <string name="phone_verification_required_desc">YouTubeにカスタムプレイリストカバーをアップロードするには、YouTubeで電話番号を確認する必要があります。電話番号を確認してから、もう一度お試しください。</string>
     <string name="verify_phone_number">電話番号を確認</string>
     <string name="uploading_cover">プレイリストカバーをアップロード中...</string>
