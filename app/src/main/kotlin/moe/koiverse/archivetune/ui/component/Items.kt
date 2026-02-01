@@ -1163,17 +1163,17 @@ fun ItemThumbnail(
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
+    val (cropThumbnailToSquare, _) = rememberPreference(CropThumbnailToSquareKey, false)
+    val isYouTubeThumb = thumbnailUrl?.contains("ytimg.com", ignoreCase = true) == true
+    val shouldCropSquare = cropThumbnailToSquare && isYouTubeThumb
 
     BoxWithConstraints(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .fillMaxSize()
-            .aspectRatio(thumbnailRatio)
+            .let { if (shouldCropSquare) it.aspectRatio(1f) else it.aspectRatio(thumbnailRatio) }
             .clip(shape)
     ) {
-        val (cropThumbnailToSquare, _) = rememberPreference(CropThumbnailToSquareKey, false)
-        val isYouTubeThumb = thumbnailUrl?.contains("ytimg.com", ignoreCase = true) == true
-        val shouldCropSquare = cropThumbnailToSquare && isYouTubeThumb
         val widthPx = if (maxWidth == Dp.Infinity) null else with(density) { maxWidth.roundToPx().coerceAtLeast(1) }
         val heightPx = if (maxHeight == Dp.Infinity) null else with(density) { maxHeight.roundToPx().coerceAtLeast(1) }
 
@@ -1194,9 +1194,7 @@ fun ItemThumbnail(
                     model = request,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .let { if (shouldCropSquare) it.aspectRatio(1f) else it.aspectRatio(16f/9f) }
+                    modifier = Modifier.fillMaxSize()
                 )
             } else {
                 Box(
@@ -1266,16 +1264,16 @@ fun LocalThumbnail(
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
+    val (cropThumbnailToSquare, _) = rememberPreference(CropThumbnailToSquareKey, false)
+    val isYouTubeThumb = thumbnailUrl?.contains("ytimg.com", ignoreCase = true) == true
+    val shouldCropSquare = cropThumbnailToSquare && isYouTubeThumb
 
     BoxWithConstraints(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .aspectRatio(thumbnailRatio)
+            .let { if (shouldCropSquare) it.aspectRatio(1f) else it.aspectRatio(thumbnailRatio) }
             .clip(shape)
     ) {
-        val (cropThumbnailToSquare, _) = rememberPreference(CropThumbnailToSquareKey, false)
-        val isYouTubeThumb = thumbnailUrl?.contains("ytimg.com", ignoreCase = true) == true
-        val shouldCropSquare = cropThumbnailToSquare && isYouTubeThumb
         val widthPx = if (maxWidth == Dp.Infinity) null else with(density) { maxWidth.roundToPx().coerceAtLeast(1) }
         val heightPx = if (maxHeight == Dp.Infinity) null else with(density) { maxHeight.roundToPx().coerceAtLeast(1) }
         val request = remember(thumbnailUrl, widthPx, heightPx) {
@@ -1293,7 +1291,7 @@ fun LocalThumbnail(
             model = request,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize().let { if (shouldCropSquare) it.aspectRatio(1f) else it.aspectRatio(16f/9f) }
+            modifier = Modifier.fillMaxSize()
         )
 
         AnimatedVisibility(
