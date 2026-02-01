@@ -100,11 +100,12 @@ object DynamicThemeManager {
     fun shouldOverwritePlayerColors(
         dynamicThemeEnabled: Boolean,
         overwriteColors: Boolean,
-        doNotApplyToPlayer: Boolean
+        doNotApplyToPlayer: Boolean,
+        isOnTabWithColors: Boolean
     ): Boolean {
         if (!dynamicThemeEnabled || !overwriteColors) return false
         if (doNotApplyToPlayer) return false
-        return _context.value.isOnTabWithColors
+        return isOnTabWithColors
     }
 
     /**
@@ -122,16 +123,18 @@ object DynamicThemeManager {
     ): List<Color> {
         if (!dynamicThemeEnabled) return defaultColors
 
-        val currentScreen = _context.value.currentScreen
-        val tabColors = _context.value.extractedColors
-        val isPlaying = _context.value.isPlaying
-        val isOnTabWithColors = _context.value.isOnTabWithColors
+        val ctx = _context.value
+        val currentScreen = ctx.currentScreen
+        val tabColors = ctx.extractedColors
+        val isPlaying = ctx.isPlaying
+        val isOnTabWithColors = ctx.isOnTabWithColors
 
         // Check if we should use tab colors to overwrite
         val shouldOverwrite = shouldOverwritePlayerColors(
             dynamicThemeEnabled = dynamicThemeEnabled,
             overwriteColors = overwriteColors,
-            doNotApplyToPlayer = doNotApplyToPlayer
+            doNotApplyToPlayer = doNotApplyToPlayer,
+            isOnTabWithColors = isOnTabWithColors
         )
 
         if (shouldOverwrite && tabColors.isNotEmpty()) {
