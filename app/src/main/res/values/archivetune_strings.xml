@@ -266,8 +266,8 @@
     <string name="phone_verification_required">Phone verification required</string>
     <string name="phone_verification_required_desc">To upload a custom playlist cover to YouTube, you need to verify your phone number on YouTube. Please verify your phone number and try again.</string>
     <string name="verify_phone_number">Verify phone number</string>
-    <string name="uploading_cover">Uploading cover...</string>
+    <string name="uploading_cover">Uploading playlist cover...</string>
     <string name="cover_updated">Playlist cover updated</string>
-    <string name="cover_upload_failed">Failed to upload cover</string>
+    <string name="cover_upload_failed">Failed to upload playlist cover</string>
     <string name="crop_cancelled">Crop cancelled</string>
 </resources>
