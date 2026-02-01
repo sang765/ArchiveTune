@@ -180,4 +180,13 @@
     <string name="settings_section_player_content">플레이어 &amp; 콘텐츠</string>
     <string name="settings_section_storage">저장소 &amp; 데이터</string>
     <string name="settings_section_system">시스템 &amp; 정보</string>
+    <string name="change_playlist_cover">재생목록 커버 변경</string>
+    <string name="select_image">이미지 선택</string>
+    <string name="phone_verification_required">전화번호 인증 필요</string>
+    <string name="phone_verification_required_desc">YouTube에 맞춤 재생목록 커버를 업로드하려면 YouTube에서 전화번호를 인증해야 합니다. 전화번호를 인증한 후 다시 시도하세요.</string>
+    <string name="verify_phone_number">전화번호 인증</string>
+    <string name="uploading_cover">커버 업로드 중...</string>
+    <string name="cover_updated">재생목록 커버가 업데이트되었습니다</string>
+    <string name="cover_upload_failed">커버 업로드 실패</string>
+    <string name="crop_cancelled">자르기 취소됨</string>
 </resources>

@@ -241,4 +241,13 @@
     <string name="theme_preview_primary_action">主要な行動</string>
     <string name="theme_preview_secondary_action">二次的行動</string>
     <string name="copy">コピー</string>
+    <string name="change_playlist_cover">プレイリストカバーを変更</string>
+    <string name="select_image">画像を選択</string>
+    <string name="phone_verification_required">電話番号の確認が必要です</string>
+    <string name="phone_verification_required_desc">YouTubeにカスタムプレイリストカバーをアップロードするには、YouTubeで電話番号を確認する必要があります。電話番号を確認してから、もう一度お試しください。</string>
+    <string name="verify_phone_number">電話番号を確認</string>
+    <string name="uploading_cover">カバーをアップロード中...</string>
+    <string name="cover_updated">プレイリストカバーが更新されました</string>
+    <string name="cover_upload_failed">カバーのアップロードに失敗しました</string>
+    <string name="crop_cancelled">トリミングがキャンセルされました</string>
 </resources>

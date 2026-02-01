@@ -261,4 +261,13 @@
     <string name="restore_step_restoring_settings">Restoring settings</string>
     <string name="restore_step_restoring_file">Restoring %1$s</string>
     <string name="restore_step_restarting">Restarting app</string>
+    <string name="change_playlist_cover">Change playlist cover</string>
+    <string name="select_image">Select image</string>
+    <string name="phone_verification_required">Phone verification required</string>
+    <string name="phone_verification_required_desc">To upload a custom playlist cover to YouTube, you need to verify your phone number on YouTube. Please verify your phone number and try again.</string>
+    <string name="verify_phone_number">Verify phone number</string>
+    <string name="uploading_cover">Uploading cover...</string>
+    <string name="cover_updated">Playlist cover updated</string>
+    <string name="cover_upload_failed">Failed to upload cover</string>
+    <string name="crop_cancelled">Crop cancelled</string>
 </resources>
