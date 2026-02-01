@@ -85,6 +85,7 @@ import moe.koiverse.archivetune.db.entities.ArtistEntity
 import moe.koiverse.archivetune.extensions.togglePlayPause
 import moe.koiverse.archivetune.models.MediaMetadata
 import moe.koiverse.archivetune.utils.rememberPreference
+import moe.koiverse.archivetune.utils.restartDiscordPresenceIfRunning
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
@@ -256,14 +257,10 @@ private fun LegacyMiniPlayer(
                                     
                                     if (isRightSwipe && canSkipPrevious) {
                                         playerConnection.player.seekToPreviousMediaItem()
-                                        if (moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.isRunning()) {
-                                            try { moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.restart() } catch (_: Exception) {}
-                                        }
+                                        restartDiscordPresenceIfRunning()
                                     } else if (!isRightSwipe && canSkipNext) {
                                         playerConnection.player.seekToNext()
-                                        if (moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.isRunning()) {
-                                            try { moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.restart() } catch (_: Exception) {}
-                                        }
+                                        restartDiscordPresenceIfRunning()
                                     }
                                 }
                                 

@@ -64,6 +64,7 @@ import kotlinx.coroutines.launch
 import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.constants.MiniPlayerHeight
 import moe.koiverse.archivetune.extensions.togglePlayPause
+import moe.koiverse.archivetune.utils.restartDiscordPresenceIfRunning
 
 import moe.koiverse.archivetune.models.MediaMetadata
 import moe.koiverse.archivetune.playback.PlayerConnection
@@ -166,14 +167,10 @@ fun SwipeableMiniPlayerBox(
 
                                     if (isRightSwipe && canSkipPrevious) {
                                         playerConnection.player.seekToPreviousMediaItem()
-                                        if (moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.isRunning()) {
-                                            try { moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.restart() } catch (_: Exception) {}
-                                        }
+                                        restartDiscordPresenceIfRunning()
                                     } else if (!isRightSwipe && canSkipNext) {
                                         playerConnection.player.seekToNext()
-                                        if (moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.isRunning()) {
-                                            try { moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.restart() } catch (_: Exception) {}
-                                        }
+                                        restartDiscordPresenceIfRunning()
                                     }
                                 }
 

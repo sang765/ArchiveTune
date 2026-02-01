@@ -93,6 +93,7 @@ import moe.koiverse.archivetune.constants.UpscaleCroppedThumbnailKey
 import moe.koiverse.archivetune.constants.HidePlayerThumbnailKey
 import moe.koiverse.archivetune.extensions.metadata
 import moe.koiverse.archivetune.innertube.YouTube
+import moe.koiverse.archivetune.utils.restartDiscordPresenceIfRunning
 import moe.koiverse.archivetune.utils.rememberEnumPreference
 import moe.koiverse.archivetune.utils.rememberPreference
 import kotlinx.coroutines.Dispatchers
@@ -214,14 +215,10 @@ fun Thumbnail(
 
         if (currentItem > currentMediaIndex && canSkipNext) {
             playerConnection.player.seekToNext()
-            if (moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.isRunning()) {
-                try { moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.restart() } catch (_: Exception) {}
-            }
+            restartDiscordPresenceIfRunning()
         } else if (currentItem < currentMediaIndex && canSkipPrevious) {
             playerConnection.player.seekToPreviousMediaItem()
-            if (moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.isRunning()) {
-                try { moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.restart() } catch (_: Exception) {}
-            }
+            restartDiscordPresenceIfRunning()
         }
     }
 
@@ -436,9 +433,7 @@ fun Thumbnail(
                                                     seekDirection = context.getString(R.string.seek_forward_dynamic, skipAmount / 1000)
                                                 }
                                                 // If a user double-tap skip lands on a new media item, restart presence manager to pick up artwork quickly
-                                                if (moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.isRunning()) {
-                                                    try { moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.restart() } catch (_: Exception) {}
-                                                }
+                                                restartDiscordPresenceIfRunning()
 
                                                 showSeekEffect = true
                                             }
