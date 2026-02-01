@@ -654,10 +654,30 @@ class InnerTube {
                 )
             }
             val responseText = response.bodyAsText()
-            // Check if phone is verified in the response
-            val isVerified = responseText.contains("hasVerification\":true") ||
-                responseText.contains("phoneNumberVerified") ||
-                !responseText.contains("needsPhoneVerification")
+            // Parse JSON and check phone verification status
+            val jsonElement = Json.parseToJsonElement(responseText)
+            
+            // Navigate to phoneNumber capabilities and check verification status
+            val phoneNumberCapabilities = jsonElement
+                .jsonObject["phoneNumber"]
+                ?.jsonObject?.get("hasVerification")
+                ?.jsonPrimitive?.boolean
+            
+            // Also check for phoneNumberVerified at top level or in capabilities
+            val phoneNumberVerified = jsonElement
+                .jsonObject["phoneNumberVerified"]
+                ?.jsonPrimitive?.boolean
+            
+            // Check if needsVerification is absent or false
+            val needsPhoneVerification = jsonElement
+                .jsonObject["needsPhoneVerification"]
+                ?.jsonPrimitive?.boolean ?: false
+            
+            // isVerified is true if phoneNumberCapabilities says hasVerification is true,
+            // or if phoneNumberVerified is true, or if needsPhoneVerification is false/absent
+            val isVerified = phoneNumberCapabilities == true || 
+                phoneNumberVerified == true || 
+                !needsPhoneVerification
             isVerified
         }
     }
