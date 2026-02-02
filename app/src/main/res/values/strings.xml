@@ -227,7 +227,7 @@
     <string name="overwrite_colors">Overwrite colors</string>
     <string name="overwrite_colors_desc">Prioritize tab colors when viewing those tabs</string>
     <string name="do_not_apply_to_player">Do not apply colors to player</string>
-    <string name="do_not_apply_to_player_desc">Tab colors won't affect player colors even when in that tab</string>
+    <string name="do_not_apply_to_player_desc">Tab colors will not affect player colors even when in that tab</string>
     <string name="use_system_font">Use system font</string>
     <string name="use_system_font_desc">Use the device font instead of the app font</string>
     <!-- Color Palette -->
