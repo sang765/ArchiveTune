@@ -120,6 +120,26 @@ fun AppearanceSettings(
         DynamicThemeKey,
         defaultValue = true
     )
+    val (dynamicColorFromArtist, onDynamicColorFromArtistChange) = rememberPreference(
+        DynamicColorFromArtistKey,
+        defaultValue = false
+    )
+    val (dynamicColorFromAlbumPlaylist, onDynamicColorFromAlbumPlaylistChange) = rememberPreference(
+        DynamicColorFromAlbumPlaylistKey,
+        defaultValue = false
+    )
+    val (dynamicColorDuringPlayback, onDynamicColorDuringPlaybackChange) = rememberPreference(
+        DynamicColorDuringPlaybackKey,
+        defaultValue = false
+    )
+    val (overwriteColors, onOverwriteColorsChange) = rememberPreference(
+        OverwriteColorsKey,
+        defaultValue = false
+    )
+    val (doNotApplyToPlayer, onDoNotApplyToPlayerChange) = rememberPreference(
+        DoNotApplyToPlayerKey,
+        defaultValue = false
+    )
     val (darkMode, onDarkModeChange) = rememberEnumPreference(
         DarkModeKey,
         defaultValue = DarkMode.AUTO
@@ -399,6 +419,46 @@ fun AppearanceSettings(
             checked = dynamicTheme,
             onCheckedChange = onDynamicThemeChange,
         )
+
+        AnimatedVisibility(visible = dynamicTheme) {
+            Column {
+                SwitchPreference(
+                    title = { Text(stringResource(R.string.dynamic_color_from_artist)) },
+                    checked = dynamicColorFromArtist,
+                    onCheckedChange = onDynamicColorFromArtistChange,
+                )
+
+                SwitchPreference(
+                    title = { Text(stringResource(R.string.dynamic_color_from_album_playlist)) },
+                    checked = dynamicColorFromAlbumPlaylist,
+                    onCheckedChange = onDynamicColorFromAlbumPlaylistChange,
+                )
+
+                SwitchPreference(
+                    title = { Text(stringResource(R.string.dynamic_color_during_playback)) },
+                    description = { Text(stringResource(R.string.dynamic_color_during_playback_desc)) },
+                    checked = dynamicColorDuringPlayback,
+                    onCheckedChange = onDynamicColorDuringPlaybackChange,
+                )
+
+                SwitchPreference(
+                    title = { Text(stringResource(R.string.overwrite_colors)) },
+                    description = { Text(stringResource(R.string.overwrite_colors_desc)) },
+                    checked = overwriteColors,
+                    onCheckedChange = onOverwriteColorsChange,
+                )
+
+                AnimatedVisibility(visible = overwriteColors) {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.do_not_apply_to_player)) },
+                        description = { Text(stringResource(R.string.do_not_apply_to_player_desc)) },
+                        checked = doNotApplyToPlayer,
+                        onCheckedChange = onDoNotApplyToPlayerChange,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                }
+            }
+        }
 
         AnimatedVisibility(visible = !dynamicTheme || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             PreferenceEntry(

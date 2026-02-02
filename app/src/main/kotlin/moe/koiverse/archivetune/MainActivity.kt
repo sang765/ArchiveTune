@@ -142,7 +142,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -152,7 +153,12 @@ import moe.koiverse.archivetune.constants.CustomThemeColorKey
 import moe.koiverse.archivetune.constants.DarkModeKey
 import moe.koiverse.archivetune.constants.DefaultOpenTabKey
 import moe.koiverse.archivetune.constants.DisableScreenshotKey
+import moe.koiverse.archivetune.constants.DoNotApplyToPlayerKey
+import moe.koiverse.archivetune.constants.DynamicColorDuringPlaybackKey
+import moe.koiverse.archivetune.constants.DynamicColorFromAlbumPlaylistKey
+import moe.koiverse.archivetune.constants.DynamicColorFromArtistKey
 import moe.koiverse.archivetune.constants.DynamicThemeKey
+import moe.koiverse.archivetune.constants.OverwriteColorsKey
 import moe.koiverse.archivetune.constants.HasPressedStarKey
 import moe.koiverse.archivetune.constants.LaunchCountKey
 import moe.koiverse.archivetune.constants.MiniPlayerBottomSpacing
@@ -539,6 +545,12 @@ class MainActivity : ComponentActivity() {
                     }
 
             val enableDynamicTheme by rememberPreference(DynamicThemeKey, defaultValue = true)
+            val dynamicColorFromArtist by rememberPreference(DynamicColorFromArtistKey, defaultValue = false)
+            val dynamicColorFromAlbumPlaylist by rememberPreference(DynamicColorFromAlbumPlaylistKey, defaultValue = false)
+            val dynamicColorDuringPlayback by rememberPreference(DynamicColorDuringPlaybackKey, defaultValue = false)
+            val overwriteColors by rememberPreference(OverwriteColorsKey, defaultValue = false)
+            val doNotApplyToPlayer by rememberPreference(DoNotApplyToPlayerKey, defaultValue = false)
+
             val customThemeColorValue by rememberPreference(CustomThemeColorKey, defaultValue = "default")
             val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
             val useSystemFont by rememberPreference(UseSystemFontKey, defaultValue = false)
@@ -589,9 +601,14 @@ class MainActivity : ComponentActivity() {
                 mutableStateOf(DefaultThemeColor)
             }
 
-            LaunchedEffect(playerConnection, enableDynamicTheme, isSystemInDarkTheme, customThemeColor) {
+            val isPlaying by (playerConnection?.isPlaying ?: MutableStateFlow(false)).collectAsState()
+            LaunchedEffect(isPlaying) {
+                moe.koiverse.archivetune.ui.theme.DynamicThemeManager.updateIsPlaying(isPlaying)
+            }
+
+            LaunchedEffect(playerConnection, enableDynamicTheme, isSystemInDarkTheme, customThemeColor, isPlaying, dynamicColorDuringPlayback) {
                 val playerConnection = playerConnection
-                if (!enableDynamicTheme || playerConnection == null) {
+                if (!enableDynamicTheme || playerConnection == null || (dynamicColorDuringPlayback && !isPlaying)) {
                     themeColor = if (!enableDynamicTheme) customThemeColor else DefaultThemeColor
                     return@LaunchedEffect
                 }
@@ -632,6 +649,11 @@ class MainActivity : ComponentActivity() {
                 themeColor = themeColor,
                 seedPalette = if (!enableDynamicTheme) customThemeSeedPalette else null,
                 useSystemFont = useSystemFont,
+                enableDynamicTheme = enableDynamicTheme,
+                dynamicColorFromArtist = dynamicColorFromArtist,
+                dynamicColorFromAlbumPlaylist = dynamicColorFromAlbumPlaylist,
+                overwriteColors = overwriteColors,
+                doNotApplyToPlayer = doNotApplyToPlayer,
             ) {
                     BoxWithConstraints(
                         modifier =
@@ -844,6 +866,16 @@ class MainActivity : ComponentActivity() {
 
                     LaunchedEffect(navBackStackEntry) {
                         val currentRoute = navBackStackEntry?.destination?.route
+                        
+                        // Update Theme Manager with current screen
+                        val themeScreen = when {
+                            currentRoute == Screens.Artist.route -> moe.koiverse.archivetune.ui.theme.ThemeScreen.ARTIST
+                            currentRoute == Screens.Album.route -> moe.koiverse.archivetune.ui.theme.ThemeScreen.ALBUM
+                            currentRoute?.startsWith("playlist/") == true -> moe.koiverse.archivetune.ui.theme.ThemeScreen.PLAYLIST
+                            else -> moe.koiverse.archivetune.ui.theme.ThemeScreen.OTHER
+                        }
+                        moe.koiverse.archivetune.ui.theme.DynamicThemeManager.updateScreen(themeScreen)
+
                         val wasOnNonTopLevelScreen = previousRoute != null && 
                             previousRoute !in topLevelScreens && 
                             previousRoute?.startsWith("search/") != true

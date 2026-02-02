@@ -50,6 +50,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -156,6 +157,10 @@ import moe.koiverse.archivetune.ui.utils.backToMain
 import moe.koiverse.archivetune.utils.makeTimeString
 import moe.koiverse.archivetune.utils.rememberEnumPreference
 import moe.koiverse.archivetune.utils.rememberPreference
+import moe.koiverse.archivetune.constants.DynamicColorFromAlbumPlaylistKey
+import moe.koiverse.archivetune.constants.DynamicThemeKey
+import moe.koiverse.archivetune.ui.theme.DynamicThemeManager
+import moe.koiverse.archivetune.ui.theme.ThemeScreen
 import moe.koiverse.archivetune.viewmodels.LocalPlaylistViewModel
 import com.valentinilk.shimmer.shimmer
 import sh.calvin.reorderable.ReorderableItem
@@ -193,8 +198,60 @@ fun LocalPlaylistScreen(
         true
     )
     var locked by rememberPreference(PlaylistEditLockKey, defaultValue = true)
+    val enableDynamicTheme by rememberPreference(DynamicThemeKey, defaultValue = true)
+    val dynamicColorFromAlbumPlaylist by rememberPreference(DynamicColorFromAlbumPlaylistKey, defaultValue = false)
     val (disableBlur) = rememberPreference(DisableBlurKey, false)
     var showAssignTagsDialog by remember { mutableStateOf(false) }
+
+    // Gradient colors state for playlist cover
+    var gradientColors by remember { mutableStateOf<List<Color>>(emptyList()) }
+    val fallbackColor = MaterialTheme.colorScheme.surface.toArgb()
+
+    // Extract gradient colors from playlist cover
+    LaunchedEffect(songs, enableDynamicTheme, dynamicColorFromAlbumPlaylist) {
+        val thumbnailUrl = songs.firstOrNull()?.song?.song?.thumbnailUrl
+        if (thumbnailUrl != null && enableDynamicTheme && dynamicColorFromAlbumPlaylist) {
+            val request = ImageRequest.Builder(context)
+                .data(thumbnailUrl)
+                .size(Size(PlayerColorExtractor.Config.IMAGE_SIZE, PlayerColorExtractor.Config.IMAGE_SIZE))
+                .allowHardware(false)
+                .build()
+
+            val result = runCatching {
+                context.imageLoader.execute(request)
+            }.getOrNull()
+
+            if (result != null) {
+                val bitmap = result.image?.toBitmap()
+                if (bitmap != null) {
+                    val palette = withContext(Dispatchers.Default) {
+                        Palette.from(bitmap)
+                            .maximumColorCount(PlayerColorExtractor.Config.MAX_COLOR_COUNT)
+                            .resizeBitmapArea(PlayerColorExtractor.Config.BITMAP_AREA)
+                            .generate()
+                    }
+
+                    val extractedColors = PlayerColorExtractor.extractGradientColors(
+                        palette = palette,
+                        fallbackColor = fallbackColor
+                    )
+                    gradientColors = extractedColors
+                }
+            }
+        } else {
+            gradientColors = emptyList()
+        }
+    }
+
+    LaunchedEffect(gradientColors) {
+        DynamicThemeManager.updateColors(gradientColors)
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            DynamicThemeManager.updateColors(emptyList())
+        }
+    }
 
     if (showAssignTagsDialog && playlist != null) {
         AssignTagsDialog(

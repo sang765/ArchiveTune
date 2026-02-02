@@ -624,5 +624,6 @@ ArchiveTune sẽ chỉ trích xuất token của bạn, và mọi thứ khác đ
     <string name="permission_status_all_granted">Tất cả quyền cần thiết đã được cho phép. Bạn đã sẵn sàng để bắt đầu.</string>
     <string name="permission_status_required">Vui lòng cho phép tất cả quyền cần thiết để tiếp tục.</string>
     <string name="next">Tiếp theo</string>
+    <string name="next_song">Bài tiếp theo</string>
     <string name="allow">Cho phép</string>
 </resources>

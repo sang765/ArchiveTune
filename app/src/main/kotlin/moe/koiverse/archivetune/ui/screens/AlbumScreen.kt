@@ -37,6 +37,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -118,6 +119,10 @@ import moe.koiverse.archivetune.ui.utils.ItemWrapper
 import moe.koiverse.archivetune.ui.utils.backToMain
 import moe.koiverse.archivetune.utils.makeTimeString
 import moe.koiverse.archivetune.utils.rememberPreference
+import moe.koiverse.archivetune.constants.DynamicColorFromAlbumPlaylistKey
+import moe.koiverse.archivetune.constants.DynamicThemeKey
+import moe.koiverse.archivetune.ui.theme.DynamicThemeManager
+import moe.koiverse.archivetune.ui.theme.ThemeScreen
 import moe.koiverse.archivetune.viewmodels.AlbumViewModel
 import com.valentinilk.shimmer.shimmer
 
@@ -142,6 +147,8 @@ fun AlbumScreen(
     val playlistId by viewModel.playlistId.collectAsState()
     val albumWithSongs by viewModel.albumWithSongs.collectAsState()
     val otherVersions by viewModel.otherVersions.collectAsState()
+    val enableDynamicTheme by rememberPreference(DynamicThemeKey, defaultValue = true)
+    val dynamicColorFromAlbumPlaylist by rememberPreference(DynamicColorFromAlbumPlaylistKey, defaultValue = false)
     val hideExplicit by rememberPreference(key = HideExplicitKey, defaultValue = false)
     val (disableBlur) = rememberPreference(DisableBlurKey, false)
 
@@ -150,13 +157,11 @@ fun AlbumScreen(
 
     // Gradient colors state for album cover
     var gradientColors by remember { mutableStateOf<List<Color>>(emptyList()) }
-    val fallbackColor = MaterialTheme.colorScheme.surface.toArgb()
-    val surfaceColor = MaterialTheme.colorScheme.surface
 
     // Extract gradient colors from album cover
-    LaunchedEffect(albumWithSongs?.album?.thumbnailUrl) {
+    LaunchedEffect(albumWithSongs?.album?.thumbnailUrl, enableDynamicTheme, dynamicColorFromAlbumPlaylist) {
         val thumbnailUrl = albumWithSongs?.album?.thumbnailUrl
-        if (thumbnailUrl != null) {
+        if (thumbnailUrl != null && enableDynamicTheme && dynamicColorFromAlbumPlaylist) {
             val request = ImageRequest.Builder(context)
                 .data(thumbnailUrl)
                 .size(Size(PlayerColorExtractor.Config.IMAGE_SIZE, PlayerColorExtractor.Config.IMAGE_SIZE))
@@ -186,6 +191,16 @@ fun AlbumScreen(
             }
         } else {
             gradientColors = emptyList()
+        }
+    }
+
+    LaunchedEffect(gradientColors) {
+        DynamicThemeManager.updateColors(gradientColors)
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            DynamicThemeManager.updateColors(emptyList())
         }
     }
 

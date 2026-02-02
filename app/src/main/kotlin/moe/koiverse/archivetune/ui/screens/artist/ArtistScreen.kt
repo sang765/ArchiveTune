@@ -49,6 +49,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -133,6 +134,10 @@ import moe.koiverse.archivetune.ui.theme.PlayerColorExtractor
 import moe.koiverse.archivetune.ui.utils.backToMain
 import moe.koiverse.archivetune.ui.utils.resize
 import moe.koiverse.archivetune.utils.rememberPreference
+import moe.koiverse.archivetune.constants.DynamicColorFromArtistKey
+import moe.koiverse.archivetune.constants.DynamicThemeKey
+import moe.koiverse.archivetune.ui.theme.DynamicThemeManager
+import moe.koiverse.archivetune.ui.theme.ThemeScreen
 import moe.koiverse.archivetune.viewmodels.ArtistViewModel
 import com.valentinilk.shimmer.shimmer
 
@@ -155,6 +160,8 @@ fun ArtistScreen(
     val libraryArtist by viewModel.libraryArtist.collectAsState()
     val librarySongs by viewModel.librarySongs.collectAsState()
     val libraryAlbums by viewModel.libraryAlbums.collectAsState()
+    val enableDynamicTheme by rememberPreference(DynamicThemeKey, defaultValue = true)
+    val dynamicColorFromArtist by rememberPreference(DynamicColorFromArtistKey, defaultValue = false)
     val hideExplicit by rememberPreference(key = HideExplicitKey, defaultValue = false)
     val (disableBlur) = rememberPreference(DisableBlurKey, false)
 
@@ -175,8 +182,8 @@ fun ArtistScreen(
     val thumbnail = artistPage?.artist?.thumbnail ?: libraryArtist?.artist?.thumbnailUrl
 
     // Extract gradient colors from artist image
-    LaunchedEffect(thumbnail) {
-        if (thumbnail != null) {
+    LaunchedEffect(thumbnail, enableDynamicTheme, dynamicColorFromArtist) {
+        if (thumbnail != null && enableDynamicTheme && dynamicColorFromArtist) {
             val request = ImageRequest.Builder(context)
                 .data(thumbnail)
                 .size(Size(PlayerColorExtractor.Config.IMAGE_SIZE, PlayerColorExtractor.Config.IMAGE_SIZE))
@@ -206,6 +213,16 @@ fun ArtistScreen(
             }
         } else {
             gradientColors = emptyList()
+        }
+    }
+
+    LaunchedEffect(gradientColors) {
+        DynamicThemeManager.updateColors(gradientColors)
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            DynamicThemeManager.updateColors(emptyList())
         }
     }
 

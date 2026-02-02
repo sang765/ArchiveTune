@@ -170,6 +170,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import me.saket.squiggles.SquigglySlider
+import moe.koiverse.archivetune.constants.DoNotApplyToPlayerKey
+import moe.koiverse.archivetune.constants.DynamicColorDuringPlaybackKey
+import moe.koiverse.archivetune.constants.DynamicThemeKey
+import moe.koiverse.archivetune.constants.OverwriteColorsKey
+import moe.koiverse.archivetune.ui.theme.DynamicThemeManager
+import moe.koiverse.archivetune.ui.theme.ThemeScreen
 import moe.koiverse.archivetune.playback.PlayerConnection
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
@@ -257,6 +263,11 @@ fun BottomSheetPlayer(
             MaterialTheme.colorScheme.surfaceContainer
         }
     }
+
+    val (enableDynamicTheme) = rememberPreference(DynamicThemeKey, defaultValue = true)
+    val (dynamicColorDuringPlayback) = rememberPreference(DynamicColorDuringPlaybackKey, defaultValue = false)
+    val (overwriteColors) = rememberPreference(OverwriteColorsKey, defaultValue = false)
+    val (doNotApplyToPlayer) = rememberPreference(DoNotApplyToPlayerKey, defaultValue = false)
 
     val playbackState by playerConnection.playbackState.collectAsState()
     val isPlaying by playerConnection.isPlaying.collectAsState()

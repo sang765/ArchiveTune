@@ -10,6 +10,8 @@ import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
@@ -48,18 +50,42 @@ fun ArchiveTuneTheme(
     themeColor: Color = DefaultThemeColor,
     seedPalette: ThemeSeedPalette? = null,
     useSystemFont: Boolean = false,
+    enableDynamicTheme: Boolean = true,
+    dynamicColorFromArtist: Boolean = false,
+    dynamicColorFromAlbumPlaylist: Boolean = false,
+    overwriteColors: Boolean = false,
+    doNotApplyToPlayer: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
+    val themeContext by DynamicThemeManager.context.collectAsState()
+
+    val finalThemeColor = remember(themeColor, themeContext, enableDynamicTheme, dynamicColorFromArtist, dynamicColorFromAlbumPlaylist, overwriteColors) {
+        if (!enableDynamicTheme) return@remember themeColor
+
+        if (overwriteColors && themeContext.extractedColors.isNotEmpty()) {
+            val onRelevantTab = when (themeContext.currentScreen) {
+                ThemeScreen.ARTIST -> dynamicColorFromArtist
+                ThemeScreen.ALBUM, ThemeScreen.PLAYLIST -> dynamicColorFromAlbumPlaylist
+                else -> false
+            }
+            if (onRelevantTab) {
+                // If it's a tab color, we might want to extract the primary color from the gradient
+                return@remember themeContext.extractedColors.firstOrNull() ?: themeColor
+            }
+        }
+        themeColor
+    }
+
     val useSystemDynamicColor =
-        (seedPalette == null && themeColor == DefaultThemeColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+        (seedPalette == null && finalThemeColor == DefaultThemeColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
 
     val typography = remember(useSystemFont) {
         if (useSystemFont) SystemTypography else AppTypography
     }
 
     val appColorScheme =
-        remember(seedPalette, themeColor, darkTheme) {
+        remember(seedPalette, finalThemeColor, darkTheme) {
             if (seedPalette != null) {
                 exactPaletteColorScheme(
                     palette = seedPalette,
@@ -68,7 +94,7 @@ fun ArchiveTuneTheme(
             } else {
                 m3DynamicColorScheme(
                     seedPalette = null,
-                    keyColor = themeColor,
+                    keyColor = finalThemeColor,
                     isDark = darkTheme,
                 )
             }
