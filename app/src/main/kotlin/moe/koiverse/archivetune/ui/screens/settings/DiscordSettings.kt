@@ -61,6 +61,17 @@ import moe.koiverse.archivetune.utils.ArtworkStorage
 
 enum class ActivitySource { ARTIST, ALBUM, SONG, APP }
 
+/**
+ * Render and manage the Discord integration settings UI and its related side effects.
+ *
+ * Shows account information and login options, controls for enabling/disabling RPC,
+ * image/interval/activity configuration, a live Rich Presence preview, and actions
+ * such as manual refresh and logout. Also performs token-based user info lookup
+ * and starts/stops presence management according to the stored preferences.
+ *
+ * @param navController Used for navigation to login, token view, experimental settings, and back navigation.
+ * @param scrollBehavior Scroll behavior applied to the top app bar.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiscordSettings(

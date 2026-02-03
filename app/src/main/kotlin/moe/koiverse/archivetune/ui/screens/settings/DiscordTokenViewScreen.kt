@@ -34,6 +34,17 @@ import moe.koiverse.archivetune.ui.component.TextFieldDialog
 import moe.koiverse.archivetune.ui.utils.backToMain
 import moe.koiverse.archivetune.utils.rememberPreference
 
+/**
+ * Displays a settings screen for viewing, copying, editing, and deleting a stored Discord token.
+ *
+ * The screen shows the token (masked by default with an option to reveal), provides actions to copy
+ * the token to the clipboard and to open an edit dialog, and exposes a delete entry that clears
+ * the token and associated username/name after confirmation. Editing validates the provided token
+ * remotely and updates persisted token, username, and name on success; validation and network
+ * errors are surfaced to the user.
+ *
+ * @param navController NavController used for back navigation and post-deletion navigation. 
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiscordTokenViewScreen(navController: NavController) {

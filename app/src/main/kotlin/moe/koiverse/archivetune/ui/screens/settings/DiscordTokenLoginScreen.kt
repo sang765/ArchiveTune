@@ -32,6 +32,16 @@ import moe.koiverse.archivetune.ui.component.IconButton
 import moe.koiverse.archivetune.ui.utils.backToMain
 import moe.koiverse.archivetune.utils.rememberPreference
 
+/**
+ * Shows a screen to enter and validate a Discord token.
+ *
+ * Validates the entered token with the remote service; on success saves the token, username,
+ * and name to preferences and navigates up. On failure displays an inline error message and
+ * exposes a loading state while validation is in progress. The UI includes an informational
+ * card, a multi-line token input with visibility toggle, and a login button.
+ *
+ * @param navController NavController used to navigate up on successful login and to handle
+ *                      the top app bar back/long-back actions.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiscordTokenLoginScreen(navController: NavController) {

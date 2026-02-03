@@ -80,6 +80,14 @@ import moe.koiverse.archivetune.ui.utils.ShowMediaInfo
 import moe.koiverse.archivetune.utils.rememberEnumPreference
 import moe.koiverse.archivetune.utils.rememberPreference
 
+/**
+ * Registers the app's navigation graph by adding all composable destinations to this NavGraphBuilder.
+ *
+ * The function wires routes (including parameterized routes) to their corresponding screen composables.
+ * The search route includes custom enter/exit/pop transitions; several routes accept path or query arguments.
+ *
+ * @param latestVersionName The version name shown on the Settings screen.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 fun NavGraphBuilder.navigationBuilder(
     navController: NavHostController,
