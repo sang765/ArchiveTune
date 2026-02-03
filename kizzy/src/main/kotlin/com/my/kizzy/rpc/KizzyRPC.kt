@@ -23,7 +23,8 @@ open class KizzyRPC(private val token: String, private val injectedLogger: Kizzy
     private val kizzyRepository = KizzyRepository()
     private val discordWebSocket = DiscordWebSocket(token)
     private var platform: String? = null
-    private val logTag = "RPC"
+    private val deviceConfig = com.my.kizzy.gateway.entities.LowEndDeviceConfig()
+    private val discordWebSocket = DiscordWebSocket(token, memoryManager, deviceConfig)
     // Use injected logger if provided, otherwise fall back to DefaultKizzyLogger which uses java.util.logging
     private val logger: KizzyLogger = injectedLogger ?: DefaultKizzyLogger("MainRPC")
 
@@ -35,7 +36,13 @@ open class KizzyRPC(private val token: String, private val injectedLogger: Kizzy
         if (!isRpcRunning()) {
             discordWebSocket.connect()
             val connected = discordWebSocket.waitForConnection(10000L)
-            if (!connected) {
+            // Use device-optimized timeout
+            val timeout = if (deviceConfig.isLowEndDevice()) {
+                deviceConfig.getConnectionTimeout()
+            } else {
+                10000L
+            }
+            val connected = discordWebSocket.waitForConnection(timeout)
                 logger.warning("stopActivity: connection timeout, skipping")
                 return
             }
@@ -142,7 +149,13 @@ open class KizzyRPC(private val token: String, private val injectedLogger: Kizzy
             try {
                 discordWebSocket.connect()
                 val connected = discordWebSocket.waitForConnection(15000L)
-                if (!connected) {
+                // Use device-optimized timeout
+                val timeout = if (deviceConfig.isLowEndDevice()) {
+                    deviceConfig.getConnectionTimeout()
+                } else {
+                    15000L
+                }
+                val connected = discordWebSocket.waitForConnection(timeout)
                     logger.severe("WebSocket connection timeout")
                     throw Exception("WebSocket connection timeout")
                 }

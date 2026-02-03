@@ -3,6 +3,7 @@ package moe.koiverse.archivetune.ui.screens.settings
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -22,6 +23,9 @@ import androidx.navigation.NavController
 import com.my.kizzy.rpc.KizzyRPC
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import moe.koiverse.archivetune.LocalPlayerAwareWindowInsets
 import moe.koiverse.archivetune.R
@@ -48,6 +52,7 @@ fun DiscordTokenLoginScreen(navController: NavController) {
     var discordUsername by rememberPreference(DiscordUsernameKey, "")
     var discordName by rememberPreference(DiscordNameKey, "")
 
+    val scope = rememberCoroutineScope()
     fun validateAndLogin() {
         if (tokenInput.isBlank()) {
             errorMessage = "Token cannot be empty"
@@ -60,8 +65,23 @@ fun DiscordTokenLoginScreen(navController: NavController) {
 
         scope.launch {
             try {
-                val result = withContext(Dispatchers.IO) {
-                    KizzyRPC.getUserInfo(tokenInput.trim())
+                // Add timeout for low-end devices to prevent hanging
+                val result = withTimeout(20000L) { // 20 second timeout
+                    withContext(Dispatchers.IO) {
+                        // Check memory before making network request
+                        val runtime = Runtime.getRuntime()
+                        val freeMemory = runtime.freeMemory()
+                        val totalMemory = runtime.totalMemory()
+                        val memoryUsage = (totalMemory - freeMemory).toDouble() / runtime.maxMemory()
+                        
+                        if (memoryUsage > 0.8) {
+                            Log.w("DiscordTokenLogin", "High memory usage detected: ${(memoryUsage * 100).toInt()}%")
+                            System.gc() // Suggest garbage collection
+                            delay(100) // Brief delay to allow GC
+                        }
+                        
+                        KizzyRPC.getUserInfo(tokenInput.trim())
+                    }
                 }
 
                 result.onSuccess { userInfo ->
@@ -74,6 +94,10 @@ fun DiscordTokenLoginScreen(navController: NavController) {
                     errorMessage = "Token validation failed. Please check your token."
                     isValidating = false
                 }
+            } catch (e: TimeoutCancellationException) {
+                Log.e("DiscordTokenLogin", "Token validation timeout", e)
+                errorMessage = "Request timeout. Please check your connection and try again."
+                isValidating = false
             } catch (e: Exception) {
                 Log.e("DiscordTokenLogin", "Token validation failed", e)
                 errorMessage = "Network error: ${e.message ?: "Please try again."}"

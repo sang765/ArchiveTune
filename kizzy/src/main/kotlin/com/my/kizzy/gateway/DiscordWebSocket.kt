@@ -2,6 +2,7 @@ package com.my.kizzy.gateway
 
 import com.my.kizzy.gateway.entities.Heartbeat
 import com.my.kizzy.gateway.entities.Identify.Companion.toIdentifyPayload
+import com.my.kizzy.gateway.entities.LowEndDeviceConfig
 import com.my.kizzy.gateway.entities.Payload
 import com.my.kizzy.gateway.entities.Ready
 import com.my.kizzy.gateway.entities.Resume
@@ -50,7 +51,8 @@ import kotlin.time.Duration.Companion.milliseconds
 open class DiscordWebSocket(
     private val token: String,
 ) : CoroutineScope {
-    private val gatewayUrl = "wss://gateway.discord.gg/?v=10&encoding=json"
+    private val memoryManager: MemoryManager = MemoryManager(),
+    private val deviceConfig: LowEndDeviceConfig = LowEndDeviceConfig()
     private var websocket: DefaultClientWebSocketSession? = null
     private var sequence = 0
     private var sessionId: String? = null
@@ -60,8 +62,14 @@ open class DiscordWebSocket(
     private var connected = false
     private var client: HttpClient = HttpClient {
         install(WebSockets)
-    }
+    private var client: HttpClient = createOptimizedClient()
+    
+    private fun createOptimizedClient(): HttpClient = HttpClient {
     private val json = Json {
+            maxFrameSize = if (deviceConfig.isLowEndDevice()) 
+                LowEndDeviceConfig.MAX_MESSAGE_SIZE / 2 
+            else 
+                LowEndDeviceConfig.MAX_MESSAGE_SIZE
         ignoreUnknownKeys = true
         encodeDefaults = true
     }
@@ -74,6 +82,13 @@ open class DiscordWebSocket(
             try {
                 Logger.getLogger("Kizzy").log(INFO, "Gateway: Connect called")
                 val url = resumeGatewayUrl ?: gatewayUrl
+                
+                // Check memory state before connecting
+                if (deviceConfig.isCriticalMemoryState()) {
+                    Logger.getLogger("Kizzy").log(INFO, "Critical memory state detected, forcing cleanup before connect")
+                    memoryManager.cleanup()
+                }
+                
                 websocket = client.webSocketSession(url)
 
                 // start receiving messages
@@ -225,9 +240,14 @@ open class DiscordWebSocket(
     suspend fun waitForConnection(timeoutMs: Long = 15000L): Boolean {
         val startTime = System.currentTimeMillis()
         while (!isSocketConnectedToAccount()) {
+        // Use device-specific timeout
+        val actualTimeout = if (deviceConfig.isLowEndDevice()) 
+            minOf(timeoutMs, deviceConfig.getConnectionTimeout()) 
+        else timeoutMs
+        
             if (System.currentTimeMillis() - startTime > timeoutMs) {
-                Logger.getLogger("Kizzy").log(INFO, "Gateway: Connection timeout after ${timeoutMs}ms")
-                return false
+            if (System.currentTimeMillis() - startTime > actualTimeout) {
+                Logger.getLogger("Kizzy").log(INFO, "Gateway: Connection timeout after ${actualTimeout}ms")
             }
             delay(50.milliseconds)
         }

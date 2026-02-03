@@ -24,6 +24,9 @@ import com.my.kizzy.rpc.KizzyRPC
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.delay
 import moe.koiverse.archivetune.LocalPlayerAwareWindowInsets
 import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.constants.DiscordNameKey
@@ -200,8 +203,22 @@ fun DiscordTokenViewScreen(navController: NavController) {
                 isValidating = true
                 scope.launch {
                     try {
-                        val result = withContext(Dispatchers.IO) {
-                            KizzyRPC.getUserInfo(newToken.trim())
+                        val result = withTimeout(20000L) { // 20 second timeout
+                            withContext(Dispatchers.IO) {
+                                // Memory check before validation
+                                val runtime = Runtime.getRuntime()
+                                val freeMemory = runtime.freeMemory()
+                                val totalMemory = runtime.totalMemory()
+                                val memoryUsage = (totalMemory - freeMemory).toDouble() / runtime.maxMemory()
+                                
+                                if (memoryUsage > 0.8) {
+                                    Log.w("DiscordTokenView", "High memory usage detected: ${(memoryUsage * 100).toInt()}%")
+                                    System.gc()
+                                    delay(100)
+                                }
+                                
+                                KizzyRPC.getUserInfo(newToken.trim())
+                            }
                         }
 
                         result.onSuccess { userInfo ->
@@ -215,6 +232,10 @@ fun DiscordTokenViewScreen(navController: NavController) {
                             validationError = "Invalid token"
                             isValidating = false
                         }
+                    } catch (e: TimeoutCancellationException) {
+                        Log.e("DiscordTokenView", "Token validation timeout", e)
+                        validationError = "Request timeout. Please check your connection and try again."
+                        isValidating = false
                     } catch (e: Exception) {
                         Log.e("DiscordTokenView", "Token validation failed", e)
                         validationError = "Network error: ${e.message ?: "Unknown error"}"
