@@ -148,7 +148,6 @@ open class KizzyRPC(private val token: String, private val injectedLogger: Kizzy
             logger.fine("trying to connect WebSocket with token=$shortToken")
             try {
                 discordWebSocket.connect()
-                val connected = discordWebSocket.waitForConnection(15000L)
                 // Use device-optimized timeout
                 val timeout = if (deviceConfig.isLowEndDevice()) {
                     deviceConfig.getConnectionTimeout()
@@ -156,6 +155,7 @@ open class KizzyRPC(private val token: String, private val injectedLogger: Kizzy
                     15000L
                 }
                 val connected = discordWebSocket.waitForConnection(timeout)
+                if (!connected) {
                     logger.severe("WebSocket connection timeout")
                     throw Exception("WebSocket connection timeout")
                 }

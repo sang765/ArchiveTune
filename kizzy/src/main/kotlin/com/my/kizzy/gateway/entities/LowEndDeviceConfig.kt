@@ -58,7 +58,7 @@ class LowEndDeviceConfig {
      */
     fun getConnectionTimeout(): Long {
         return if (isLowEndDevice()) {
-            CONNECTION_TIMEOUT_MS / 2 // Shorter timeout for low-end devices
+            CONNECTION_TIMEOUT_MS * 2 // Longer timeout for low-end devices
         } else {
             CONNECTION_TIMEOUT_MS
         }

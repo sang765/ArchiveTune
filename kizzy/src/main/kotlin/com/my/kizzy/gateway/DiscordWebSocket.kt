@@ -245,9 +245,9 @@ open class DiscordWebSocket(
             minOf(timeoutMs, deviceConfig.getConnectionTimeout()) 
         else timeoutMs
         
-            if (System.currentTimeMillis() - startTime > timeoutMs) {
             if (System.currentTimeMillis() - startTime > actualTimeout) {
                 Logger.getLogger("Kizzy").log(INFO, "Gateway: Connection timeout after ${actualTimeout}ms")
+                return false
             }
             delay(50.milliseconds)
         }

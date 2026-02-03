@@ -27,7 +27,7 @@ class MemoryManager {
             // Check frame size before processing
             if (data.size > maxFrameSize) {
                 logger.warning("Frame size ${data.size} exceeds maximum allowed size $maxFrameSize, truncating")
-                return@withContext String(data.sliceArray(0..maxFrameSize), StandardCharsets.UTF_8)
+                return@withContext String(data.copyOfRange(0, maxFrameSize), StandardCharsets.UTF_8)
             }
             
             // For smaller frames, use direct conversion
