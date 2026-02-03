@@ -35,8 +35,8 @@ class MemoryManager {
                 return@withContext String(data, StandardCharsets.UTF_8)
             }
             
-            // For larger frames, use streaming approach
-            return@withContext readLargeFrameStreaming(data)
+            // For larger frames, use direct conversion to avoid memory duplication
+            return@withContext String(data, StandardCharsets.UTF_8)
             
         } catch (e: OutOfMemoryError) {
             logger.severe("OutOfMemoryError while reading frame, forcing cleanup")
@@ -45,35 +45,6 @@ class MemoryManager {
         } catch (e: Exception) {
             logger.warning("Error reading frame: ${e.message}")
             throw e
-        }
-    }
-    
-    /**
-     * Read large frames using streaming approach to minimize memory usage
-     */
-    private fun readLargeFrameStreaming(data: ByteArray): String {
-        val chunkSize = 64 * 1024 // 64KB chunks
-        val output = ByteArrayOutputStream()
-        
-        try {
-            var offset = 0
-            while (offset < data.size) {
-                val remainingBytes = data.size - offset
-                val currentChunkSize = minOf(chunkSize, remainingBytes)
-                
-                output.write(data, offset, currentChunkSize)
-                offset += currentChunkSize
-                
-                // Check memory pressure during processing
-                if (isMemoryPressureHigh()) {
-                    logger.warning("High memory pressure detected during frame processing")
-                    System.gc() // Suggest garbage collection
-                }
-            }
-            
-            return output.toString(StandardCharsets.UTF_8.name())
-        } finally {
-            output.close()
         }
     }
     
