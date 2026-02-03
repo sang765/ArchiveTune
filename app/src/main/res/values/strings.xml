@@ -501,6 +501,17 @@ ArchiveTune will only extract your token, and everything else is stored locally.
     <string name="discord_delete_token">Delete Token</string>
     <string name="discord_delete_token_confirm">Are you sure you want to delete your Discord token?</string>
     <!-- Last.fm -->
+    <string name="discord_token_empty_error">Token cannot be empty</string>
+    <string name="validating_text">Validating…</string>
+    <string name="discord_network_error">Network error: %s</string>
+    <string name="please_try_again">Please try again.</string>
+    <string name="hide_token">Hide token</string>
+    <string name="show_token">Show token</string>
+    <string name="discord_token_label">Token</string>
+    <string name="copy_button">Copy</string>
+    <string name="edit_button">Edit</string>
+    <string name="edit_discord_token_title">Edit Discord Token</string>
+    <string name="token_updated_message">Token updated successfully</string>
     <string name="scrobbling">Scrobbling</string>
     <string name="lastfm_integration">Last.fm Integration</string>
     <string name="enable_scrobbling">Enable Scrobbling</string>

@@ -35,7 +35,7 @@ import moe.koiverse.archivetune.utils.rememberPreference
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DiscordTokenLoginScreen(navController: NavController) {
-    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val keyboardController = LocalSoftwareKeyboardController.current
 

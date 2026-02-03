@@ -447,6 +447,17 @@
     <string name="discord_delete_token">トークンを削除</string>
     <string name="discord_delete_token_confirm">Discord トークンを削除してもよろしいですか？</string>
     <!-- Last.fm -->
+    <string name="discord_token_empty_error">トークンを入力してください</string>
+    <string name="validating_text">検証中…</string>
+    <string name="discord_network_error">ネットワークエラー: %s</string>
+    <string name="please_try_again">もう一度お試しください。</string>
+    <string name="hide_token">トークンを隠す</string>
+    <string name="show_token">トークンを表示</string>
+    <string name="discord_token_label">トークン</string>
+    <string name="copy_button">コピー</string>
+    <string name="edit_button">編集</string>
+    <string name="edit_discord_token_title">Discord トークンを編集</string>
+    <string name="token_updated_message">トークンが正常に更新されました</string>
     <string name="scrobbling">スクロブリング</string>
     <string name="lastfm_integration">Last.fm 連携</string>
     <string name="enable_scrobbling">スクロブリングを有効にする</string>

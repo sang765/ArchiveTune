@@ -268,7 +268,7 @@ fun DiscordTokenViewScreen(navController: NavController) {
                         navController.navigateUp()
                     }
                 ) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
