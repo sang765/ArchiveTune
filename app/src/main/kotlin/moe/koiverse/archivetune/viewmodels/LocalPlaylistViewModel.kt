@@ -11,9 +11,12 @@ import moe.koiverse.archivetune.db.MusicDatabase
 import moe.koiverse.archivetune.db.entities.PlaylistSong
 import moe.koiverse.archivetune.extensions.reversed
 import moe.koiverse.archivetune.extensions.toEnum
+import moe.koiverse.archivetune.innertube.YouTube
+import moe.koiverse.archivetune.innertube.models.SongItem
 import moe.koiverse.archivetune.utils.dataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -22,6 +25,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.Collator
 import java.util.Locale
 import javax.inject.Inject
@@ -31,7 +35,7 @@ class LocalPlaylistViewModel
 @Inject
 constructor(
     @ApplicationContext context: Context,
-    database: MusicDatabase,
+    val database: MusicDatabase,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     val playlistId = savedStateHandle.get<String>("playlistId")!!
@@ -68,6 +72,68 @@ constructor(
                 PlaylistSongSortType.PLAY_TIME -> songs.sortedBy { it.song.song.totalPlayTime }
             }.reversed(sortDescending && sortType != PlaylistSongSortType.CUSTOM)
         }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    val playlistSuggestions: StateFlow<List<SongItem>?> = playlist
+        .map { playlistEntity ->
+            if (playlistEntity == null) return@map null
+            loadPlaylistSuggestions(playlistEntity.playlist.name)
+        }
+        .stateIn(viewModelScope, SharingStarted.Lazily, null)
+
+    private suspend fun loadPlaylistSuggestions(playlistName: String): List<SongItem> {
+        val existingSongIds = playlistSongs.first().map { it.song.id }
+        return withContext(IO) {
+            try {
+                YouTube.search(playlistName, YouTube.SearchFilter.FILTER_SONG)
+                    .getOrNull()
+                    ?.items
+                    ?.filterIsInstance<SongItem>()
+                    ?.filterNot { song -> song.id in existingSongIds }
+                    ?.take(12)
+                    ?: emptyList()
+            } catch (e: Exception) {
+                emptyList()
+            }
+        }
+    }
+
+    suspend fun addSongToPlaylist(songItem: SongItem) {
+        val existingSongs = playlistSongs.first()
+        val songAlreadyInPlaylist = existingSongs.any { it.song.id == songItem.id }
+
+        if (songAlreadyInPlaylist) return
+
+        database.transaction {
+            val songEntity = database.query {
+                moe.koiverse.archivetune.db.entities.SongEntity(songItem.id)
+            }
+
+            if (songEntity == null) {
+                insert(
+                    moe.koiverse.archivetune.db.entities.SongEntity(
+                        id = songItem.id,
+                        title = songItem.title,
+                        thumbnailUrl = songItem.thumbnail,
+                        duration = songItem.duration ?: 0,
+                    )
+                )
+            }
+
+            val newPosition = existingSongs.size
+            insert(
+                moe.koiverse.archivetune.db.entities.PlaylistSongMap(
+                    songId = songItem.id,
+                    playlistId = playlistId,
+                    position = newPosition,
+                    setVideoId = songItem.setVideoId,
+                )
+            )
+        }
+
+        playlist.value?.playlist?.browseId?.let { browseId ->
+            YouTube.addToPlaylist(browseId, songItem.id)
+        }
+    }
 
     init {
         viewModelScope.launch {
