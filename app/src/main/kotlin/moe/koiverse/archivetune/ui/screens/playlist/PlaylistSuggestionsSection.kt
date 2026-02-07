@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -87,7 +88,7 @@ fun PlaylistSuggestionsSection(
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.add),
-                                contentDescription = null,
+                                contentDescription = stringResource(R.string.add_to_playlist),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(24.dp)
                             )
@@ -103,8 +104,7 @@ fun PlaylistSuggestionsSection(
                             text = song.title,
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Bold,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
                             modifier = Modifier.basicMarquee()
                         )
                         Text(

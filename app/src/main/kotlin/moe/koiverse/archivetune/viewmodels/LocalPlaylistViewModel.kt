@@ -13,9 +13,12 @@ import moe.koiverse.archivetune.extensions.reversed
 import moe.koiverse.archivetune.extensions.toEnum
 import moe.koiverse.archivetune.innertube.YouTube
 import moe.koiverse.archivetune.innertube.models.SongItem
+import moe.koiverse.archivetune.models.toMediaMetadata
 import moe.koiverse.archivetune.utils.dataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import timber.log.Timber
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -92,6 +95,7 @@ constructor(
                     ?.take(12)
                     ?: emptyList()
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 emptyList()
             }
         }
@@ -104,19 +108,8 @@ constructor(
         if (songAlreadyInPlaylist) return
 
         database.transaction {
-            val songEntity = database.query {
-                moe.koiverse.archivetune.db.entities.SongEntity(songItem.id)
-            }
-
-            if (songEntity == null) {
-                insert(
-                    moe.koiverse.archivetune.db.entities.SongEntity(
-                        id = songItem.id,
-                        title = songItem.title,
-                        thumbnailUrl = songItem.thumbnail,
-                        duration = songItem.duration ?: 0,
-                    )
-                )
+            if (getSongByIdBlocking(songItem.id) == null) {
+                insert(songItem.toMediaMetadata())
             }
 
             val newPosition = existingSongs.size
@@ -131,7 +124,12 @@ constructor(
         }
 
         playlist.value?.playlist?.browseId?.let { browseId ->
-            YouTube.addToPlaylist(browseId, songItem.id)
+            try {
+                YouTube.addToPlaylist(browseId, songItem.id)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                Timber.e(e, "Failed to add song %s to playlist %s", songItem.id, browseId)
+            }
         }
     }
 
