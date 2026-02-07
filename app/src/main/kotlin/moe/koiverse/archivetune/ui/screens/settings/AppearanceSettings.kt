@@ -66,6 +66,11 @@ import moe.koiverse.archivetune.constants.ChipSortTypeKey
 import moe.koiverse.archivetune.constants.DarkModeKey
 import moe.koiverse.archivetune.constants.DefaultOpenTabKey
 import moe.koiverse.archivetune.constants.DynamicThemeKey
+import moe.koiverse.archivetune.constants.DynamicColorFromArtistKey
+import moe.koiverse.archivetune.constants.DynamicColorFromAlbumsPlaylistKey
+import moe.koiverse.archivetune.constants.DynamicColorDuringPlayPauseKey
+import moe.koiverse.archivetune.constants.DynamicColorOverwriteKey
+import moe.koiverse.archivetune.constants.DynamicColorNoOverwritePlayerKey
 import moe.koiverse.archivetune.constants.GridItemSize
 import moe.koiverse.archivetune.constants.GridItemsSizeKey
 import moe.koiverse.archivetune.constants.LibraryFilter
@@ -126,6 +131,26 @@ fun AppearanceSettings(
     val (dynamicTheme, onDynamicThemeChange) = rememberPreference(
         DynamicThemeKey,
         defaultValue = true
+    )
+    val (dynamicColorFromArtist, onDynamicColorFromArtistChange) = rememberPreference(
+        DynamicColorFromArtistKey,
+        defaultValue = true
+    )
+    val (dynamicColorFromAlbumsPlaylist, onDynamicColorFromAlbumsPlaylistChange) = rememberPreference(
+        DynamicColorFromAlbumsPlaylistKey,
+        defaultValue = true
+    )
+    val (dynamicColorDuringPlayPause, onDynamicColorDuringPlayPauseChange) = rememberPreference(
+        DynamicColorDuringPlayPauseKey,
+        defaultValue = true
+    )
+    val (dynamicColorOverwrite, onDynamicColorOverwriteChange) = rememberPreference(
+        DynamicColorOverwriteKey,
+        defaultValue = true
+    )
+    val (dynamicColorNoOverwritePlayer, onDynamicColorNoOverwritePlayerChange) = rememberPreference(
+        DynamicColorNoOverwritePlayerKey,
+        defaultValue = false
     )
     val (darkMode, onDarkModeChange) = rememberEnumPreference(
         DarkModeKey,
@@ -406,6 +431,50 @@ fun AppearanceSettings(
             checked = dynamicTheme,
             onCheckedChange = onDynamicThemeChange,
         )
+
+        AnimatedVisibility(visible = dynamicTheme) {
+            Column {
+                SwitchPreference(
+                    title = { Text(stringResource(R.string.dynamic_color_from_artist)) },
+                    icon = { Icon(painterResource(R.drawable.person), null) },
+                    checked = dynamicColorFromArtist,
+                    onCheckedChange = onDynamicColorFromArtistChange,
+                )
+
+                SwitchPreference(
+                    title = { Text(stringResource(R.string.dynamic_color_from_albums_playlist)) },
+                    icon = { Icon(painterResource(R.drawable.album), null) },
+                    checked = dynamicColorFromAlbumsPlaylist,
+                    onCheckedChange = onDynamicColorFromAlbumsPlaylistChange,
+                )
+
+                SwitchPreference(
+                    title = { Text(stringResource(R.string.dynamic_color_during_play_pause)) },
+                    description = stringResource(R.string.dynamic_color_during_play_pause_desc),
+                    icon = { Icon(painterResource(R.drawable.play), null) },
+                    checked = dynamicColorDuringPlayPause,
+                    onCheckedChange = onDynamicColorDuringPlayPauseChange,
+                )
+
+                SwitchPreference(
+                    title = { Text(stringResource(R.string.dynamic_color_overwrite)) },
+                    description = stringResource(R.string.dynamic_color_overwrite_desc),
+                    icon = { Icon(painterResource(R.drawable.format_paint), null) },
+                    checked = dynamicColorOverwrite,
+                    onCheckedChange = onDynamicColorOverwriteChange,
+                )
+
+                AnimatedVisibility(visible = dynamicTheme && dynamicColorOverwrite) {
+                    SwitchPreference(
+                        title = { Text(stringResource(R.string.dynamic_color_no_overwrite_player)) },
+                        description = stringResource(R.string.dynamic_color_no_overwrite_player_desc),
+                        icon = { Icon(painterResource(R.drawable.music_note), null) },
+                        checked = dynamicColorNoOverwritePlayer,
+                        onCheckedChange = onDynamicColorNoOverwritePlayerChange,
+                    )
+                }
+            }
+        }
 
         AnimatedVisibility(visible = !dynamicTheme || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             PreferenceEntry(

@@ -202,6 +202,14 @@
     <string name="appearance">外観</string>
     <string name="theme">テーマ</string>
     <string name="enable_dynamic_theme">ダイナミックテーマを有効にする</string>
+    <string name="dynamic_color_from_artist">アーティストタブからの動的カラー</string>
+    <string name="dynamic_color_from_albums_playlist">アルバム、プレイリストおよびシングルEPタブからの動的カラー</string>
+    <string name="dynamic_color_during_play_pause">再生/一時停止時の動的カラー</string>
+    <string name="dynamic_color_during_play_pause_desc">一時停止時、カラーはデフォルトカラーまたは上記オプションが有効で該当タブにいる場合はアーティスト、アルバム、プレイリスト等のカラーに戻ります。</string>
+    <string name="dynamic_color_overwrite">カラー上書き</string>
+    <string name="dynamic_color_overwrite_desc">このオプションが有効の場合、現在そのタブにいる場合、アーティストタブ、プレイリスト等のカラーが優先的に表示됩니다。</string>
+    <string name="dynamic_color_no_overwrite_player">プレイヤーにカラーを適用しない</string>
+    <string name="dynamic_color_no_overwrite_player_desc">このオプションが有効の場合、そのタブにいる場合でもプレイヤーを開いても、アーティストタブ、プレイリスト等のカラーがプレイヤーの色を押し淹すことがありません。プレイヤーの色は影響を受けません。</string>
     <!-- Color Palette -->
     <string name="color_palette">カラーパレット</string>
     <string name="customize_theme_colors">アプリのテーマカラーを選択</string>

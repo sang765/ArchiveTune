@@ -216,6 +216,14 @@
     <string name="appearance">Giao diện</string>
     <string name="theme">Giao diện</string>
     <string name="enable_dynamic_theme">Bật giao diện động</string>
+    <string name="dynamic_color_from_artist">Màu động từ tab Nghệ sĩ</string>
+    <string name="dynamic_color_from_albums_playlist">Màu động từ tab Album, Danh sách phát và Single EP</string>
+    <string name="dynamic_color_during_play_pause">Màu động trong quá trình phát/tạm dừng</string>
+    <string name="dynamic_color_during_play_pause_desc">Khi tạm dừng, màu sẽ quay trở lại màu mặc định hoặc màu của Nghệ sĩ, Album, Danh sách phát, v.v., nếu bạn đã bật các tùy chọn ở trên và đang ở tab đó.</string>
+    <string name="dynamic_color_overwrite">Ghi đè màu</string>
+    <string name="dynamic_color_overwrite_desc">Khi tùy chọn này được bật, màu sắc của các tab nghệ sĩ, danh sách phát, v.v. sẽ được ưu tiên hiển thị nếu bạn hiện đang ở các tab đó.</string>
+    <string name="dynamic_color_no_overwrite_player">Không áp dụng màu cho trình phát</string>
+    <string name="dynamic_color_no_overwrite_player_desc">Khi tùy chọn này được bật, màu sắc của các tab nghệ sĩ, danh sách phát, v.v. sẽ KHÔNG áp đảo màu của trình phát, ngay cả khi bạn ở tab đó và mở trình phát; màu của trình phát sẽ KHÔNG bị ảnh hưởng.</string>
     <string name="use_system_font">Sử dụng font hệ thống</string>
     <string name="use_system_font_desc">Sử dụng font thiết bị thay vì font ứng dụng</string>
     <!-- Color Palette -->

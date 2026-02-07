@@ -220,6 +220,14 @@
     <string name="appearance">Appearance</string>
     <string name="theme">Theme</string>
     <string name="enable_dynamic_theme">Enable dynamic theme</string>
+    <string name="dynamic_color_from_artist">Dynamic color from Artist tab</string>
+    <string name="dynamic_color_from_albums_playlist">Dynamic color from Albums, Playlist and Single EP tab</string>
+    <string name="dynamic_color_during_play_pause">Dynamic color during play/pause</string>
+    <string name="dynamic_color_during_play_pause_desc">When paused, the colors will revert to your default colors or the colors of the Artist, Album, Playlist, etc., if you have enabled the options above and are in that tab.</string>
+    <string name="dynamic_color_overwrite">Overwrite colors</string>
+    <string name="dynamic_color_overwrite_desc">When this option is enabled, the color of artist tabs, playlists, etc., will be prioritized for display if you are currently on those tabs.</string>
+    <string name="dynamic_color_no_overwrite_player">Do not apply colors to the player</string>
+    <string name="dynamic_color_no_overwrite_player_desc">When this option is enabled, the colors of artist tabs, playlists, etc., will NOT OVERWHELM the player\'s colors, even if you are in that tab and open the player; the player\'s colors will NOT be affected.</string>
     <string name="use_system_font">Use system font</string>
     <string name="use_system_font_desc">Use the device font instead of the app font</string>
     <!-- Color Palette -->
