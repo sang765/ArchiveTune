@@ -18,9 +18,13 @@ import moe.koiverse.archivetune.db.MusicDatabase
 import moe.koiverse.archivetune.db.entities.PlaylistSong
 import moe.koiverse.archivetune.extensions.reversed
 import moe.koiverse.archivetune.extensions.toEnum
+import moe.koiverse.archivetune.innertube.YouTube
+import moe.koiverse.archivetune.models.PlaylistSuggestion
+import moe.koiverse.archivetune.models.toMediaMetadata
 import moe.koiverse.archivetune.utils.dataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -29,6 +33,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import moe.koiverse.archivetune.innertube.models.SongItem
+import moe.koiverse.archivetune.utils.reportException
 import java.text.Collator
 import java.util.Locale
 import javax.inject.Inject
@@ -75,6 +81,36 @@ constructor(
                 PlaylistSongSortType.PLAY_TIME -> songs.sortedBy { it.song.song.totalPlayTime }
             }.reversed(sortDescending && sortType != PlaylistSongSortType.CUSTOM)
         }.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    // StateFlow for playlist suggestions
+    val playlistSuggestions = MutableStateFlow<List<SongItem>?>(null)
+
+    // Method to load playlist suggestions
+    fun loadPlaylistSuggestions(playlistName: String, playlistId: String) {
+        viewModelScope.launch {
+            try {
+                val searchResult = YouTube.search(playlistName, YouTube.SearchFilter.FILTER_SONG).getOrNull()
+                if (searchResult != null) {
+                    // Get existing playlist songs to filter them out
+                    val existingSongs = database.playlistSongs(playlistId).first()
+                    val existingSongIds = existingSongs.map { it.song.id }
+                    
+                    // Filter out songs already in the playlist and limit to 10-15 suggestions
+                    val suggestions = searchResult.items
+                        .filterIsInstance<SongItem>()
+                        .filter { it.id !in existingSongIds }
+                        .take(12)
+                    
+                    playlistSuggestions.value = suggestions
+                } else {
+                    playlistSuggestions.value = emptyList()
+                }
+            } catch (e: Exception) {
+                reportException(e)
+                playlistSuggestions.value = emptyList()
+            }
+        }
+    }
 
     init {
         viewModelScope.launch {

@@ -141,8 +141,6 @@ import moe.koiverse.archivetune.models.toMediaMetadata
 import moe.koiverse.archivetune.playback.ExoDownloadService
 import moe.koiverse.archivetune.playback.queues.ListQueue
 import moe.koiverse.archivetune.playback.queues.LocalMixQueue
-import moe.koiverse.archivetune.ui.screens.playlist.PlaylistSuggestionsSection
-import moe.koiverse.archivetune.ui.screens.playlist.PlaylistSuggestionsHeader
 import moe.koiverse.archivetune.ui.component.DefaultDialog
 import moe.koiverse.archivetune.ui.component.DraggableScrollbar
 import moe.koiverse.archivetune.ui.component.EmptyPlaceholder
@@ -188,7 +186,6 @@ fun LocalPlaylistScreen(
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
 
     val playlist by viewModel.playlist.collectAsState()
-    val playlistSuggestions by viewModel.playlistSuggestions.collectAsState()
     val songs by viewModel.playlistSongs.collectAsState()
     val mutableSongs = remember { mutableStateListOf<PlaylistSong>() }
     val playlistLength = remember(songs) {
@@ -288,35 +285,8 @@ fun LocalPlaylistScreen(
         }
     }
 
-    LaunchedEffect(playlist) {
-        playlist?.let { playlistEntity ->
-            viewModel.loadPlaylistSuggestions(
-                playlistName = playlistEntity.playlist.name,
-                playlistId = playlistEntity.id
-            )
-        }
-    }
     var showEditDialog by remember { mutableStateOf(false) }
 
-    val onAddToPlaylist = { songItem: SongItem ->
-        playlist?.let { playlistEntity ->
-            coroutineScope.launch {
-                try {
-                    val browseId = playlistEntity.playlist.browseId
-                    if (browseId != null) {
-                        YouTube.addToPlaylist(browseId, songItem.id)
-                    }
-                    database.transaction {
-                        addSongToPlaylist(playlistEntity, listOf(songItem.id))
-                    }
-                    snackbarHostState.showSnackbar(context.getString(R.string.added_to_playlist, playlistEntity.playlist.name))
-                } catch (e: Exception) {
-                    reportException(e)
-                    snackbarHostState.showSnackbar(context.getString(R.string.error_adding_to_playlist))
-                }
-            }
-        }
-    }
     if (showEditDialog) {
         playlist?.playlist?.let { playlistEntity ->
             TextFieldDialog(
@@ -1366,22 +1336,6 @@ fun LocalPlaylistScreen(
                                 content()
                             }
                         }
-                    }
-                }
-            }
-            playlistSuggestions?.let { suggestions ->
-                if (suggestions.isNotEmpty()) {
-                    item {
-                        PlaylistSuggestionsHeader()
-                    }
-                    item {
-                        PlaylistSuggestionsSection(
-                            suggestions = suggestions,
-                            onAddToPlaylist = onAddToPlaylist,
-                            navController = navController,
-                            playerConnection = playerConnection,
-                            menuState = menuState
-                        )
                     }
                 }
             }

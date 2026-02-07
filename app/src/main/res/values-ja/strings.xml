@@ -639,3 +639,6 @@
     <string name="playback_state_unknown">不明</string>
     <string name="share_logs">ログを共有</string>
 </resources>
+    <string name="you_might_like">あなたが好きかもしれません</string>
+    <string name="added_to_playlist">%sに追加されました</string>
+    <string name="error_adding_to_playlist">プレイリストへの追加エラー</string>

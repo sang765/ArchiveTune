@@ -11,6 +11,8 @@ import androidx.compose.runtime.Immutable
 import moe.koiverse.archivetune.innertube.models.SongItem
 import moe.koiverse.archivetune.db.entities.Song
 import moe.koiverse.archivetune.db.entities.SongEntity
+import moe.koiverse.archivetune.db.entities.ArtistEntity
+import moe.koiverse.archivetune.db.entities.AlbumEntity
 import moe.koiverse.archivetune.ui.utils.resize
 import java.io.Serializable
 import java.time.LocalDateTime
@@ -106,4 +108,25 @@ fun SongItem.toMediaMetadata() =
         },
         explicit = explicit,
         setVideoId = setVideoId
+    )
+
+fun SongItem.toSongEntity() =
+    toMediaMetadata().toSongEntity()
+
+fun SongItem.toSong() =
+    Song(
+        song = toSongEntity(),
+        artists = artists.map { artist ->
+            ArtistEntity(
+                id = artist.id ?: "",
+                name = artist.name,
+                thumbnailUrl = artist.thumbnailUrl
+            )
+        },
+        album = album?.let { album ->
+            AlbumEntity(
+                id = album.id,
+                title = album.name
+            )
+        }
     )

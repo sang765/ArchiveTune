@@ -650,3 +650,6 @@ ArchiveTune sẽ chỉ trích xuất token của bạn, và mọi thứ khác đ
     <string name="share_logs">Chia sẻ nhật ký</string>
     <string name="next_song">Bài hát tiếp theo</string>
 </resources>
+    <string name="you_might_like">Bạn có thể thích</string>
+    <string name="added_to_playlist">Đã thêm vào %s</string>
+    <string name="error_adding_to_playlist">Lỗi thêm vào danh sách phát</string>
