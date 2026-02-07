@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -36,7 +37,6 @@ import coil3.compose.AsyncImage
 import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.innertube.models.SongItem
 import moe.koiverse.archivetune.ui.component.NavigationTitle
-import moe.koiverse.archivetune.ui.utils.joinByBullet
 import moe.koiverse.archivetune.utils.makeTimeString
 
 @OptIn(ExperimentalFoundationApi::class)
