@@ -116,7 +116,7 @@ fun PlaylistSuggestionsSection(
                         )
                         if (song.duration != null) {
                             Text(
-                                text = makeTimeString(song.duration * 1000L),
+                                text = makeTimeString((song.duration ?: 0) * 1000L),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.secondary,
                                 maxLines = 1
