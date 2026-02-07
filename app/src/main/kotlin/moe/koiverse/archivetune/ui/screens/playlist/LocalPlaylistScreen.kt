@@ -165,6 +165,7 @@ import moe.koiverse.archivetune.ui.utils.backToMain
 import moe.koiverse.archivetune.utils.makeTimeString
 import moe.koiverse.archivetune.utils.rememberEnumPreference
 import moe.koiverse.archivetune.utils.rememberPreference
+import moe.koiverse.archivetune.utils.reportException
 import moe.koiverse.archivetune.viewmodels.LocalPlaylistViewModel
 import com.valentinilk.shimmer.shimmer
 import sh.calvin.reorderable.ReorderableItem

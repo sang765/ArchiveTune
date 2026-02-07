@@ -93,12 +93,12 @@ constructor(
                 if (searchResult != null) {
                     // Get existing playlist songs to filter them out
                     val existingSongs = database.playlistSongs(playlistId).first()
-                    val existingSongIds = existingSongs.map { it.song.id }
+                    val existingSongIds: List<String> = existingSongs.map { it.song.song.id }
                     
                     // Filter out songs already in the playlist and limit to 10-15 suggestions
                     val suggestions = searchResult.items
                         .filterIsInstance<SongItem>()
-                        .filter { it.id !in existingSongIds }
+                        .filter { songItem -> songItem.id !in existingSongIds }
                         .take(12)
                     
                     playlistSuggestions.value = suggestions

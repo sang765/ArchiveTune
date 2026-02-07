@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -31,9 +32,9 @@ import moe.koiverse.archivetune.constants.ListItemHeight
 import moe.koiverse.archivetune.innertube.models.SongItem
 import moe.koiverse.archivetune.models.toSong
 import moe.koiverse.archivetune.playback.PlayerConnection
+import moe.koiverse.archivetune.ui.component.MenuState
 import moe.koiverse.archivetune.ui.component.NavigationTitle
 import moe.koiverse.archivetune.ui.component.SongListItem
-import moe.koiverse.archivetune.ui.component.LocalMenuState
 
 @Composable
 fun PlaylistSuggestionsSection(
@@ -41,7 +42,7 @@ fun PlaylistSuggestionsSection(
     onAddToPlaylist: (SongItem) -> Unit,
     navController: NavController,
     playerConnection: PlayerConnection,
-    menuState: LocalMenuState,
+    menuState: MenuState,
     modifier: Modifier = Modifier
 ) {
     if (suggestions.isNotEmpty()) {

@@ -120,13 +120,15 @@ fun SongItem.toSong() =
             ArtistEntity(
                 id = artist.id ?: "",
                 name = artist.name,
-                thumbnailUrl = artist.thumbnailUrl
+                thumbnailUrl = null
             )
         },
         album = album?.let { album ->
             AlbumEntity(
                 id = album.id,
-                title = album.name
+                title = album.name,
+                songCount = 1,
+                duration = this@toSong.duration ?: 0
             )
         }
     )
