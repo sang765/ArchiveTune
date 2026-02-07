@@ -99,7 +99,6 @@
     <string name="remove_from_history">Remove from history</string>
     <string name="remove_from_playlist">Remove from playlist</string>
     <string name="you_might_like">You might like</string>
-    <string name="added_to_playlist">Added to %s</string>
     <string name="error_adding_to_playlist">Error adding to playlist</string>
     <string name="remove_from_queue">Remove from queue</string>
     <string name="search_online">Search online</string>
