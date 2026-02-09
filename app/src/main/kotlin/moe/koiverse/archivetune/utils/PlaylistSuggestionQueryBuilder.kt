@@ -8,6 +8,7 @@
 package moe.koiverse.archivetune.utils
 
 import moe.koiverse.archivetune.db.entities.PlaylistSong
+import java.util.Locale
 
 /**
  * Utility to build search queries for playlist suggestions
@@ -92,39 +93,28 @@ object PlaylistSuggestionQueryBuilder {
 
     /**
      * Clean playlist name for search (remove special chars, trim)
+     * Unicode-aware: keeps letters and numbers from all languages
      */
     private fun cleanPlaylistName(name: String): String {
         return name
-            .replace(Regex("[^a-zA-Z0-9\\s]"), "")
+            .replace(Regex("[^\\p{L}\\p{N}\\s]+"), "")
             .trim()
-            .lowercase()
+            .lowercase(Locale.getDefault())
     }
 
     /**
-     * Extract genre and mood keywords from text
+     * Extract genre and mood keywords from text using word boundaries
      */
     private fun extractKeywords(text: String): List<String> {
-        val lowercaseText = text.lowercase()
-        val words = lowercaseText.split(Regex("\\s+"))
+        val lowercaseText = text.lowercase(Locale.getDefault())
         val keywords = mutableListOf<String>()
 
-        // Check for exact genre/mood matches
-        genreKeywords.forEach { genre ->
-            if (lowercaseText.contains(genre)) {
-                keywords.add(genre)
-            }
-        }
-
-        moodKeywords.forEach { mood ->
-            if (lowercaseText.contains(mood)) {
-                keywords.add(mood)
-            }
-        }
-
-        // Check multi-word keywords
-        val multiWordKeywords = genreKeywords + moodKeywords
-        multiWordKeywords.filter { it.contains(" ") }.forEach { keyword ->
-            if (lowercaseText.contains(keyword)) {
+        // Check all genre and mood keywords with word boundaries
+        val allKeywords = genreKeywords + moodKeywords
+        allKeywords.forEach { keyword ->
+            val escapedKeyword = Regex.escape(keyword)
+            val wordBoundaryPattern = "\\b$escapedKeyword\\b".toRegex(RegexOption.IGNORE_CASE)
+            if (wordBoundaryPattern.containsMatchIn(lowercaseText)) {
                 keywords.add(keyword)
             }
         }

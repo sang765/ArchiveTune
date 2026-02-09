@@ -1351,32 +1351,51 @@ fun LocalPlaylistScreen(
                         isLoading = isLoadingSuggestions,
                         onAddToPlaylist = { song ->
                             coroutineScope.launch(Dispatchers.IO) {
-                                database.transaction {
-                                    // Insert song metadata if not already in database
-                                    insert(song.toMediaMetadata())
-                                }
-                                
-                                // Add to playlist
                                 playlist?.let { playlistData ->
+                                    // Insert song metadata and add to playlist in single transaction
                                     database.transaction {
+                                        insert(song.toMediaMetadata())
                                         addSongToPlaylist(playlistData, listOf(song.id))
                                     }
 
-                                    // If YouTube playlist, also add via API
+                                    // If YouTube playlist, also add via API with error handling
                                     playlistData.playlist.browseId?.let { browseId ->
-                                        YouTube.addToPlaylist(browseId, song.id)
+                                        try {
+                                            YouTube.addToPlaylist(browseId, song.id)
+                                            
+                                            // Show success snackbar
+                                            withContext(Dispatchers.Main) {
+                                                snackbarHostState.showSnackbar(
+                                                    message = context.getString(R.string.added_to_playlist),
+                                                    duration = SnackbarDuration.Short
+                                                )
+                                            }
+                                        } catch (e: Exception) {
+                                            // On API failure, remove from local playlist to keep consistent
+                                            database.transaction {
+                                                removeSongFromPlaylist(playlistData.id, song.id)
+                                            }
+                                            
+                                            // Show error snackbar
+                                            withContext(Dispatchers.Main) {
+                                                snackbarHostState.showSnackbar(
+                                                    message = "Failed to add to YouTube playlist: ${e.message}",
+                                                    duration = SnackbarDuration.Long
+                                                )
+                                            }
+                                        }
+                                    } ?: run {
+                                        // Local-only playlist, show success
+                                        withContext(Dispatchers.Main) {
+                                            snackbarHostState.showSnackbar(
+                                                message = context.getString(R.string.added_to_playlist),
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
                                     }
                                 }
 
-                                // Show snackbar confirmation
-                                withContext(Dispatchers.Main) {
-                                    snackbarHostState.showSnackbar(
-                                        message = context.getString(R.string.added_to_playlist),
-                                        duration = SnackbarDuration.Short
-                                    )
-                                }
-
-                                // Auto-refresh suggestions after adding
+                                // Auto-refresh suggestions after adding (regardless of API outcome)
                                 viewModel.resetAndLoadPlaylistSuggestions()
                             }
                         },

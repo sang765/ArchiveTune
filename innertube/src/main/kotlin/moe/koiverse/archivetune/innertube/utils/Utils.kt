@@ -10,6 +10,7 @@ package moe.koiverse.archivetune.innertube.utils
 import moe.koiverse.archivetune.innertube.YouTube
 import moe.koiverse.archivetune.innertube.pages.LibraryPage
 import moe.koiverse.archivetune.innertube.pages.PlaylistPage
+import moe.koiverse.archivetune.innertube.pages.SearchResult
 import java.security.MessageDigest
 
 @JvmName("completedLibrary")
@@ -82,6 +83,12 @@ suspend fun Result<LibraryPage>.completed(): Result<LibraryPage> = runCatching {
         items = items,
         continuation = null
     )
+}
+
+@JvmName("completedSearch")
+suspend fun Result<SearchResult>.completed(): Result<SearchResult> = runCatching {
+    val result = getOrThrow()
+    result
 }
 
 fun ByteArray.toHex(): String = joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }

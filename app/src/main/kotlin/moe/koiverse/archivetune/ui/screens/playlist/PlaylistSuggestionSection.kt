@@ -37,12 +37,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import moe.koiverse.archivetune.R
+import moe.koiverse.archivetune.db.entities.AlbumEntity
+import moe.koiverse.archivetune.db.entities.ArtistEntity
+import moe.koiverse.archivetune.db.entities.Song
+import moe.koiverse.archivetune.db.entities.SongEntity
 import moe.koiverse.archivetune.innertube.models.SongItem
-import moe.koiverse.archivetune.models.MediaMetadata
 import moe.koiverse.archivetune.ui.component.IconButton
-import moe.koiverse.archivetune.ui.component.SongListItem
+import moe.koiverse.archivetune.ui.component.ListItem
 import moe.koiverse.archivetune.ui.component.shimmer.ListItemPlaceHolder
 import moe.koiverse.archivetune.ui.component.shimmer.ShimmerHost
+import moe.koiverse.archivetune.ui.utils.makeTimeString
 import com.valentinilk.shimmer.shimmer
 
 @Composable
@@ -85,7 +89,7 @@ fun PlaylistSuggestionsSection(
                 onLongClick = {}
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.refresh),
+                    painter = painterResource(R.drawable.sync),
                     contentDescription = stringResource(R.string.refresh_suggestions),
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -119,28 +123,21 @@ fun PlaylistSuggestionsSection(
                 Box(
                     modifier = Modifier.width(300.dp)
                 ) {
-                    SongListItem(
-                        song = MediaMetadata(
-                            id = song.id,
-                            title = song.title,
-                            artists = song.artists.map {
-                                moe.koiverse.archivetune.models.Artist(
-                                    id = it.id,
-                                    name = it.name
+                    ListItem(
+                        title = song.title,
+                        subtitle = song.artists.joinToString { it.name } + 
+                            (song.duration?.let { " • ${makeTimeString(it * 1000L)}" } ?: ""),
+                        thumbnailContent = {
+                            Box(
+                                modifier = Modifier
+                                    .size(56.dp)
+                            ) {
+                                moe.koiverse.archivetune.ui.component.AsyncImage(
+                                    url = song.thumbnail,
+                                    modifier = Modifier.size(56.dp)
                                 )
-                            },
-                            album = song.album?.let {
-                                moe.koiverse.archivetune.models.Album(
-                                    id = it.id,
-                                    title = it.name
-                                )
-                            },
-                            duration = song.duration,
-                            thumbnailUrl = song.thumbnail
-                        ),
-                        isActive = false,
-                        isPlaying = false,
-                        showInLibraryIcon = false,
+                            }
+                        },
                         trailingContent = {
                             IconButton(
                                 onClick = { onAddToPlaylist(song) },

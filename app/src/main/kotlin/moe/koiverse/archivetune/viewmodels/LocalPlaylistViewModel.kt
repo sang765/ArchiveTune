@@ -157,7 +157,7 @@ constructor(
                     val filteredSongs = searchResult.items
                         .filterIsInstance<moe.koiverse.archivetune.innertube.models.SongItem>()
                         .filterVideo(true)
-                        .filterExplicit(false)
+                        .filterExplicit(true)
                         .filter { it.id !in existingSongIds }
                         .take(30)
 
@@ -205,7 +205,7 @@ constructor(
                         val newSongs = searchResult.items
                             .filterIsInstance<moe.koiverse.archivetune.innertube.models.SongItem>()
                             .filterVideo(true)
-                            .filterExplicit(false)
+                            .filterExplicit(true)
                             .filter { it.id !in allSuggestedIds }
 
                         if (newSongs.isNotEmpty()) {
@@ -232,7 +232,7 @@ constructor(
                         val newSongs = searchResult.items
                             .filterIsInstance<moe.koiverse.archivetune.innertube.models.SongItem>()
                             .filterVideo(true)
-                            .filterExplicit(false)
+                            .filterExplicit(true)
                             .filter { it.id !in allSuggestedIds }
 
                         _playlistSuggestions.value = currentSuggestion.copy(
