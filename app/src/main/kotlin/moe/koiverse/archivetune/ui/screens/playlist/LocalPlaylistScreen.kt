@@ -157,7 +157,6 @@ import moe.koiverse.archivetune.ui.component.shimmer.ShimmerHost
 import moe.koiverse.archivetune.ui.component.shimmer.TextPlaceholder
 import moe.koiverse.archivetune.ui.menu.SelectionSongMenu
 import moe.koiverse.archivetune.ui.menu.SongMenu
-import moe.koiverse.archivetune.ui.screens.playlist.PlaylistSuggestionsSection
 import moe.koiverse.archivetune.ui.theme.PlayerColorExtractor
 import moe.koiverse.archivetune.ui.utils.ItemWrapper
 import moe.koiverse.archivetune.ui.utils.backToMain
@@ -1342,17 +1341,6 @@ fun LocalPlaylistScreen(
             }
 
             // Playlist Suggestions Section
-            if (!selection && !isSearching) {
-                item {
-                    PlaylistSuggestionsSection(snackbarHostState = snackbarHostState, 
-                        modifier = Modifier.padding(vertical = 16.dp)
-                    )
-                }
-            }
-
-        }
-
-        DraggableScrollbar(
             modifier = Modifier
                 .padding(
                     LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime)

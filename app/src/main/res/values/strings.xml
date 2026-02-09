@@ -648,10 +648,4 @@ ArchiveTune will only extract your token, and everything else is stored locally.
     <string name="next">Next</string>
     <string name="next_song">Next Song</string>
     <string name="allow">Allow</string>
-    <!-- Playlist Suggestions -->
-    <string name="you_might_like">You might like</string>
-    <string name="refresh_suggestions">Refresh suggestions</string>
-    <string name="added_song_to_playlist">Added %1$s to %2$s</string>
-    <string name="added_song">Added %s</string>
-    <string name="suggest_videos">Suggest videos too</string>
 </resources>

@@ -35,7 +35,6 @@ fun NavigationTitle(
     title: String,
     modifier: Modifier = Modifier,
     label: String? = null,
-    subtitle: String? = null,
     thumbnail: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null,
 ) {
@@ -74,17 +73,6 @@ fun NavigationTitle(
             )
 
             subtitle?.let {
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
-                )
-            }
-        }
-
-        if (onClick != null) {
             Icon(
                 painter = painterResource(R.drawable.arrow_forward),
                 contentDescription = null,
