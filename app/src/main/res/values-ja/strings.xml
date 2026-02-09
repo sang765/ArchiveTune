@@ -641,4 +641,7 @@
     <!-- Playlist Suggestions -->
     <string name="you_might_like">あなた好み</string>
     <string name="refresh_suggestions">提案を更新</string>
+    <string name="added_song_to_playlist">%1$s を %2$s に追加しました</string>
+    <string name="added_song">%s を追加しました</string>
+    <string name="suggest_videos">ビデオも提案する</string>
 </resources>

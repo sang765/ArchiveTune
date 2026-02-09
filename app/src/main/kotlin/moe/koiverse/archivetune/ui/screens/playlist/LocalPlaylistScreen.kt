@@ -1344,7 +1344,7 @@ fun LocalPlaylistScreen(
             // Playlist Suggestions Section
             if (!selection && !isSearching) {
                 item {
-                    PlaylistSuggestionsSection(
+                    PlaylistSuggestionsSection(snackbarHostState = snackbarHostState, 
                         modifier = Modifier.padding(vertical = 16.dp)
                     )
                 }

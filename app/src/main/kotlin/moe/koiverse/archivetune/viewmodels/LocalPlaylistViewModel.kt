@@ -11,6 +11,7 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -30,6 +31,7 @@ import moe.koiverse.archivetune.constants.PlaylistSongSortType
 import moe.koiverse.archivetune.constants.PlaylistSongSortTypeKey
 import moe.koiverse.archivetune.constants.HideExplicitKey
 import moe.koiverse.archivetune.constants.HideVideoKey
+import moe.koiverse.archivetune.constants.PlaylistSuggestionsSuggestVideosKey
 import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.db.MusicDatabase
 import moe.koiverse.archivetune.db.entities.PlaylistSong
@@ -261,6 +263,16 @@ constructor(
     fun resetAndLoadPlaylistSuggestions() {
         loadPlaylistSuggestions(forceReset = true)
     }
+
+    fun toggleSuggestVideos() {
+        viewModelScope.launch {
+            context.dataStore.edit {
+                val current = it[PlaylistSuggestionsSuggestVideosKey] ?: false
+                it[PlaylistSuggestionsSuggestVideosKey] = !current
+            }
+            resetAndLoadPlaylistSuggestions()
+        }
+    }
     
     suspend fun addSongToPlaylist(song: moe.koiverse.archivetune.innertube.models.SongItem, browseId: String?): Boolean {
         return try {
@@ -324,7 +336,8 @@ constructor(
         val currentQuery = queries[currentIndex]
         
         try {
-            val searchFilter = YouTube.SearchFilter.FILTER_SONG
+            val suggestVideosToo = context.dataStore.data.first()[PlaylistSuggestionsSuggestVideosKey] ?: false
+            val searchFilter = if (suggestVideosToo) null else YouTube.SearchFilter.FILTER_SONG
             
             val result = YouTube.search(currentQuery.query, searchFilter).getOrNull()
                 ?: return
@@ -436,7 +449,8 @@ constructor(
 
     private suspend fun filterSuggestionItems(items: List<YTItem>): List<YTItem> {
         val hideExplicit = context.dataStore.data.first()[HideExplicitKey] ?: false
-        val hideVideos = context.dataStore.data.first()[HideVideoKey] ?: false
+        val suggestVideosToo = context.dataStore.data.first()[PlaylistSuggestionsSuggestVideosKey] ?: false
+        val hideVideos = (context.dataStore.data.first()[HideVideoKey] ?: false) || !suggestVideosToo
 
         var filteredItems = items.filter { item ->
             item.id !in suggestedSongIds.value

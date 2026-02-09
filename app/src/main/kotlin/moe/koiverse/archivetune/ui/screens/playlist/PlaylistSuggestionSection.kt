@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,6 +40,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import moe.koiverse.archivetune.LocalPlayerConnection
 import moe.koiverse.archivetune.R
+import moe.koiverse.archivetune.constants.PlaylistSuggestionsSuggestVideosKey
 import moe.koiverse.archivetune.extensions.toMediaItem
 import moe.koiverse.archivetune.extensions.togglePlayPause
 import moe.koiverse.archivetune.innertube.models.SongItem
@@ -45,11 +48,13 @@ import moe.koiverse.archivetune.playback.queues.ListQueue
 import moe.koiverse.archivetune.ui.component.IconButton
 import moe.koiverse.archivetune.ui.component.NavigationTitle
 import moe.koiverse.archivetune.ui.component.YouTubeListItem
+import moe.koiverse.archivetune.utils.rememberPreference
 import moe.koiverse.archivetune.viewmodels.LocalPlaylistViewModel
 
 @Composable
 fun PlaylistSuggestionsSection(
     modifier: Modifier = Modifier,
+    snackbarHostState: SnackbarHostState? = null,
     viewModel: LocalPlaylistViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -60,6 +65,8 @@ fun PlaylistSuggestionsSection(
     
     val playlistSuggestions by viewModel.playlistSuggestions.collectAsState()
     val isLoading by viewModel.isLoadingSuggestions.collectAsState()
+    
+    val suggestVideosToo by rememberPreference(PlaylistSuggestionsSuggestVideosKey, false)
     
     val currentSuggestions = playlistSuggestions
     if (currentSuggestions == null && !isLoading) return
@@ -75,12 +82,26 @@ fun PlaylistSuggestionsSection(
         ) {
             NavigationTitle(
                 title = stringResource(R.string.you_might_like),
-                subtitle = currentSuggestions?.let { s ->
-                    if (s.totalQueries > 1) {
-                        "${s.currentQueryIndex + 1} / ${s.totalQueries}"
-                    } else null
-                },
                 modifier = Modifier.weight(1f)
+            )
+        }
+        
+        // Suggest Videos Option
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { viewModel.toggleSuggestVideos() }
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.suggest_videos),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f)
+            )
+            Switch(
+                checked = suggestVideosToo,
+                onCheckedChange = { viewModel.toggleSuggestVideos() }
             )
         }
         
@@ -112,18 +133,32 @@ fun PlaylistSuggestionsSection(
                                         
                                         if (success) {
                                             val playlistName = viewModel.playlist.value?.playlist?.name
+                                            val songTitle = songItem.title
                                             val message = if (playlistName != null) {
-                                                context.getString(R.string.added_to_playlist, playlistName)
+                                                context.getString(R.string.added_song_to_playlist, songTitle, playlistName)
                                             } else {
-                                                context.getString(R.string.add_to_playlist)
+                                                context.getString(R.string.added_song, songTitle)
                                             }
-                                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                            
+                                            if (snackbarHostState != null) {
+                                                snackbarHostState.showSnackbar(message)
+                                            } else {
+                                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                            }
                                         } else {
-                                            Toast.makeText(context, R.string.error_unknown, Toast.LENGTH_SHORT).show()
+                                            if (snackbarHostState != null) {
+                                                snackbarHostState.showSnackbar(context.getString(R.string.error_unknown))
+                                            } else {
+                                                Toast.makeText(context, R.string.error_unknown, Toast.LENGTH_SHORT).show()
+                                            }
                                         }
                                     } catch (e: Exception) {
                                         Log.e("PlaylistSuggestions", "Error adding song to playlist", e)
-                                        Toast.makeText(context, R.string.error_unknown, Toast.LENGTH_SHORT).show()
+                                        if (snackbarHostState != null) {
+                                            snackbarHostState.showSnackbar(context.getString(R.string.error_unknown))
+                                        } else {
+                                            Toast.makeText(context, R.string.error_unknown, Toast.LENGTH_SHORT).show()
+                                        }
                                     }
                                 }
                             },
