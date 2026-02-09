@@ -1339,6 +1339,56 @@ fun LocalPlaylistScreen(
                     }
                 }
             }
+
+            // Playlist Suggestions Section
+            if (!selection && !isSearching) {
+                item(key = "suggestions_section") {
+                    val suggestions by viewModel.playlistSuggestions.collectAsState()
+                    val isLoadingSuggestions by viewModel.isLoadingSuggestions.collectAsState()
+
+                    PlaylistSuggestionsSection(
+                        suggestions = suggestions.songs,
+                        isLoading = isLoadingSuggestions,
+                        onAddToPlaylist = { song ->
+                            coroutineScope.launch(Dispatchers.IO) {
+                                database.transaction {
+                                    // Insert song metadata if not already in database
+                                    insert(song.toMediaMetadata())
+                                }
+                                
+                                // Add to playlist
+                                playlist?.let { playlistData ->
+                                    database.transaction {
+                                        addSongToPlaylist(playlistData, listOf(song.id))
+                                    }
+
+                                    // If YouTube playlist, also add via API
+                                    playlistData.playlist.browseId?.let { browseId ->
+                                        YouTube.addToPlaylist(browseId, song.id)
+                                    }
+                                }
+
+                                // Show snackbar confirmation
+                                withContext(Dispatchers.Main) {
+                                    snackbarHostState.showSnackbar(
+                                        message = context.getString(R.string.added_to_playlist),
+                                        duration = SnackbarDuration.Short
+                                    )
+                                }
+
+                                // Auto-refresh suggestions after adding
+                                viewModel.resetAndLoadPlaylistSuggestions()
+                            }
+                        },
+                        onLoadMore = {
+                            viewModel.loadMoreSuggestions()
+                        },
+                        onRefresh = {
+                            viewModel.resetAndLoadPlaylistSuggestions()
+                        }
+                    )
+                }
+            }
         }
 
         DraggableScrollbar(

@@ -170,6 +170,8 @@
     <string name="playlist_imported">インポートされたプレイリスト</string>
     <string name="removed_song_from_playlist">プレイリストから「%s」を削除しました</string>
     <string name="playlist_synced">プレイリスト 同期</string>
+    <string name="you_might_like">おすすめ</string>
+    <string name="refresh_suggestions">おすすめを更新</string>
     <string name="undo">元に戻す</string>
     <!-- Player -->
     <string name="lyrics_not_found">歌詞が見つかりません</string>

@@ -181,6 +181,8 @@
     <string name="playlist_imported">Đã nhập danh sách phát</string>
     <string name="removed_song_from_playlist">Đã xóa \"%s\" khỏi danh sách phát</string>
     <string name="playlist_synced">Đã đồng bộ danh sách phát</string>
+    <string name="you_might_like">Bạn có thể thích</string>
+    <string name="refresh_suggestions">Làm mới đề xuất</string>
     <string name="undo">Hoàn tác</string>
     <!-- Player -->
     <string name="lyrics_not_found">Không tìm thấy lời bài hát</string>
