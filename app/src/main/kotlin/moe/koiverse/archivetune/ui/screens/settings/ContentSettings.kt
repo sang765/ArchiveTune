@@ -59,9 +59,6 @@ fun ContentSettings(
     val context = LocalContext.current
 
     // Used only before Android 13
-    val (appLanguage, onAppLanguageChange) = rememberPreference(key = AppLanguageKey, defaultValue = SYSTEM_DEFAULT)
-
-    val (contentLanguage, onContentLanguageChange) = rememberPreference(key = ContentLanguageKey, defaultValue = "system")
     val (contentCountry, onContentCountryChange) = rememberPreference(key = ContentCountryKey, defaultValue = "system")
     val (hideExplicit, onHideExplicitChange) = rememberPreference(key = HideExplicitKey, defaultValue = false)
     val (hideVideo, onHideVideoChange) = rememberPreference(key = HideVideoKey, defaultValue = false)
@@ -147,44 +144,6 @@ fun ContentSettings(
         )
 
         PreferenceGroupTitle(title = stringResource(R.string.app_language))
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            PreferenceEntry(
-                title = { Text(stringResource(R.string.app_language)) },
-                icon = { Icon(painterResource(R.drawable.language), null) },
-                onClick = {
-                    context.startActivity(
-                        Intent(
-                            Settings.ACTION_APP_LOCALE_SETTINGS,
-                            "package:${context.packageName}".toUri()
-                        )
-                    )
-                }
-            )
-        }
-        // Support for Android versions before Android 13
-        else {
-            ListPreference(
-                title = { Text(stringResource(R.string.app_language)) },
-                icon = { Icon(painterResource(R.drawable.language), null) },
-                selectedValue = appLanguage,
-                values = listOf(SYSTEM_DEFAULT) + LanguageCodeToName.keys.toList(),
-                valueText = {
-                    LanguageCodeToName.getOrElse(it) { stringResource(R.string.system_default) }
-                },
-                onValueSelected = { langTag ->
-                    val newLocale = langTag
-                        .takeUnless { it == SYSTEM_DEFAULT }
-                        ?.let { Locale.forLanguageTag(it) }
-                        ?: Locale.getDefault()
-
-                    onAppLanguageChange(langTag)
-                    setAppLocale(context, newLocale)
-
-                }
-            )
-        }
-
-        PreferenceGroupTitle(title = stringResource(R.string.proxy))
         SwitchPreference(
             title = { Text(stringResource(R.string.enable_proxy)) },
             icon = { Icon(painterResource(R.drawable.wifi_proxy), null) },
