@@ -270,6 +270,9 @@ fun SliderPreference(
     icon: (@Composable () -> Unit)? = null,
     value: Float,
     onValueChange: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float> = 15f..60f,
+    steps: Int = 0,
+    valueText: (@Composable (Float) -> String)? = null,
     isEnabled: Boolean = true,
 ) {
     var showDialog by remember {
@@ -287,12 +290,9 @@ fun SliderPreference(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Text(
-                        text = stringResource(R.string.history_duration),
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
-                        style = MaterialTheme.typography.headlineSmall,
-                    )
+                    ProvideTextStyle(MaterialTheme.typography.headlineSmall) {
+                        title()
+                    }
                 }
             },
             onDismiss = { showDialog = false },
@@ -305,12 +305,12 @@ fun SliderPreference(
                 showDialog = false
             },
             onReset = {
-                sliderValue = 30f // Default value or any reset value you prefer
+                sliderValue = valueRange.start
             },
             content = {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = pluralStringResource(
+                        text = valueText?.invoke(sliderValue) ?: pluralStringResource(
                             R.plurals.seconds,
                             sliderValue.roundToInt(),
                             sliderValue.roundToInt()
@@ -323,7 +323,8 @@ fun SliderPreference(
                     Slider(
                         value = sliderValue,
                         onValueChange = { sliderValue = it },
-                        valueRange = 15f..60f,
+                        valueRange = valueRange,
+                        steps = steps,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
