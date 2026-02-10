@@ -315,7 +315,7 @@ fun PlayerSettings(
         SwitchPreference(
             title = { Text(stringResource(R.string.smooth_play_pause)) },
             description = stringResource(R.string.smooth_play_pause_desc),
-            icon = { Icon(painterResource(R.drawable.play_pause), null) },
+            icon = { Icon(painterResource(R.drawable.slow_motion_video), null) },
             checked = smoothPlayPause,
             onCheckedChange = onSmoothPlayPauseChange
         )
