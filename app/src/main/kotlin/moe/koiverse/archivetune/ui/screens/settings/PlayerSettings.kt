@@ -56,6 +56,11 @@ import moe.koiverse.archivetune.constants.HistoryDuration
 import moe.koiverse.archivetune.constants.PlayerStreamClient
 import moe.koiverse.archivetune.constants.PlayerStreamClientKey
 import moe.koiverse.archivetune.constants.SeekExtraSeconds
+import moe.koiverse.archivetune.constants.SmoothPlayPauseKey
+import moe.koiverse.archivetune.constants.PlayPauseFadeDurationKey
+import moe.koiverse.archivetune.constants.SmoothTrackTransitionsKey
+import moe.koiverse.archivetune.constants.TrackTransitionDurationKey
+import moe.koiverse.archivetune.constants.SmoothTransitionsAffectManualSkipKey
 import moe.koiverse.archivetune.ui.component.ArtistSeparatorsDialog
 import moe.koiverse.archivetune.ui.component.TagsManagementDialog
 import moe.koiverse.archivetune.ui.component.EnumListPreference
@@ -138,6 +143,28 @@ fun PlayerSettings(
     val (artistSeparators, onArtistSeparatorsChange) = rememberPreference(
         ArtistSeparatorsKey,
         defaultValue = ",;/&"
+    )
+
+    // Smooth playback preferences
+    val (smoothPlayPause, onSmoothPlayPauseChange) = rememberPreference(
+        SmoothPlayPauseKey,
+        defaultValue = false
+    )
+    val (playPauseFadeDuration, onPlayPauseFadeDurationChange) = rememberPreference(
+        PlayPauseFadeDurationKey,
+        defaultValue = 300
+    )
+    val (smoothTrackTransitions, onSmoothTrackTransitionsChange) = rememberPreference(
+        SmoothTrackTransitionsKey,
+        defaultValue = false
+    )
+    val (trackTransitionDuration, onTrackTransitionDurationChange) = rememberPreference(
+        TrackTransitionDurationKey,
+        defaultValue = 500
+    )
+    val (smoothTransitionsAffectManualSkip, onSmoothTransitionsAffectManualSkipChange) = rememberPreference(
+        SmoothTransitionsAffectManualSkipKey,
+        defaultValue = true
     )
 
     var showArtistSeparatorsDialog by remember { mutableStateOf(false) }
@@ -279,6 +306,59 @@ fun PlayerSettings(
             checked = audioNormalization,
             onCheckedChange = onAudioNormalizationChange
         )
+
+        // Smooth Playback section
+        PreferenceGroupTitle(
+            title = stringResource(R.string.smooth_playback)
+        )
+
+        SwitchPreference(
+            title = { Text(stringResource(R.string.smooth_play_pause)) },
+            description = stringResource(R.string.smooth_play_pause_desc),
+            icon = { Icon(painterResource(R.drawable.play_pause), null) },
+            checked = smoothPlayPause,
+            onCheckedChange = onSmoothPlayPauseChange
+        )
+
+        if (smoothPlayPause) {
+            SliderPreference(
+                title = { Text(stringResource(R.string.fade_duration)) },
+                value = playPauseFadeDuration.toFloat(),
+                onValueChange = { onPlayPauseFadeDurationChange(it.toInt()) },
+                valueRange = 100f..1000f,
+                steps = 17,
+                valueText = { stringResource(R.string.fade_duration_ms, it.toInt()) },
+                modifier = Modifier.padding(start = 16.dp)
+            )
+        }
+
+        SwitchPreference(
+            title = { Text(stringResource(R.string.smooth_track_transitions)) },
+            description = stringResource(R.string.smooth_track_transitions_desc),
+            icon = { Icon(painterResource(R.drawable.skip_next), null) },
+            checked = smoothTrackTransitions,
+            onCheckedChange = onSmoothTrackTransitionsChange
+        )
+
+        if (smoothTrackTransitions) {
+            SliderPreference(
+                title = { Text(stringResource(R.string.transition_duration)) },
+                value = trackTransitionDuration.toFloat(),
+                onValueChange = { onTrackTransitionDurationChange(it.toInt()) },
+                valueRange = 100f..2000f,
+                steps = 37,
+                valueText = { stringResource(R.string.fade_duration_ms, it.toInt()) },
+                modifier = Modifier.padding(start = 16.dp)
+            )
+
+            SwitchPreference(
+                title = { Text(stringResource(R.string.affect_manual_skip)) },
+                description = stringResource(R.string.affect_manual_skip_desc),
+                checked = smoothTransitionsAffectManualSkip,
+                onCheckedChange = onSmoothTransitionsAffectManualSkipChange,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+        }
 
         SwitchPreference(
             title = { Text(stringResource(R.string.seek_seconds_addup)) },

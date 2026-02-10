@@ -33,16 +33,18 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PlayerConnection(
     context: Context,
     binder: MusicBinder,
     val database: MusicDatabase,
-    scope: CoroutineScope,
+    private val scope: CoroutineScope,
 ) : Player.Listener {
     val service = binder.service
     val player = service.player
+    val volumeFadeManager = VolumeFadeManager()
 
     val playbackState = MutableStateFlow(player.playbackState)
     private val playWhenReady = MutableStateFlow(player.playWhenReady)
@@ -129,27 +131,79 @@ class PlayerConnection(
         service.toggleLike()
     }
 
-    fun seekToNext() {
-        player.seekToNext()
-        player.prepare()
-        player.playWhenReady = true
-        // Immediately restart the Discord presence updater so it picks up the new track without waiting
-        if (moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.isRunning()) {
-            try {
-                moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.restart()
-            } catch (_: Exception) {}
+    fun seekToNext(smooth: Boolean = false) {
+        if (smooth) {
+            scope.launch {
+                val wasPlaying = player.playWhenReady
+                if (wasPlaying) {
+                    val transitionDuration = service.trackTransitionDuration.value
+                    volumeFadeManager.storeVolume(player)
+                    volumeFadeManager.fadeOut(player, transitionDuration) {
+                        player.seekToNext()
+                        player.prepare()
+                        player.playWhenReady = true
+                    }
+                    volumeFadeManager.fadeIn(player, transitionDuration, volumeFadeManager.getOriginalVolume())
+                } else {
+                    player.seekToNext()
+                    player.prepare()
+                }
+                
+                // Immediately restart the Discord presence updater so it picks up the new track without waiting
+                if (moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.isRunning()) {
+                    try {
+                        moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.restart()
+                    } catch (_: Exception) {}
+                }
+            }
+        } else {
+            player.seekToNext()
+            player.prepare()
+            player.playWhenReady = true
+            // Immediately restart the Discord presence updater so it picks up the new track without waiting
+            if (moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.isRunning()) {
+                try {
+                    moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.restart()
+                } catch (_: Exception) {}
+            }
         }
     }
 
-    fun seekToPrevious() {
-        player.seekToPrevious()
-        player.prepare()
-        player.playWhenReady = true
-        // Immediately restart the Discord presence updater so it picks up the new track without waiting
-        if (moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.isRunning()) {
-            try {
-                moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.restart()
-            } catch (_: Exception) {}
+    fun seekToPrevious(smooth: Boolean = false) {
+        if (smooth) {
+            scope.launch {
+                val wasPlaying = player.playWhenReady
+                if (wasPlaying) {
+                    val transitionDuration = service.trackTransitionDuration.value
+                    volumeFadeManager.storeVolume(player)
+                    volumeFadeManager.fadeOut(player, transitionDuration) {
+                        player.seekToPrevious()
+                        player.prepare()
+                        player.playWhenReady = true
+                    }
+                    volumeFadeManager.fadeIn(player, transitionDuration, volumeFadeManager.getOriginalVolume())
+                } else {
+                    player.seekToPrevious()
+                    player.prepare()
+                }
+                
+                // Immediately restart the Discord presence updater so it picks up the new track without waiting
+                if (moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.isRunning()) {
+                    try {
+                        moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.restart()
+                    } catch (_: Exception) {}
+                }
+            }
+        } else {
+            player.seekToPrevious()
+            player.prepare()
+            player.playWhenReady = true
+            // Immediately restart the Discord presence updater so it picks up the new track without waiting
+            if (moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.isRunning()) {
+                try {
+                    moe.koiverse.archivetune.ui.screens.settings.DiscordPresenceManager.restart()
+                } catch (_: Exception) {}
+            }
         }
     }
 

@@ -411,6 +411,16 @@
     <string name="auto_load_more_desc">Automatically add more songs when the end of the queue is reached. Disabled when repeat mode is active</string>
     <string name="skip_silence">Skip silence</string>
     <string name="audio_normalization">Audio normalization</string>
+    <string name="smooth_playback">Smooth playback</string>
+    <string name="smooth_play_pause">Smooth play/pause</string>
+    <string name="smooth_play_pause_desc">Fade audio when playing or pausing</string>
+    <string name="fade_duration">Fade duration</string>
+    <string name="fade_duration_ms">%d ms</string>
+    <string name="smooth_track_transitions">Smooth track transitions</string>
+    <string name="smooth_track_transitions_desc">Crossfade between tracks</string>
+    <string name="transition_duration">Transition duration</string>
+    <string name="affect_manual_skip">Affect manual skip buttons</string>
+    <string name="affect_manual_skip_desc">Apply smooth transitions to next/previous buttons and swipe gestures</string>
     <string name="auto_skip_next_on_error">Auto skip to next song when error occurs</string>
     <string name="auto_skip_next_on_error_desc">Ensure your continuous playback experience</string>
     <string name="stop_music_on_task_clear">Stop music on task clear</string>

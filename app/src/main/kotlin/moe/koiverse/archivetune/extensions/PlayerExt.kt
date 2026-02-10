@@ -15,6 +15,7 @@ import androidx.media3.common.Player.REPEAT_MODE_OFF
 import androidx.media3.common.Player.REPEAT_MODE_ONE
 import androidx.media3.common.Timeline
 import moe.koiverse.archivetune.models.MediaMetadata
+import moe.koiverse.archivetune.playback.VolumeFadeManager
 import java.util.ArrayDeque
 
 fun Player.togglePlayPause() {
@@ -22,6 +23,25 @@ fun Player.togglePlayPause() {
         prepare()
     }
     playWhenReady = !playWhenReady
+}
+
+suspend fun Player.smoothTogglePlayPause(fadeDurationMs: Int, volumeFadeManager: VolumeFadeManager) {
+    if (playWhenReady) {
+        // Currently playing, fade out then pause
+        volumeFadeManager.fadeOut(this, fadeDurationMs) {
+            playWhenReady = false
+        }
+        // Restore volume for next play
+        volumeFadeManager.restoreVolume(this)
+    } else {
+        // Currently paused, play then fade in
+        if (playbackState == Player.STATE_IDLE) {
+            prepare()
+        }
+        volumeFadeManager.storeVolume(this)
+        playWhenReady = true
+        volumeFadeManager.fadeIn(this, fadeDurationMs, volumeFadeManager.getOriginalVolume())
+    }
 }
 
 fun Player.toggleRepeatMode() {

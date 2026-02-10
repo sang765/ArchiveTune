@@ -80,6 +80,11 @@ import moe.koiverse.archivetune.constants.AudioNormalizationKey
 import moe.koiverse.archivetune.constants.AudioOffload
 import moe.koiverse.archivetune.constants.AudioCrossfadeDurationKey
 import moe.koiverse.archivetune.constants.AudioQualityKey
+import moe.koiverse.archivetune.constants.SmoothPlayPauseKey
+import moe.koiverse.archivetune.constants.PlayPauseFadeDurationKey
+import moe.koiverse.archivetune.constants.SmoothTrackTransitionsKey
+import moe.koiverse.archivetune.constants.TrackTransitionDurationKey
+import moe.koiverse.archivetune.constants.SmoothTransitionsAffectManualSkipKey
 import moe.koiverse.archivetune.constants.AutoLoadMoreKey
 import moe.koiverse.archivetune.constants.AutoDownloadOnLikeKey
 import moe.koiverse.archivetune.constants.AutoSkipNextOnErrorKey
@@ -287,6 +292,13 @@ class MusicService :
     private val normalizeFactor = MutableStateFlow(1f)
     var playerVolume = MutableStateFlow(1f)
 
+    
+    // Smooth playback settings
+    val smoothPlayPauseEnabled = MutableStateFlow(false)
+    val playPauseFadeDuration = MutableStateFlow(300)
+    val smoothTrackTransitionsEnabled = MutableStateFlow(false)
+    val trackTransitionDuration = MutableStateFlow(500)
+    val smoothTransitionsAffectManualSkip = MutableStateFlow(true)
     lateinit var sleepTimer: SleepTimer
 
     @Inject
@@ -551,6 +563,43 @@ class MusicService :
             .distinctUntilChanged()
             .collectLatest(scope) {
                 crossfadeProcessor.crossfadeDurationMs = it
+        
+        // Smooth play/pause observers
+        dataStore.data
+            .map { it[SmoothPlayPauseKey] ?: false }
+            .distinctUntilChanged()
+            .collectLatest(scope) {
+                smoothPlayPauseEnabled.value = it
+            }
+        
+        dataStore.data
+            .map { it[PlayPauseFadeDurationKey] ?: 300 }
+            .distinctUntilChanged()
+            .collectLatest(scope) {
+                playPauseFadeDuration.value = it
+            }
+        
+        // Smooth track transitions observers
+        dataStore.data
+            .map { it[SmoothTrackTransitionsKey] ?: false }
+            .distinctUntilChanged()
+            .collectLatest(scope) {
+                smoothTrackTransitionsEnabled.value = it
+            }
+        
+        dataStore.data
+            .map { it[TrackTransitionDurationKey] ?: 500 }
+            .distinctUntilChanged()
+            .collectLatest(scope) {
+                trackTransitionDuration.value = it
+            }
+        
+        dataStore.data
+            .map { it[SmoothTransitionsAffectManualSkipKey] ?: true }
+            .distinctUntilChanged()
+            .collectLatest(scope) {
+                smoothTransitionsAffectManualSkip.value = it
+            }
             }
 
         dataStore.data

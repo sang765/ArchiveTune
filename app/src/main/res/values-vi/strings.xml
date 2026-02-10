@@ -402,6 +402,16 @@
     <string name="auto_load_more_desc">Tự động thêm nhiều bài hát khi đến cuối hàng đợi. Tắt khi chế độ lặp đang hoạt động</string>
     <string name="skip_silence">Bỏ qua im lặng</string>
     <string name="audio_normalization">Chuẩn hóa âm thanh</string>
+    <string name="smooth_playback">Phát mượt mà</string>
+    <string name="smooth_play_pause">Phát/tạm dừng mượt mà</string>
+    <string name="smooth_play_pause_desc">Làm mờ âm thanh khi phát hoặc tạm dừng</string>
+    <string name="fade_duration">Thời gian làm mờ</string>
+    <string name="fade_duration_ms">%d ms</string>
+    <string name="smooth_track_transitions">Chuyển bài mượt mà</string>
+    <string name="smooth_track_transitions_desc">Chuyển đổi mượt giữa các bài hát</string>
+    <string name="transition_duration">Thời gian chuyển đổi</string>
+    <string name="affect_manual_skip">Áp dụng cho nút bỏ qua thủ công</string>
+    <string name="affect_manual_skip_desc">Áp dụng chuyển đổi mượt cho nút tiếp theo/trước và cử chỉ vuốt</string>
     <string name="auto_skip_next_on_error">Tự động chuyển sang bài tiếp theo khi có lỗi</string>
     <string name="auto_skip_next_on_error_desc">Đảm bảo trải nghiệm phát nhạc liên tục của bạn</string>
     <string name="stop_music_on_task_clear">Dừng nhạc khi xóa tác vụ</string>

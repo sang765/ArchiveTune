@@ -384,6 +384,16 @@
     <string name="auto_load_more_desc">可能であれば、キューの終わりに達したときに自動的に曲を追加</string>
     <string name="skip_silence">無音部分をスキップ</string>
     <string name="audio_normalization">音声正規化</string>
+    <string name="smooth_playback">スムーズ再生</string>
+    <string name="smooth_play_pause">スムーズ再生/一時停止</string>
+    <string name="smooth_play_pause_desc">再生または一時停止時にオーディオをフェード</string>
+    <string name="fade_duration">フェード時間</string>
+    <string name="fade_duration_ms">%d ミリ秒</string>
+    <string name="smooth_track_transitions">スムーズトラック切り替え</string>
+    <string name="smooth_track_transitions_desc">トラック間でクロスフェード</string>
+    <string name="transition_duration">切り替え時間</string>
+    <string name="affect_manual_skip">手動スキップボタンに適用</string>
+    <string name="affect_manual_skip_desc">次へ/前へボタンとスワイプジェスチャーにスムーズ切り替えを適用</string>
     <string name="auto_skip_next_on_error">エラー発生時は次の曲に自動スキップ</string>
     <string name="auto_skip_next_on_error_desc">連続再生エクスペリエンス</string>
     <string name="stop_music_on_task_clear">タスククリア時に音楽を停止</string>
