@@ -115,6 +115,8 @@ fun UpdateScreen(
     var isLoadingCommits by remember { mutableStateOf(true) }
     var latestVersion by remember { mutableStateOf<String?>(null) }
     var isExpanded by remember { mutableStateOf(true) }
+    var showWhatsNewDialog by remember { mutableStateOf(false) }
+    var releaseNotes by remember { mutableStateOf<String?>(null) }
     var hasNotificationPermission by remember {
         mutableStateOf(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -241,6 +243,32 @@ fun UpdateScreen(
                                     )
                                 }
                             }
+                        }
+                    }
+                }
+
+                // "What's New?" button (only show when new version is available)
+                latestVersion?.let { latest ->
+                    if (latest != BuildConfig.VERSION_NAME) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = {
+                                coroutineScope.launch {
+                                    Updater.getLatestReleaseNotes().onSuccess {
+                                        releaseNotes = it
+                                        showWhatsNewDialog = true
+                                    }
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.info),
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = stringResource(R.string.whats_new))
                         }
                     }
                 }

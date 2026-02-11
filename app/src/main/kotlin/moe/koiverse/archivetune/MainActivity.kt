@@ -29,6 +29,7 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -49,6 +50,7 @@ import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
@@ -108,6 +110,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalUriHandler
+import android.widget.Toast
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -536,16 +539,134 @@ class MainActivity : ComponentActivity() {
 
                         Spacer(Modifier.height(12.dp))
 
-                        androidx.compose.material3.Button(
-                            onClick = {
-                                try {
-                                    uriHandler.openUri(Updater.getLatestDownloadUrl())
-                                } catch (_: Exception) {}
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Text(text = stringResource(R.string.update_text))
+                        // Download state management
+                        val downloadState by moe.koiverse.archivetune.utils.UpdateDownloadManager.downloadStateFlow.collectAsState()
+                        
+                        // Storage permission launcher for Android < 13
+                        val storagePermissionLauncher = rememberLauncherForActivityResult(
+                            ActivityResultContracts.RequestPermission()
+                        ) { isGranted ->
+                            if (isGranted) {
+                                moe.koiverse.archivetune.utils.UpdateDownloadManager.startDownload(
+                                    this@MainActivity,
+                                    Updater.getLatestDownloadUrl()
+                                )
+                            } else {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    getString(R.string.storage_permission_required),
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
                         }
+
+                        // Progress animation
+                        val progress = when (val state = downloadState) {
+                            is moe.koiverse.archivetune.utils.DownloadState.Downloading -> state.progress / 100f
+                            else -> 0f
+                        }
+                        val animatedProgress by animateFloatAsState(
+                            targetValue = progress,
+                            label = "downloadProgress"
+                        )
+
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            androidx.compose.material3.Button(
+                                onClick = {
+                                    when (downloadState) {
+                                        is moe.koiverse.archivetune.utils.DownloadState.Idle -> {
+                                            // Check and request storage permission for Android < 13
+                                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU &&
+                                                ContextCompat.checkSelfPermission(
+                                                    this@MainActivity,
+                                                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                                                ) != PackageManager.PERMISSION_GRANTED
+                                            ) {
+                                                storagePermissionLauncher.launch(
+                                                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                                                )
+                                            } else {
+                                                moe.koiverse.archivetune.utils.UpdateDownloadManager.startDownload(
+                                                    this@MainActivity,
+                                                    Updater.getLatestDownloadUrl()
+                                                )
+                                            }
+                                        }
+                                        is moe.koiverse.archivetune.utils.DownloadState.Downloading -> {
+                                            moe.koiverse.archivetune.utils.UpdateDownloadManager.cancelDownload()
+                                        }
+                                        is moe.koiverse.archivetune.utils.DownloadState.Completed -> {
+                                            // Installation is handled automatically by UpdateDownloadManager
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                getString(R.string.install_update),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                        is moe.koiverse.archivetune.utils.DownloadState.Failed -> {
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                getString(R.string.download_failed),
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            moe.koiverse.archivetune.utils.UpdateDownloadManager.cleanup(this@MainActivity)
+                                        }
+                                        else -> {}
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                when (val state = downloadState) {
+                                    is moe.koiverse.archivetune.utils.DownloadState.Downloading -> {
+                                        val downloaded = moe.koiverse.archivetune.utils.UpdateDownloadManager.formatBytes(state.bytesDownloaded)
+                                        val total = moe.koiverse.archivetune.utils.UpdateDownloadManager.formatBytes(state.totalBytes)
+                                        Text(
+                                            text = stringResource(
+                                                R.string.downloading_update,
+                                                downloaded,
+                                                total,
+                                                state.progress,
+                                                state.speed
+                                            )
+                                        )
+                                    }
+                                    is moe.koiverse.archivetune.utils.DownloadState.Completed -> {
+                                        Text(text = stringResource(R.string.install_update))
+                                    }
+                                    is moe.koiverse.archivetune.utils.DownloadState.Failed -> {
+                                        Text(text = stringResource(R.string.download_failed))
+                                    }
+                                    is moe.koiverse.archivetune.utils.DownloadState.Cancelled -> {
+                                        Text(text = stringResource(R.string.update_text))
+                                    }
+                                    else -> {
+                                        Text(text = stringResource(R.string.update_text))
+                                    }
+                                }
+                            }
+
+                            // Animated progress overlay
+                            if (downloadState is moe.koiverse.archivetune.utils.DownloadState.Downloading) {
+                                Box(
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .background(
+                                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                            shape = androidx.compose.foundation.shape.RoundedCornerShape(50)
+                                        )
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(animatedProgress)
+                                        .height(48.dp)
+                                        .background(
+                                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                            shape = androidx.compose.foundation.shape.RoundedCornerShape(50)
+                                        )
+                                )
+                            }
+                        }
+
                     }
 
                     // fetch release notes and show sheet when a new version is detected
