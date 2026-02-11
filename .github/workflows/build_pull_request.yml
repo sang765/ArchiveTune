@@ -224,17 +224,17 @@ jobs:
             
             **Current setup:**
             - ✅ Code checkout completed
-            - ⏳ Setting up Java JDK 21
+            - ⏳ Setting up Java JDK 17
             - ⏳ Setting up Gradle build system
             - ⏳ Generating Android debug keystore
             
             ---
             *Current step:* Configuring Java and Gradle...
             
-      - name: Set up JDK 21
+      - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
-          java-version: 21
+          java-version: 17
           distribution: "temurin"
           
       - name: Set Up Gradle
@@ -263,7 +263,7 @@ jobs:
             **Workflow:** ⏳ [Build Pull Request](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
             
             ✅ Environment set up:
-            - ✅ Java JDK 21
+            - ✅ Java JDK 17
             - ✅ Gradle configured
             - ✅ Build permissions set
             
@@ -600,4 +600,3 @@ jobs:
           echo "❌ Build failed. Marking workflow as failed."
           echo "Check the comment above for detailed error logs."
           exit 1
-          
