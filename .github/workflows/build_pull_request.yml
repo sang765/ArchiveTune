@@ -225,17 +225,26 @@ jobs:
             **Current setup:**
             - ✅ Code checkout completed
             - ⏳ Setting up Java JDK 17
+            - ⏳ Setting up Android SDK
             - ⏳ Setting up Gradle build system
             - ⏳ Generating Android debug keystore
             
             ---
-            *Current step:* Configuring Java and Gradle...
+            *Current step:* Configuring Java, Android SDK, and Gradle...
             
       - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
           java-version: 17
           distribution: "temurin"
+          
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: 36
+          build-tools: 35.0.0
+          ndk-version: 26.1.10909125
+          cmake-version: 3.22.1
           
       - name: Set Up Gradle
         uses: gradle/actions/setup-gradle@v5
