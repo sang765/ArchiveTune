@@ -224,7 +224,7 @@ jobs:
             
             **Current setup:**
             - ✅ Code checkout completed
-            - ⏳ Setting up Java JDK 17
+            - ⏳ Setting up Java JDK 21
             - ⏳ Setting up Android SDK
             - ⏳ Setting up Gradle build system
             - ⏳ Generating Android debug keystore
@@ -232,10 +232,10 @@ jobs:
             ---
             *Current step:* Configuring Java, Android SDK, and Gradle...
             
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v5
         with:
-          java-version: 17
+          java-version: 21
           distribution: "temurin"
           
       - name: Set up Android SDK
@@ -272,7 +272,7 @@ jobs:
             **Workflow:** ⏳ [Build Pull Request](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
             
             ✅ Environment set up:
-            - ✅ Java JDK 17
+            - ✅ Java JDK 21
             - ✅ Gradle configured
             - ✅ Build permissions set
             
