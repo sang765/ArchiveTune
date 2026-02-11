@@ -81,6 +81,9 @@ import moe.koiverse.archivetune.constants.AudioNormalizationKey
 import moe.koiverse.archivetune.constants.AudioOffload
 import moe.koiverse.archivetune.constants.AudioCrossfadeDurationKey
 import moe.koiverse.archivetune.constants.AudioQualityKey
+import moe.koiverse.archivetune.constants.SmoothTrackTransitionsKey
+import moe.koiverse.archivetune.constants.TrackTransitionFadeDurationKey
+import moe.koiverse.archivetune.constants.ApplyTransitionToManualSkipKey
 import moe.koiverse.archivetune.constants.AutoLoadMoreKey
 import moe.koiverse.archivetune.constants.AutoDownloadOnLikeKey
 import moe.koiverse.archivetune.constants.AutoSkipNextOnErrorKey
@@ -568,6 +571,21 @@ class MusicService :
             .distinctUntilChanged()
             .collectLatest(scope) {
                 crossfadeProcessor.crossfadeDurationMs = it
+            }
+
+        // Update crossfade duration for smooth track transitions
+        dataStore.data
+            .map { prefs ->
+                val smoothEnabled = prefs[SmoothTrackTransitionsKey] ?: false
+                val duration = prefs[TrackTransitionFadeDurationKey] ?: 500
+                if (smoothEnabled) duration else 0
+            }
+            .distinctUntilChanged()
+            .collectLatest(scope) {
+                // This will be used for track transitions
+                if (it > 0) {
+                    crossfadeProcessor.crossfadeDurationMs = it
+                }
             }
 
         dataStore.data

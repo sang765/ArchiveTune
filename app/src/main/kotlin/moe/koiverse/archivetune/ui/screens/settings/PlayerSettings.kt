@@ -57,6 +57,11 @@ import moe.koiverse.archivetune.constants.HistoryDuration
 import moe.koiverse.archivetune.constants.PlayerStreamClient
 import moe.koiverse.archivetune.constants.PlayerStreamClientKey
 import moe.koiverse.archivetune.constants.SeekExtraSeconds
+import moe.koiverse.archivetune.constants.SmoothPlayPauseKey
+import moe.koiverse.archivetune.constants.PlayPauseFadeDurationKey
+import moe.koiverse.archivetune.constants.SmoothTrackTransitionsKey
+import moe.koiverse.archivetune.constants.TrackTransitionFadeDurationKey
+import moe.koiverse.archivetune.constants.ApplyTransitionToManualSkipKey
 import moe.koiverse.archivetune.ui.component.ArtistSeparatorsDialog
 import moe.koiverse.archivetune.ui.component.TagsManagementDialog
 import moe.koiverse.archivetune.ui.component.EnumListPreference
@@ -65,6 +70,7 @@ import moe.koiverse.archivetune.ui.component.ListDialog
 import moe.koiverse.archivetune.ui.component.PreferenceEntry
 import moe.koiverse.archivetune.ui.component.PreferenceGroupTitle
 import moe.koiverse.archivetune.ui.component.SliderPreference
+import moe.koiverse.archivetune.ui.component.DurationSliderPreference
 import moe.koiverse.archivetune.ui.component.SwitchPreference
 import moe.koiverse.archivetune.ui.utils.backToMain
 import moe.koiverse.archivetune.utils.rememberEnumPreference
@@ -103,6 +109,27 @@ fun PlayerSettings(
     )
     val (audioNormalization, onAudioNormalizationChange) = rememberPreference(
         AudioNormalizationKey,
+        defaultValue = true
+    )
+
+    val (smoothPlayPause, onSmoothPlayPauseChange) = rememberPreference(
+        SmoothPlayPauseKey,
+        defaultValue = false
+    )
+    val (playPauseFadeDuration, onPlayPauseFadeDurationChange) = rememberPreference(
+        PlayPauseFadeDurationKey,
+        defaultValue = 300
+    )
+    val (smoothTrackTransitions, onSmoothTrackTransitionsChange) = rememberPreference(
+        SmoothTrackTransitionsKey,
+        defaultValue = false
+    )
+    val (trackTransitionFadeDuration, onTrackTransitionFadeDurationChange) = rememberPreference(
+        TrackTransitionFadeDurationKey,
+        defaultValue = 500
+    )
+    val (applyTransitionToManualSkip, onApplyTransitionToManualSkipChange) = rememberPreference(
+        ApplyTransitionToManualSkipKey,
         defaultValue = true
     )
 
@@ -288,6 +315,58 @@ fun PlayerSettings(
             checked = seekExtraSeconds,
             onCheckedChange = onSeekExtraSeconds
         )
+
+        PreferenceGroupTitle(
+            title = stringResource(R.string.player_and_audio) + " - Playback Transitions"
+        )
+
+        SwitchPreference(
+            title = { Text(stringResource(R.string.smooth_play_pause)) },
+            description = stringResource(R.string.smooth_play_pause_desc),
+            icon = { Icon(painterResource(R.drawable.play), null) },
+            checked = smoothPlayPause,
+            onCheckedChange = onSmoothPlayPauseChange
+        )
+
+        if (smoothPlayPause) {
+            DurationSliderPreference(
+                title = stringResource(R.string.play_pause_fade_duration),
+                icon = { Icon(painterResource(R.drawable.timer), null) },
+                value = playPauseFadeDuration,
+                onValueChange = onPlayPauseFadeDurationChange,
+                valueRange = 100..1000,
+                unit = stringResource(R.string.milliseconds),
+                defaultValue = 300
+            )
+        }
+
+        SwitchPreference(
+            title = { Text(stringResource(R.string.smooth_track_transitions)) },
+            description = stringResource(R.string.smooth_track_transitions_desc),
+            icon = { Icon(painterResource(R.drawable.skip_next), null) },
+            checked = smoothTrackTransitions,
+            onCheckedChange = onSmoothTrackTransitionsChange
+        )
+
+        if (smoothTrackTransitions) {
+            DurationSliderPreference(
+                title = stringResource(R.string.track_transition_fade_duration),
+                icon = { Icon(painterResource(R.drawable.timer), null) },
+                value = trackTransitionFadeDuration,
+                onValueChange = onTrackTransitionFadeDurationChange,
+                valueRange = 100..2000,
+                unit = stringResource(R.string.milliseconds),
+                defaultValue = 500
+            )
+
+            SwitchPreference(
+                title = { Text(stringResource(R.string.apply_to_manual_skip)) },
+                description = stringResource(R.string.apply_to_manual_skip_desc),
+                icon = { Icon(painterResource(R.drawable.skip_next), null) },
+                checked = applyTransitionToManualSkip,
+                onCheckedChange = onApplyTransitionToManualSkipChange
+            )
+        }
 
         PreferenceGroupTitle(
             title = stringResource(R.string.queue)

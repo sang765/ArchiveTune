@@ -342,6 +342,84 @@ fun SliderPreference(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DurationSliderPreference(
+    modifier: Modifier = Modifier,
+    title: String,
+    icon: (@Composable () -> Unit)? = null,
+    value: Int,
+    onValueChange: (Int) -> Unit,
+    valueRange: IntRange,
+    unit: String,
+    defaultValue: Int = 300,
+    isEnabled: Boolean = true,
+) {
+    var showDialog by remember {
+        mutableStateOf(false)
+    }
+
+    var sliderValue by remember(value) {
+        mutableStateOf(value)
+    }
+
+    if (showDialog) {
+        ActionPromptDialog(
+            titleBar = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = title,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
+                        style = MaterialTheme.typography.headlineSmall,
+                    )
+                }
+            },
+            onDismiss = { showDialog = false },
+            onConfirm = {
+                showDialog = false
+                onValueChange.invoke(sliderValue)
+            },
+            onCancel = {
+                sliderValue = value
+                showDialog = false
+            },
+            onReset = {
+                sliderValue = defaultValue
+            },
+            content = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "$sliderValue $unit",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+
+                    Slider(
+                        value = sliderValue.toFloat(),
+                        onValueChange = { sliderValue = it.toInt() },
+                        valueRange = valueRange.first.toFloat()..valueRange.last.toFloat(),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        )
+    }
+
+    PreferenceEntry(
+        modifier = modifier,
+        title = { Text(title) },
+        description = "$value $unit",
+        icon = icon,
+        onClick = { showDialog = true },
+        isEnabled = isEnabled,
+    )
+}
+
 @Composable
 fun PreferenceGroupTitle(
     title: String,

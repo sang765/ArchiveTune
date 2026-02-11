@@ -8,6 +8,11 @@
 
 package moe.koiverse.archivetune.extensions
 
+import android.animation.ValueAnimator
+import android.content.Context
+import android.view.animation.LinearInterpolator
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.core.DataStore
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -15,14 +20,71 @@ import androidx.media3.common.Player.REPEAT_MODE_ALL
 import androidx.media3.common.Player.REPEAT_MODE_OFF
 import androidx.media3.common.Player.REPEAT_MODE_ONE
 import androidx.media3.common.Timeline
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import moe.koiverse.archivetune.constants.PlayPauseFadeDurationKey
+import moe.koiverse.archivetune.constants.SmoothPlayPauseKey
 import moe.koiverse.archivetune.models.MediaMetadata
 import java.util.ArrayDeque
 
-fun Player.togglePlayPause() {
+private var fadeJob: Job? = null
+
+fun Player.togglePlayPause(fadeDurationMs: Int = 0) {
     if (!playWhenReady && playbackState == Player.STATE_IDLE) {
         prepare()
     }
-    playWhenReady = !playWhenReady
+    
+    if (fadeDurationMs > 0) {
+        fadeJob?.cancel()
+        val currentVolume = volume
+        val targetWhenReady = !playWhenReady
+        
+        if (targetWhenReady) {
+            // Fading in: Set playWhenReady first, then fade volume from 0 to target
+            playWhenReady = true
+            fadeJob = CoroutineScope(Dispatchers.Main).launch {
+                val steps = 20
+                val stepDuration = fadeDurationMs / steps
+                volume = 0f
+                for (i in 1..steps) {
+                    volume = currentVolume * (i.toFloat() / steps)
+                    delay(stepDuration.toLong())
+                }
+                volume = currentVolume
+            }
+        } else {
+            // Fading out: Fade volume to 0, then set playWhenReady
+            fadeJob = CoroutineScope(Dispatchers.Main).launch {
+                val steps = 20
+                val stepDuration = fadeDurationMs / steps
+                for (i in 1..steps) {
+                    volume = currentVolume * (1f - i.toFloat() / steps)
+                    delay(stepDuration.toLong())
+                }
+                playWhenReady = false
+                volume = currentVolume
+            }
+        }
+    } else {
+        playWhenReady = !playWhenReady
+    }
+}
+
+fun Player.togglePlayPauseSmooth(context: Context, dataStore: DataStore<Preferences>) {
+    CoroutineScope(Dispatchers.Main).launch {
+        val preferences = dataStore.data.first()
+        val smoothEnabled = preferences[SmoothPlayPauseKey] ?: false
+        val fadeDuration = if (smoothEnabled) {
+            preferences[PlayPauseFadeDurationKey] ?: 300
+        } else {
+            0
+        }
+        togglePlayPause(fadeDuration)
+    }
 }
 
 fun Player.toggleRepeatMode() {
