@@ -231,7 +231,7 @@ dependencies {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
+        jvmTarget.set(JvmTarget.JVM_21)
         freeCompilerArgs.add("-Xannotation-default-target=param-property")
         freeCompilerArgs.addAll(
             "-opt-in=kotlin.RequiresOptIn",
