@@ -663,7 +663,6 @@ ArchiveTune sẽ chỉ trích xuất token của bạn, và mọi thứ khác đ
     <string name="approve">Chấp nhận</string>
     <string name="change_playlist_cover">Thay đổi ảnh bìa danh sách phát</string>
     <string name="connecting">Đang kết nối…</string>
-    <string name="copy_link">Sao chép liên kết</string>
     <string name="deny">Từ chối</string>
     <string name="disabled">Đã tắt</string>
     <string name="enabled">Đã bật</string>
