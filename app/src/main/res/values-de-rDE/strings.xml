@@ -550,4 +550,7 @@
     <string name="new_version_available">Neue Version verfügbar</string>
     <string name="translation_models">Übersetzungsmodelle</string>
     <string name="clear_translation_models">Klare Übersetzungsmodelle</string>
+    <string name="change_playlist_cover">Playlist-Cover ändern</string>
+    <string name="remove_playlist_cover">Cover entfernen</string>
+    <string name="tempo">Geschwindigkeit</string>
 </resources>
