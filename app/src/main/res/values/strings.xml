@@ -547,7 +547,6 @@ ArchiveTune will only extract your token, and everything else is stored locally.
     <string name="download_failed">Download failed</string>
     <string name="storage_permission_required">Storage permission required to download updates</string>
     <string name="new_version_available_menu">New version available</string>
-    <string name="downloading">Downloading</string>
     <!-- Translate UI strings -->
     <string name="translate">Translate</string>
     <string name="language_label">Language</string>

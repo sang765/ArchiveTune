@@ -492,7 +492,6 @@
     <string name="download_failed">ダウンロード失敗</string>
     <string name="storage_permission_required">更新をダウンロードするにはストレージ権限が必要です</string>
     <string name="new_version_available_menu">新しいバージョンが利用可能</string>
-    <string name="downloading">ダウンロード中</string>
     <!-- Translate UI strings -->
     <string name="translate">翻訳</string>
     <string name="language_label">言語</string>

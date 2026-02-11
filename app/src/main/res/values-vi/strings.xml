@@ -538,7 +538,6 @@ ArchiveTune sẽ chỉ trích xuất token của bạn, và mọi thứ khác đ
     <string name="download_failed">Tải xuống thất bại</string>
     <string name="storage_permission_required">Cần quyền truy cập bộ nhớ để tải xuống bản cập nhật</string>
     <string name="new_version_available_menu">Phiên bản mới có sẵn</string>
-    <string name="downloading">Đang tải xuống</string>
     <!-- Translate UI strings -->
     <string name="translate">Dịch</string>
     <string name="language_label">Ngôn ngữ</string>
