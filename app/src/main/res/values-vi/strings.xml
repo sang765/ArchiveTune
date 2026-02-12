@@ -605,7 +605,6 @@ ArchiveTune sẽ chỉ trích xuất token của bạn, và mọi thứ khác đ
     <string name="update_notification_title">Cập nhật Có sẵn</string>
     <string name="update_notification_text">ArchiveTune %s hiện đã có sẵn</string>
     <string name="download">Tải xuống</string>
-
     <string name="permissions_title">Cho phép ArchiveTune hoạt động tốt nhất</string>
     <string name="permissions_subtitle">Chúng tôi sử dụng một số quyền để phát và quản lý nhạc của bạn một cách đáng tin cậy. Bạn có thể thay đổi những quyền này bất cứ lúc nào trong cài đặt hệ thống.</string>
     <string name="permission_storage_title">Truy cập lưu trữ</string>
@@ -617,7 +616,6 @@ ArchiveTune sẽ chỉ trích xuất token của bạn, và mọi thứ khác đ
     <string name="permission_status_required">Vui lòng cho phép tất cả quyền cần thiết để tiếp tục.</string>
     <string name="next">Tiếp theo</string>
     <string name="allow">Cho phép</string>
-
     <string name="tempo">Nhịp độ</string>
     <string name="pitch">Cao độ</string>
     <string name="pitch_mode_semitones_short">st</string>
@@ -649,4 +647,6 @@ ArchiveTune sẽ chỉ trích xuất token của bạn, và mọi thứ khác đ
     <string name="playback_state_unknown">KHÔNG XÁC ĐỊNH</string>
     <string name="share_logs">Chia sẻ nhật ký</string>
     <string name="next_song">Bài hát tiếp theo</string>
+    <string name="change_playlist_cover">Thay đổi cover playlist</string>
+    <string name="remove_playlist_cover">Loại bỏ cover</string>
 </resources>
