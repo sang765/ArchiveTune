@@ -2358,11 +2358,47 @@ class MusicService :
 
     scrobbleManager?.onSongStop()
 
+    // Handle crossfade for different transition types based on user preferences
+    // Manual transitions (SEEK) respect the ApplyTransitionToManualSkipKey preference
+    // Automatic transitions (AUTO) always use the configured crossfade duration
+    // Repeat transitions (REPEAT) work with both REPEAT_MODE_ONE and REPEAT_MODE_ALL
+    val applyToManualSkip = dataStore.get(ApplyTransitionToManualSkipKey, true)
+    val smoothTransitionsEnabled = dataStore.get(SmoothTrackTransitionsKey, false)
+    
+    // For manual skips (next/previous buttons, swipe gestures), check if smooth transitions should apply
+    if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK) {
+        if (!applyToManualSkip || !smoothTransitionsEnabled) {
+            // Temporarily disable crossfade for this manual skip
+            // The crossfade processor will be re-enabled by the preference flow collectors
+            // This ensures instant transitions when the user has disabled smooth manual skips
+            val previousDuration = crossfadeProcessor.crossfadeDurationMs
+            crossfadeProcessor.crossfadeDurationMs = 0
+            
+            // Restore crossfade duration after a short delay to allow the transition to complete
+            scope.launch {
+                kotlinx.coroutines.delay(100)
+                // Re-read preferences to restore the correct crossfade duration
+                val duration = dataStore.get(TrackTransitionFadeDurationKey, 500)
+                if (smoothTransitionsEnabled) {
+                    crossfadeProcessor.crossfadeDurationMs = duration
+                }
+            }
+        }
+    }
+    
+    // For REPEAT_MODE_ONE: The crossfade processor handles fade-out at the end of the track
+    // and the track restarts smoothly. No special handling needed as the processor
+    // automatically applies fade-out when queueEndOfStream() is called.
+    
+    // For REPEAT_MODE_ALL: When the queue wraps around from last to first item,
+    // the transition is treated as AUTO, so crossfade applies normally.
+
     // Clear automix when user manually seeks to a different song
     // This ensures recommendations are refreshed based on the new context
     if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK && dataStore.get(AutoLoadMoreKey, true)) {
         clearAutomix()
     }
+
 
     // Auto-load more from queue if available
     if (!suppressAutoPlayback &&
