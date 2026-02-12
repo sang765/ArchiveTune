@@ -60,6 +60,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -96,6 +98,9 @@ import moe.koiverse.archivetune.constants.PlayerDesignStyle
 import moe.koiverse.archivetune.constants.PlayerHorizontalPadding
 import moe.koiverse.archivetune.constants.SliderStyle
 import moe.koiverse.archivetune.extensions.togglePlayPause
+import moe.koiverse.archivetune.extensions.togglePlayPauseSmooth
+import moe.koiverse.archivetune.utils.dataStore
+import kotlinx.coroutines.launch
 import moe.koiverse.archivetune.extensions.toggleRepeatMode
 import moe.koiverse.archivetune.models.MediaMetadata
 import moe.koiverse.archivetune.playback.PlayerConnection
@@ -630,6 +635,8 @@ fun PlayerPlaybackControls(
     currentSongLiked: Boolean
 ) {
     val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsState()
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     when (playerDesignStyle) {
         PlayerDesignStyle.V2 -> {
@@ -674,7 +681,7 @@ fun PlayerPlaybackControls(
                                 playerConnection.player.seekTo(0, 0)
                                 playerConnection.player.playWhenReady = true
                             } else {
-                                playerConnection.player.togglePlayPause()
+                                coroutineScope.launch { playerConnection.player.togglePlayPauseSmooth(context, context.dataStore) }
                             }
                         },
                         colors = IconButtonDefaults.filledIconButtonColors(
@@ -788,7 +795,7 @@ fun PlayerPlaybackControls(
                                     playerConnection.player.seekTo(0, 0)
                                     playerConnection.player.playWhenReady = true
                                 } else {
-                                    playerConnection.player.togglePlayPause()
+                                    coroutineScope.launch { playerConnection.player.togglePlayPauseSmooth(context, context.dataStore) }
                                 }
                             },
                         contentAlignment = Alignment.Center
@@ -950,7 +957,7 @@ fun PlayerPlaybackControls(
                                 playerConnection.player.seekTo(0, 0)
                                 playerConnection.player.playWhenReady = true
                             } else {
-                                playerConnection.player.togglePlayPause()
+                                coroutineScope.launch { playerConnection.player.togglePlayPauseSmooth(context, context.dataStore) }
                             }
                         },
                         shape = RoundedCornerShape(28.dp),
@@ -1099,7 +1106,7 @@ fun PlayerPlaybackControls(
                                 playerConnection.player.seekTo(0, 0)
                                 playerConnection.player.playWhenReady = true
                             } else {
-                                playerConnection.player.togglePlayPause()
+                                coroutineScope.launch { playerConnection.player.togglePlayPauseSmooth(context, context.dataStore) }
                             }
                         },
                 ) {

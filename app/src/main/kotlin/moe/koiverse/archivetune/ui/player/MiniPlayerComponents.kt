@@ -38,6 +38,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -74,6 +76,9 @@ import kotlinx.coroutines.launch
 import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.constants.MiniPlayerHeight
 import moe.koiverse.archivetune.extensions.togglePlayPause
+import moe.koiverse.archivetune.extensions.togglePlayPauseSmooth
+import moe.koiverse.archivetune.utils.dataStore
+import kotlinx.coroutines.launch
 
 import moe.koiverse.archivetune.models.MediaMetadata
 import moe.koiverse.archivetune.playback.PlayerConnection
@@ -236,6 +241,8 @@ fun MiniPlayerPlayPauseButton(
     playerConnection: PlayerConnection
 ) {
     Box(
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
         contentAlignment = Alignment.Center,
         modifier = Modifier.size(48.dp)
     ) {
@@ -266,7 +273,7 @@ fun MiniPlayerPlayPauseButton(
                         playerConnection.player.seekTo(0, 0)
                         playerConnection.player.playWhenReady = true
                     } else {
-                        playerConnection.player.togglePlayPause()
+                        coroutineScope.launch { playerConnection.player.togglePlayPauseSmooth(context, context.dataStore) }
                     }
                 }
         ) {

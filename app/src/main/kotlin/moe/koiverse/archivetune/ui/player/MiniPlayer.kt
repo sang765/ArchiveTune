@@ -49,6 +49,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -87,6 +89,9 @@ import moe.koiverse.archivetune.constants.UseNewMiniPlayerDesignKey
 import moe.koiverse.archivetune.constants.CropThumbnailToSquareKey
 import moe.koiverse.archivetune.db.entities.ArtistEntity
 import moe.koiverse.archivetune.extensions.togglePlayPause
+import moe.koiverse.archivetune.extensions.togglePlayPauseSmooth
+import moe.koiverse.archivetune.utils.dataStore
+import kotlinx.coroutines.launch
 import moe.koiverse.archivetune.models.MediaMetadata
 import moe.koiverse.archivetune.utils.rememberPreference
 import kotlinx.coroutines.launch
@@ -175,6 +180,8 @@ private fun LegacyMiniPlayer(
     val playbackState by playerConnection.playbackState.collectAsState()
     val error by playerConnection.error.collectAsState()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsState()
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val canSkipNext by playerConnection.canSkipNext.collectAsState()
     val canSkipPrevious by playerConnection.canSkipPrevious.collectAsState()
     
@@ -317,7 +324,7 @@ private fun LegacyMiniPlayer(
                         playerConnection.player.seekTo(0, 0)
                         playerConnection.player.playWhenReady = true
                     } else {
-                        playerConnection.player.togglePlayPause()
+                        coroutineScope.launch { playerConnection.player.togglePlayPauseSmooth(context, context.dataStore) }
                     }
                 },
             ) {

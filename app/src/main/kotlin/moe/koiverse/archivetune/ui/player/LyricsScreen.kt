@@ -108,6 +108,7 @@ import moe.koiverse.archivetune.constants.ThumbnailCornerRadius
 import moe.koiverse.archivetune.db.entities.LyricsEntity
 import moe.koiverse.archivetune.extensions.togglePlayPause
 import moe.koiverse.archivetune.extensions.toggleRepeatMode
+import moe.koiverse.archivetune.extensions.togglePlayPauseSmooth
 import moe.koiverse.archivetune.lyrics.LyricsHelper
 import moe.koiverse.archivetune.models.MediaMetadata
 import moe.koiverse.archivetune.ui.component.Lyrics
@@ -132,8 +133,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
 import kotlin.runCatching
 import moe.koiverse.archivetune.utils.makeTimeString
+import moe.koiverse.archivetune.utils.dataStore
 import androidx.compose.ui.text.style.TextAlign
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -572,7 +575,7 @@ fun LyricsScreen(
 
                                 // Play/Pause button
                                 IconButton(
-                                    onClick = { player.togglePlayPause() },
+                                    onClick = { coroutineScope.launch { player.togglePlayPauseSmooth(context, context.dataStore) } },
                                     modifier = Modifier.size(56.dp)
                                 ) {
                                     if (isLoading) {
@@ -906,7 +909,7 @@ fun LyricsScreen(
 
                             // Play/Pause button (largest)
                             IconButton(
-                                onClick = { player.togglePlayPause() },
+                                onClick = { coroutineScope.launch { player.togglePlayPauseSmooth(context, context.dataStore) } },
                                 modifier = Modifier.size(56.dp) // Slightly smaller but still prominent
                             ) {
                                 if (isLoading) {
