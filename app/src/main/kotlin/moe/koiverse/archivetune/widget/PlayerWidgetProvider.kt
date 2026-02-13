@@ -13,11 +13,10 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
-import android.os.Build
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.widget.RemoteViews
 import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
@@ -30,16 +29,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.playback.MusicService
+import java.net.HttpURLConnection
+import java.net.URL
 
 /**
  * AppWidgetProvider for the ArchiveTune music player widget.
- * Handles widget lifecycle and user interactions.
+ * Handles widget lifecycle. Playback controls are handled by PlayerWidgetControlReceiver.
  */
 class PlayerWidgetProvider : AppWidgetProvider() {
-
-    private var controllerFuture: ListenableFuture<MediaController>? = null
-    private var mediaController: MediaController? = null
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     companion object {
         // Intent actions
@@ -83,19 +80,19 @@ class PlayerWidgetProvider : AppWidgetProvider() {
         // Create RemoteViews for the main widget
         val views = RemoteViews(context.packageName, R.layout.widget_player)
 
-        // Set up click intents for controls
+        // Set up click intents for controls - use internal receiver for playback actions
         setupControlButtons(context, views)
 
         // Update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views)
 
         // Also update with current playback state
-        updateWidgetWithPlaybackState(context, appWidgetManager, appWidgetIds)
+        updateWidgetWithPlaybackState(context, appWidgetManager, intArrayOf(appWidgetId))
     }
 
     private fun setupControlButtons(context: Context, views: RemoteViews) {
-        // Play/Pause button
-        val playPauseIntent = Intent(context, PlayerWidgetProvider::class.java).apply {
+        // Play/Pause button - use internal control receiver
+        val playPauseIntent = Intent(context, PlayerWidgetControlReceiver::class.java).apply {
             action = ACTION_PLAY_PAUSE
         }
         val playPausePendingIntent = PendingIntent.getBroadcast(
@@ -106,8 +103,8 @@ class PlayerWidgetProvider : AppWidgetProvider() {
         )
         views.setOnClickPendingIntent(R.id.widget_btn_play_pause, playPausePendingIntent)
 
-        // Next button
-        val nextIntent = Intent(context, PlayerWidgetProvider::class.java).apply {
+        // Next button - use internal control receiver
+        val nextIntent = Intent(context, PlayerWidgetControlReceiver::class.java).apply {
             action = ACTION_NEXT
         }
         val nextPendingIntent = PendingIntent.getBroadcast(
@@ -118,8 +115,8 @@ class PlayerWidgetProvider : AppWidgetProvider() {
         )
         views.setOnClickPendingIntent(R.id.widget_btn_next, nextPendingIntent)
 
-        // Previous button
-        val previousIntent = Intent(context, PlayerWidgetProvider::class.java).apply {
+        // Previous button - use internal control receiver
+        val previousIntent = Intent(context, PlayerWidgetControlReceiver::class.java).apply {
             action = ACTION_PREVIOUS
         }
         val previousPendingIntent = PendingIntent.getBroadcast(
@@ -138,7 +135,6 @@ class PlayerWidgetProvider : AppWidgetProvider() {
 
     override fun onDisabled(context: Context) {
         // Last widget instance removed
-        releaseMediaController()
         super.onDisabled(context)
     }
 
@@ -146,34 +142,7 @@ class PlayerWidgetProvider : AppWidgetProvider() {
         super.onReceive(context, intent)
 
         when (intent.action) {
-            ACTION_PLAY_PAUSE -> handlePlayPause(context)
-            ACTION_NEXT -> handleNext(context)
-            ACTION_PREVIOUS -> handlePrevious(context)
             ACTION_UPDATE -> handleUpdate(context)
-        }
-    }
-
-    private fun handlePlayPause(context: Context) {
-        connectToMediaController(context) { controller ->
-            controller?.let {
-                if (it.isPlaying) {
-                    it.pause()
-                } else {
-                    it.play()
-                }
-            }
-        }
-    }
-
-    private fun handleNext(context: Context) {
-        connectToMediaController(context) { controller ->
-            controller?.seekToNext()
-        }
-    }
-
-    private fun handlePrevious(context: Context) {
-        connectToMediaController(context) { controller ->
-            controller?.seekToPrevious()
         }
     }
 
@@ -183,20 +152,6 @@ class PlayerWidgetProvider : AppWidgetProvider() {
             ComponentName(context, PlayerWidgetProvider::class.java)
         )
         updateWidgetWithPlaybackState(context, appWidgetManager, appWidgetIds)
-    }
-
-    private fun connectToMediaController(context: Context, action: (MediaController?) -> Unit) {
-        val sessionToken = SessionToken(context, ComponentName(context, MusicService::class.java))
-        controllerFuture = MediaController.Builder(context, sessionToken).buildAsync()
-
-        controllerFuture?.addListener({
-            try {
-                mediaController = controllerFuture?.get()
-                action(mediaController)
-            } catch (e: Exception) {
-                action(null)
-            }
-        }, MoreExecutors.directExecutor())
     }
 
     private fun updateWidgetWithPlaybackState(
@@ -243,18 +198,11 @@ class PlayerWidgetProvider : AppWidgetProvider() {
                     ?: context.getString(R.string.unknown_artist)
                 views.setTextViewText(R.id.widget_artist_name, artist)
 
-                // Get artwork if available
+                // Get artwork - handle both content and remote URIs
                 currentMediaItem.mediaMetadata.artworkUri?.let { artworkUri ->
-                    try {
-                        val inputStream = context.contentResolver.openInputStream(artworkUri)
-                        inputStream?.use { stream ->
-                            val bitmap = android.graphics.BitmapFactory.decodeStream(stream)
-                            if (bitmap != null) {
-                                views.setImageViewBitmap(R.id.widget_album_art, bitmap)
-                            }
-                        }
-                    } catch (e: Exception) {
-                        // Keep default placeholder
+                    val bitmap = loadArtwork(context, artworkUri)
+                    if (bitmap != null) {
+                        views.setImageViewBitmap(R.id.widget_album_art, bitmap)
                     }
                 }
             } else {
@@ -299,17 +247,51 @@ class PlayerWidgetProvider : AppWidgetProvider() {
         }
     }
 
-    private fun releaseMediaController() {
-        mediaController?.let {
-            MediaController.releaseFuture(controllerFuture!!)
+    /**
+     * Load artwork from URI, supporting both content:// and http/https URIs
+     */
+    private fun loadArtwork(context: Context, artworkUri: Uri): Bitmap? {
+        return try {
+            when (artworkUri.scheme) {
+                "content" -> {
+                    context.contentResolver.openInputStream(artworkUri)?.use { stream ->
+                        BitmapFactory.decodeStream(stream)
+                    }
+                }
+                "http", "https" -> {
+                    // Fetch from network on background thread
+                    loadBitmapFromNetwork(artworkUri.toString())
+                }
+                "file" -> {
+                    BitmapFactory.decodeFile(artworkUri.path)
+                }
+                else -> null
+            }
+        } catch (e: Exception) {
+            null
         }
-        mediaController = null
-        controllerFuture = null
     }
 
-    override fun onDestroy() {
-        releaseMediaController()
-        scope.cancel()
-        super.onDestroy()
+    /**
+     * Load bitmap from network URL
+     */
+    private fun loadBitmapFromNetwork(urlString: String): Bitmap? {
+        return try {
+            val url = URL(urlString)
+            val connection = url.openConnection() as HttpURLConnection
+            connection.doInput = true
+            connection.connectTimeout = 5000
+            connection.readTimeout = 5000
+            connection.connect()
+            
+            val inputStream = connection.inputStream
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream.close()
+            connection.disconnect()
+            
+            bitmap
+        } catch (e: Exception) {
+            null
+        }
     }
 }

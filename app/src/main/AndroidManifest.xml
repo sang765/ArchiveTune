@@ -34,6 +34,11 @@
         android:supportsRtl="false"
         android:theme="@style/Theme.ArchiveTune"
         tools:targetApi="tiramisu">
+
+    <!-- Custom permission for widget actions -->
+    <permission
+        android:name="moe.koiverse.archivetune.permission.WIDGET_CONTROL"
+        android:protectionLevel="signature" />
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
@@ -176,20 +181,29 @@
             </intent-filter>
         </receiver>
 
-        <!-- Player Widget Provider -->
+        <!-- Player Widget Provider - handles APPWIDGET_UPDATE only (exported) -->
         <receiver
             android:name=".widget.PlayerWidgetProvider"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/player_widget_info" />
+        </receiver>
+
+        <!-- Internal widget control receiver (not exported, requires signature permission) -->
+        <receiver
+            android:name=".widget.PlayerWidgetControlReceiver"
+            android:exported="false"
+            android:permission="moe.koiverse.archivetune.permission.WIDGET_CONTROL">
+            <intent-filter>
                 <action android:name="moe.koiverse.archivetune.WIDGET_PLAY_PAUSE" />
                 <action android:name="moe.koiverse.archivetune.WIDGET_NEXT" />
                 <action android:name="moe.koiverse.archivetune.WIDGET_PREVIOUS" />
                 <action android:name="moe.koiverse.archivetune.WIDGET_UPDATE" />
             </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/player_widget_info" />
         </receiver>
 
         <!-- Widget Update Service -->

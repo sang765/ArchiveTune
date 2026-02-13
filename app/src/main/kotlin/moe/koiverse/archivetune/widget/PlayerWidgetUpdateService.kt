@@ -13,12 +13,9 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.IBinder
 import android.widget.RemoteViews
-import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.MediaSessionCompat
-import android.support.v4.media.session.PlaybackStateCompat
-import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
@@ -34,6 +31,8 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.playback.MusicService
+import java.net.HttpURLConnection
+import java.net.URL
 
 /**
  * Service for updating the player widget with current playback state.
@@ -41,7 +40,7 @@ import moe.koiverse.archivetune.playback.MusicService
  */
 class PlayerWidgetUpdateService : Service() {
 
-    private lateinit var controllerFuture: ListenableFuture<MediaController>
+    private var controllerFuture: ListenableFuture<MediaController>? = null
     private var mediaController: MediaController? = null
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var updateJob: Job? = null
@@ -94,9 +93,9 @@ class PlayerWidgetUpdateService : Service() {
         val sessionToken = SessionToken(this, ComponentName(this, MusicService::class.java))
         controllerFuture = MediaController.Builder(this, sessionToken).buildAsync()
 
-        controllerFuture.addListener({
+        controllerFuture?.addListener({
             try {
-                mediaController = controllerFuture.get()
+                mediaController = controllerFuture?.get()
                 mediaController?.addListener(playerListener)
                 startPeriodicUpdates()
             } catch (e: Exception) {
@@ -121,7 +120,7 @@ class PlayerWidgetUpdateService : Service() {
             }
         }
 
-        override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+        override fun onMediaItemTransition(mediaItem: androidx.media3.common.MediaItem?, reason: Int) {
             updateWidgetsNow()
         }
 
@@ -136,7 +135,7 @@ class PlayerWidgetUpdateService : Service() {
 
     private fun handlePlaybackStateChange(playbackState: Int) {
         when (playbackState) {
-            Player.STATE_READED, Player.STATE_BUFFERING -> {
+            Player.STATE_READY, Player.STATE_BUFFERING -> {
                 // Start or continue periodic updates
             }
             Player.STATE_IDLE, Player.STATE_ENDED -> {
@@ -192,17 +191,11 @@ class PlayerWidgetUpdateService : Service() {
                     ?: getString(R.string.unknown_artist)
                 views.setTextViewText(R.id.widget_artist_name, artist)
 
-                // Artwork
+                // Artwork - handle both content and remote URIs
                 currentMediaItem.mediaMetadata.artworkUri?.let { artworkUri ->
-                    try {
-                        contentResolver.openInputStream(artworkUri)?.use { stream ->
-                            val bitmap = BitmapFactory.decodeStream(stream)
-                            if (bitmap != null) {
-                                views.setImageViewBitmap(R.id.widget_album_art, bitmap)
-                            }
-                        }
-                    } catch (e: Exception) {
-                        // Keep default
+                    val bitmap = loadArtwork(artworkUri)
+                    if (bitmap != null) {
+                        views.setImageViewBitmap(R.id.widget_album_art, bitmap)
                     }
                 }
             } else {
@@ -226,6 +219,54 @@ class PlayerWidgetUpdateService : Service() {
         }
     }
 
+    /**
+     * Load artwork from URI, supporting both content:// and http/https URIs
+     */
+    private fun loadArtwork(artworkUri: Uri): Bitmap? {
+        return try {
+            when (artworkUri.scheme) {
+                "content" -> {
+                    contentResolver.openInputStream(artworkUri)?.use { stream ->
+                        BitmapFactory.decodeStream(stream)
+                    }
+                }
+                "http", "https" -> {
+                    // Fetch from network
+                    loadBitmapFromNetwork(artworkUri.toString())
+                }
+                "file" -> {
+                    BitmapFactory.decodeFile(artworkUri.path)
+                }
+                else -> null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Load bitmap from network URL
+     */
+    private fun loadBitmapFromNetwork(urlString: String): Bitmap? {
+        return try {
+            val url = URL(urlString)
+            val connection = url.openConnection() as HttpURLConnection
+            connection.doInput = true
+            connection.connectTimeout = 5000
+            connection.readTimeout = 5000
+            connection.connect()
+
+            val inputStream = connection.inputStream
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream.close()
+            connection.disconnect()
+
+            bitmap
+        } catch (e: Exception) {
+            null
+        }
+    }
+
     private fun updateWidgetsToDefaultState(
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
@@ -244,11 +285,13 @@ class PlayerWidgetUpdateService : Service() {
 
     override fun onDestroy() {
         mediaController?.removeListener(playerListener)
-        MediaController.releaseFuture(controllerFuture)
+        controllerFuture?.let {
+            MediaController.releaseFuture(it)
+        }
+        controllerFuture = null
+        mediaController = null
         stopPeriodicUpdates()
         scope.cancel()
         super.onDestroy()
     }
 }
-
-import android.widget.RemoteViews

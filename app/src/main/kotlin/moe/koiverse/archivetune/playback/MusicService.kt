@@ -2689,7 +2689,9 @@ class MusicService :
      */
     private fun notifyWidgetUpdate() {
         try {
-            val intent = Intent(PlayerWidgetProvider.ACTION_UPDATE)
+            val intent = Intent(this, PlayerWidgetProvider::class.java).apply {
+                action = PlayerWidgetProvider.ACTION_UPDATE
+            }
             sendBroadcast(intent)
         } catch (e: Exception) {
             // Ignore widget update errors
@@ -2741,14 +2743,14 @@ class MusicService :
                 currentQueue.nextPage().filterExplicit(dataStore.get(HideExplicitKey, false)).filterVideo(dataStore.get(HideVideoKey, false))
             if (player.playbackState != STATE_IDLE) {
                 player.addMediaItems(mediaItems.drop(1))
-
-    // Notify widget of track change
-    notifyWidgetUpdate()
             } else {
                 scope.launch { discordRpc?.stopActivity() }
             }
         }
     }
+    
+    // Notify widget of track change - always notify on media item transition
+    notifyWidgetUpdate()
     
     // Auto-play recommendations when approaching end of queue
     if (!suppressAutoPlayback &&
