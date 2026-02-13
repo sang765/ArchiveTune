@@ -434,6 +434,13 @@ class MusicService :
         }
 
         ensureStartedAsForeground()
+        
+        // Initialize widget update service
+        try {
+            moe.koiverse.archivetune.widget.WidgetUpdateService.initialize(this)
+        } catch (e: Exception) {
+            reportException(e)
+        }
 
         
         player =
@@ -3580,6 +3587,9 @@ class MusicService :
             DiscordPresenceManager.stop()
         } catch (_: Exception) {}
         try {
+        try {
+            moe.koiverse.archivetune.widget.WidgetUpdateService.release()
+        } catch (_: Exception) {}
             discordRpc?.closeRPC()
         } catch (_: Exception) {}
         discordRpc = null

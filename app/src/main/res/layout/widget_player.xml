@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:gravity="center_vertical">
+
+    <!-- Album Artwork -->
+    <ImageView
+        android:id="@+id/widget_album_art"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/album_art"
+        android:background="@drawable/widget_background" />
+
+    <!-- Track Info and Controls -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="12dp"
+        android:orientation="vertical">
+
+        <!-- Track Title -->
+        <TextView
+            android:id="@+id/widget_track_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/not_playing"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever" />
+
+        <!-- Artist Name -->
+        <TextView
+            android:id="@+id/widget_artist_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="12sp"
+            android:textColor="#B3FFFFFF"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:layout_marginTop="2dp" />
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:id="@+id/widget_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_marginTop="8dp"
+            android:max="100"
+            android:progress="0"
+            android:progressTint="#FFFFFF"
+            android:progressBackgroundTint="#33FFFFFF" />
+
+        <!-- Control Buttons -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <!-- Previous Button -->
+            <ImageButton
+                android:id="@+id/widget_btn_previous"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/skip_previous"
+                android:contentDescription="@string/previous"
+                android:tint="#FFFFFF" />
+
+            <!-- Play/Pause Button -->
+            <ImageButton
+                android:id="@+id/widget_btn_play_pause"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/play"
+                android:contentDescription="@string/play_pause"
+                android:tint="#FFFFFF" />
+
+            <!-- Next Button -->
+            <ImageButton
+                android:id="@+id/widget_btn_next"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/skip_next"
+                android:contentDescription="@string/next"
+                android:tint="#FFFFFF" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
+

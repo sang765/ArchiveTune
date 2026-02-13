@@ -174,7 +174,22 @@
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
             </intent-filter>
-        </receiver>        
+        </receiver>
+
+        <receiver
+            android:name=".widget.PlayerWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="moe.koiverse.archivetune.WIDGET_PLAY_PAUSE" />
+                <action android:name="moe.koiverse.archivetune.WIDGET_NEXT" />
+                <action android:name="moe.koiverse.archivetune.WIDGET_PREVIOUS" />
+                <action android:name="moe.koiverse.archivetune.WIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/player_widget_info" />
+        </receiver>
 
         <meta-data
             android:name="com.google.android.gms.car.application"
