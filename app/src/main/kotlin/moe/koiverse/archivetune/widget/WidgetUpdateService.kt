@@ -75,8 +75,10 @@ object WidgetUpdateService {
         val controller = mediaController ?: return
         val context = this.context ?: return
 
-        val title = controller.mediaMetadata.title?.toString()
-        val artist = controller.mediaMetadata.artist?.toString()
+        // Capture metadata on main thread before switching to IO
+        val metadata = controller.mediaMetadata
+        val title = metadata.title?.toString()
+        val artist = metadata.artist?.toString()
         val isPlaying = controller.isPlaying
         val progress = if (controller.duration > 0) {
             ((controller.currentPosition.toFloat() / controller.duration) * 100).toInt()
@@ -86,7 +88,7 @@ object WidgetUpdateService {
 
         // Load album art asynchronously
         scope.launch(Dispatchers.IO) {
-            val albumArt = loadAlbumArt(controller.mediaMetadata)
+            val albumArt = loadAlbumArt(metadata)
             launch(Dispatchers.Main) {
                 PlayerWidgetProvider.updateAllWidgets(
                     context,
