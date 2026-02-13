@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="8dp">
+
+    <!-- Album Artwork (smaller) -->
+    <ImageView
+        android:id="@+id/widget_album_art"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:contentDescription="@string/album_art"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_music_placeholder" />
+
+    <!-- Track Title Only -->
+    <TextView
+        android:id="@+id/widget_track_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:text="@string/no_music_playing"
+        android:textColor="@android:color/white"
+        android:textSize="13sp" />
+
+    <!-- Play/Pause and Next Controls -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <!-- Play/Pause Button -->
+        <ImageButton
+            android:id="@+id/widget_btn_play_pause"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/play"
+            android:padding="6dp"
+            android:src="@drawable/play" />
+
+        <!-- Next Button -->
+        <ImageButton
+            android:id="@+id/widget_btn_next"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/next"
+            android:padding="6dp"
+            android:src="@drawable/skip_next" />
+
+    </LinearLayout>
+
+</LinearLayout>

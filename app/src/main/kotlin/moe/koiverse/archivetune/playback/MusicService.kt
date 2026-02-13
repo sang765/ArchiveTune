@@ -28,6 +28,7 @@ import android.net.ConnectivityManager
 import android.os.Binder
 import android.widget.Toast
 import androidx.core.content.getSystemService
+import moe.koiverse.archivetune.widget.PlayerWidgetProvider
 import androidx.core.net.toUri
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -2683,6 +2684,18 @@ class MusicService :
         )
     }
 
+    /**
+     * Notify the widget to update with current playback state.
+     */
+    private fun notifyWidgetUpdate() {
+        try {
+            val intent = Intent(PlayerWidgetProvider.ACTION_UPDATE)
+            sendBroadcast(intent)
+        } catch (e: Exception) {
+            // Ignore widget update errors
+        }
+    }
+
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
     super.onMediaItemTransition(mediaItem, reason)
 
@@ -2728,6 +2741,9 @@ class MusicService :
                 currentQueue.nextPage().filterExplicit(dataStore.get(HideExplicitKey, false)).filterVideo(dataStore.get(HideVideoKey, false))
             if (player.playbackState != STATE_IDLE) {
                 player.addMediaItems(mediaItems.drop(1))
+
+    // Notify widget of track change
+    notifyWidgetUpdate()
             } else {
                 scope.launch { discordRpc?.stopActivity() }
             }
@@ -2814,6 +2830,9 @@ class MusicService :
     if (playbackState == Player.STATE_IDLE || playbackState == Player.STATE_ENDED) {
         scrobbleManager?.onSongStop()
     }
+
+    // Notify widget of playback state change
+    notifyWidgetUpdate()
     
     // Auto-start recommendations when playback ends
     if (!suppressAutoPlayback &&

@@ -139,6 +139,13 @@
     <string name="volume">Volume</string>
     <string name="file_size">File size</string>
     <string name="unknown">Unknown</string>
+    <string name="unknown_artist">Unknown Artist</string>
+    <string name="no_music_playing">No music playing</string>
+    <string name="album_art">Album artwork</string>
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
+    <string name="widget_name">ArchiveTune Player</string>
+    <string name="widget_description">Control music playback from your home screen</string>
     <string name="copied">Copied to clipboard</string>
     <string name="edit_lyrics">Edit lyrics</string>
     <string name="search_lyrics">Search lyrics</string>
