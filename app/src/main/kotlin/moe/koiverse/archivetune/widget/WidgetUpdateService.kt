@@ -28,6 +28,7 @@ import java.net.URL
 object WidgetUpdateService {
     private var mediaController: MediaController? = null
     private var controllerFuture: ListenableFuture<MediaController>? = null
+    private var context: Context? = null
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     
     private val playerListener = object : Player.Listener {
@@ -47,6 +48,7 @@ object WidgetUpdateService {
     fun initialize(context: Context) {
         if (mediaController != null) return
 
+        this.context = context.applicationContext
         val sessionToken = SessionToken(context, ComponentName(context, MusicService::class.java))
         controllerFuture = MediaController.Builder(context, sessionToken).buildAsync()
 
@@ -66,11 +68,12 @@ object WidgetUpdateService {
         mediaController?.release()
         mediaController = null
         controllerFuture = null
+        context = null
     }
 
     private fun updateWidget() {
         val controller = mediaController ?: return
-        val context = controller.applicationContext
+        val context = this.context ?: return
 
         val title = controller.mediaMetadata.title?.toString()
         val artist = controller.mediaMetadata.artist?.toString()
@@ -123,4 +126,3 @@ object WidgetUpdateService {
         }
     }
 }
-
