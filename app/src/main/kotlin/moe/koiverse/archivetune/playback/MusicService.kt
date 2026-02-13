@@ -3587,9 +3587,9 @@ class MusicService :
             DiscordPresenceManager.stop()
         } catch (_: Exception) {}
         try {
-        try {
             moe.koiverse.archivetune.widget.WidgetUpdateService.release()
         } catch (_: Exception) {}
+        try {
             discordRpc?.closeRPC()
         } catch (_: Exception) {}
         discordRpc = null
