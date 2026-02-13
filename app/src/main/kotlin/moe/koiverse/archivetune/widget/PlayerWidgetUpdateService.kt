@@ -29,6 +29,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.playback.MusicService
 import java.net.HttpURLConnection
@@ -161,61 +162,69 @@ class PlayerWidgetUpdateService : Service() {
     }
 
     private fun updateWidgetsNow() {
-        val appWidgetManager = AppWidgetManager.getInstance(this)
-        val appWidgetIds = appWidgetManager.getAppWidgetIds(
-            ComponentName(this, PlayerWidgetProvider::class.java)
-        )
+        scope.launch {
+            val appWidgetManager = AppWidgetManager.getInstance(this@PlayerWidgetUpdateService)
+            val appWidgetIds = appWidgetManager.getAppWidgetIds(
+                ComponentName(this@PlayerWidgetUpdateService, PlayerWidgetProvider::class.java)
+            )
 
-        if (appWidgetIds.isEmpty()) return
+            if (appWidgetIds.isEmpty()) return@launch
 
-        val controller = mediaController
-        if (controller == null) {
-            updateWidgetsToDefaultState(appWidgetManager, appWidgetIds)
-            return
-        }
+            val controller = mediaController
+            if (controller == null) {
+                updateWidgetsToDefaultState(appWidgetManager, appWidgetIds)
+                return@launch
+            }
 
-        val currentMediaItem = controller.currentMediaItem
+            val currentMediaItem = controller.currentMediaItem
 
-        for (appWidgetId in appWidgetIds) {
-            val views = RemoteViews(packageName, R.layout.widget_player)
+            for (appWidgetId in appWidgetIds) {
+                val views = RemoteViews(packageName, R.layout.widget_player)
 
-            // Update track info
-            if (currentMediaItem != null) {
-                // Title
-                val title = currentMediaItem.mediaMetadata.title?.toString()
-                    ?: getString(R.string.no_music_playing)
-                views.setTextViewText(R.id.widget_track_title, title)
+                // Update track info
+                if (currentMediaItem != null) {
+                    // Title
+                    val title = currentMediaItem.mediaMetadata.title?.toString()
+                        ?: getString(R.string.no_music_playing)
+                    views.setTextViewText(R.id.widget_track_title, title)
 
-                // Artist
-                val artist = currentMediaItem.mediaMetadata.artist?.toString()
-                    ?: getString(R.string.unknown_artist)
-                views.setTextViewText(R.id.widget_artist_name, artist)
+                    // Artist
+                    val artist = currentMediaItem.mediaMetadata.artist?.toString()
+                        ?: getString(R.string.unknown_artist)
+                    views.setTextViewText(R.id.widget_artist_name, artist)
 
-                // Artwork - handle both content and remote URIs
-                currentMediaItem.mediaMetadata.artworkUri?.let { artworkUri ->
-                    val bitmap = loadArtwork(artworkUri)
-                    if (bitmap != null) {
-                        views.setImageViewBitmap(R.id.widget_album_art, bitmap)
+                    // Artwork - handle both content and remote URIs
+                    currentMediaItem.mediaMetadata.artworkUri?.let { artworkUri ->
+                        val bitmap = withContext(Dispatchers.IO) { loadArtwork(artworkUri) }
+                        if (bitmap != null) {
+                            views.setImageViewBitmap(R.id.widget_album_art, bitmap)
+                        }
                     }
+                } else {
+                    views.setTextViewText(
+                        R.id.widget_track_title,
+                        getString(R.string.no_music_playing)
+                    )
+                    views.setTextViewText(
+                        R.id.widget_artist_name,
+                        getString(R.string.unknown_artist)
+                    )
                 }
-            } else {
-                views.setTextViewText(R.id.widget_track_title, getString(R.string.no_music_playing))
-                views.setTextViewText(R.id.widget_artist_name, getString(R.string.unknown_artist))
+
+                // Play/Pause button
+                val playPauseIcon = if (controller.isPlaying) R.drawable.pause else R.drawable.play
+                views.setImageViewResource(R.id.widget_btn_play_pause, playPauseIcon)
+
+                // Progress
+                val duration = controller.duration
+                if (duration > 0) {
+                    val position = controller.position
+                    val progress = ((position.toFloat() / duration.toFloat()) * 100).toInt()
+                    views.setProgressBar(R.id.widget_progress, 100, progress, false)
+                }
+
+                appWidgetManager.updateAppWidget(appWidgetId, views)
             }
-
-            // Play/Pause button
-            val playPauseIcon = if (controller.isPlaying) R.drawable.pause else R.drawable.play
-            views.setImageViewResource(R.id.widget_btn_play_pause, playPauseIcon)
-
-            // Progress
-            val duration = controller.duration
-            if (duration > 0) {
-                val position = controller.position
-                val progress = ((position.toFloat() / duration.toFloat()) * 100).toInt()
-                views.setProgressBar(R.id.widget_progress, 100, progress, false)
-            }
-
-            appWidgetManager.updateAppWidget(appWidgetId, views)
         }
     }
 

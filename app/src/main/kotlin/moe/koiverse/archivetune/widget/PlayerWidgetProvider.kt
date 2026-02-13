@@ -61,6 +61,8 @@ class PlayerWidgetProvider : AppWidgetProvider() {
         }
     }
 
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
@@ -136,6 +138,7 @@ class PlayerWidgetProvider : AppWidgetProvider() {
     override fun onDisabled(context: Context) {
         // Last widget instance removed
         super.onDisabled(context)
+        scope.cancel()
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -184,49 +187,57 @@ class PlayerWidgetProvider : AppWidgetProvider() {
         val currentMediaItem = controller.currentMediaItem
 
         for (appWidgetId in appWidgetIds) {
-            val views = RemoteViews(context.packageName, R.layout.widget_player)
+            scope.launch {
+                val views = RemoteViews(context.packageName, R.layout.widget_player)
 
-            // Update track info
-            if (currentMediaItem != null) {
-                // Get title from media item
-                val title = currentMediaItem.mediaMetadata.title?.toString()
-                    ?: context.getString(R.string.no_music_playing)
-                views.setTextViewText(R.id.widget_track_title, title)
+                // Update track info
+                if (currentMediaItem != null) {
+                    // Get title from media item
+                    val title = currentMediaItem.mediaMetadata.title?.toString()
+                        ?: context.getString(R.string.no_music_playing)
+                    views.setTextViewText(R.id.widget_track_title, title)
 
-                // Get artist from media item
-                val artist = currentMediaItem.mediaMetadata.artist?.toString()
-                    ?: context.getString(R.string.unknown_artist)
-                views.setTextViewText(R.id.widget_artist_name, artist)
+                    // Get artist from media item
+                    val artist = currentMediaItem.mediaMetadata.artist?.toString()
+                        ?: context.getString(R.string.unknown_artist)
+                    views.setTextViewText(R.id.widget_artist_name, artist)
 
-                // Get artwork - handle both content and remote URIs
-                currentMediaItem.mediaMetadata.artworkUri?.let { artworkUri ->
-                    val bitmap = loadArtwork(context, artworkUri)
-                    if (bitmap != null) {
-                        views.setImageViewBitmap(R.id.widget_album_art, bitmap)
+                    // Get artwork - handle both content and remote URIs
+                    currentMediaItem.mediaMetadata.artworkUri?.let { artworkUri ->
+                        val bitmap = loadArtwork(context, artworkUri)
+                        if (bitmap != null) {
+                            views.setImageViewBitmap(R.id.widget_album_art, bitmap)
+                        }
                     }
+                } else {
+                    views.setTextViewText(
+                        R.id.widget_track_title,
+                        context.getString(R.string.no_music_playing)
+                    )
+                    views.setTextViewText(
+                        R.id.widget_artist_name,
+                        context.getString(R.string.unknown_artist)
+                    )
                 }
-            } else {
-                views.setTextViewText(R.id.widget_track_title, context.getString(R.string.no_music_playing))
-                views.setTextViewText(R.id.widget_artist_name, context.getString(R.string.unknown_artist))
-            }
 
-            // Update play/pause button
-            val playPauseIcon = if (controller.isPlaying) {
-                R.drawable.pause
-            } else {
-                R.drawable.play
-            }
-            views.setImageViewResource(R.id.widget_btn_play_pause, playPauseIcon)
+                // Update play/pause button
+                val playPauseIcon = if (controller.isPlaying) {
+                    R.drawable.pause
+                } else {
+                    R.drawable.play
+                }
+                views.setImageViewResource(R.id.widget_btn_play_pause, playPauseIcon)
 
-            // Update progress (simplified - in production would track position)
-            val duration = controller.duration
-            if (duration > 0) {
-                val position = controller.position
-                val progress = ((position.toFloat() / duration.toFloat()) * 100).toInt()
-                views.setProgressBar(R.id.widget_progress, 100, progress, false)
-            }
+                // Update progress (simplified - in production would track position)
+                val duration = controller.duration
+                if (duration > 0) {
+                    val position = controller.position
+                    val progress = ((position.toFloat() / duration.toFloat()) * 100).toInt()
+                    views.setProgressBar(R.id.widget_progress, 100, progress, false)
+                }
 
-            appWidgetManager.updateAppWidget(appWidgetId, views)
+                appWidgetManager.updateAppWidget(appWidgetId, views)
+            }
         }
     }
 
