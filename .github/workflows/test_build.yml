@@ -29,6 +29,9 @@ jobs:
           java-version: "21"
           distribution: "temurin"
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Prepare Gradle cache encryption key
         shell: bash
         env:
