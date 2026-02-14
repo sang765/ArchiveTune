@@ -718,13 +718,19 @@
     <string name="together_error_state">Erreur</string>
     <string name="got_it">Compris</string>
     <string name="together_welcome_title">Bienvenue sur ArchiveTune Music Together</string>
-    <string name="together_welcome_body">Music Together permet à plusieurs appareils de partager une session en direct avec une file d\'attente et une lecture synchronisées. Un appareil héberge une session et partage un lien, les autres se connectent au même réseau Wi-Fi.</string>
+    <string name="together_welcome_body">Music Together permet à plusieurs appareils de partager une session en direct avec une file d\'attente et une lecture synchronisées.</string>
     <string name="together_welcome_host_title">Organiser une session</string>
     <string name="together_welcome_host_body">Appuyez sur Démarrer la session, puis partagez le lien de la session. Laissez ArchiveTune ouvert en arrière-plan pendant l\'hébergement.</string>
     <string name="together_welcome_join_title">Se connecter depuis un autre appareil</string>
-    <string name="together_welcome_join_body">Ouvrez le lien partagé ou collez-le ici, puis appuyez sur Rejoindre. Votre file d\'attente et votre lecture suivront celles de l\'hôte.</string>
+    <string name="together_welcome_join_body">Ouvrez le lien partagé ou entrez le code, puis appuyez sur Rejoindre. Votre file d\'attente et votre lecture suivront celles de l\'hôte.</string>
     <string name="together_welcome_permissions_title">Autorisations et sécurité</string>
     <string name="together_welcome_permissions_body">Les hôtes peuvent décider si les invités peuvent ajouter des titres, contrôler la lecture ou si une approbation est requise pour rejoindre la session.</string>
     <string name="together_kick_confirm">Coup %1$s ?</string>
     <string name="music_together">ArchiveTune Music Together</string>
+    <string name="together_waiting_approval">En attente d\'approbation</string>
+    <string name="together_host_left_session">L\'hôte a quitté la session</string>
+    <string name="audio_offload">Déchargement audio</string>
+    <string name="audio_offload_desc">Autoriser les appareils compatibles à lire l\'audio en utilisant le décodage matériel basse consommation. Certaines fonctions de traitement audio sont désactivées.</string>
+    <string name="joined">A rejoint</string>
+    <string name="together_dont_show_again">Ne plus afficher ce message</string>
 </resources>
