@@ -17,7 +17,7 @@
     <string name="account">Tài khoản</string>
     <string name="quick_picks">Lựa chọn nhanh</string>
     <string name="quick_picks_empty">Nghe các bài hát để tạo lựa chọn nhanh</string>
-    <string name="forgotten_favorites">Tình yêu quên lãng</string>
+    <string name="forgotten_favorites">Những thứ đã bị lãng quên</string>
     <string name="keep_listening">Tiếp tục nghe</string>
     <string name="your_youtube_playlists">Danh sách phát YouTube của bạn</string>
     <string name="similar_to">Tương tự như</string>
@@ -463,7 +463,7 @@
     <string name="disable_screenshot_desc">Khi tùy chọn này được bật, chụp màn hình và chế độ xem ứng dụng trong Ứng dụng gần đây sẽ bị tắt.</string>
     <string name="enable_lrclib">Bật nhà cung cấp lời bài hát LrcLib</string>
     <string name="enable_kugou">Bật nhà cung cấp lời bài hát KuGou</string>
-    <string name="hide_explicit">Ẩn nội dung rõ ràng</string>
+    <string name="hide_explicit">Ẩn nội dung nhạy cảm</string>
     <string name="hide_video">Ẩn video âm nhạc</string>
     <string name="backup_restore">Sao lưu và khôi phục</string>
     <string name="action_backup">Sao lưu</string>
@@ -602,7 +602,7 @@ ArchiveTune sẽ chỉ trích xuất token của bạn, và mọi thứ khác đ
     <string name="recent_commits">Commits Gần đây</string>
     <string name="update_notification_channel_name">Cập nhật Ứng dụng</string>
     <string name="update_notification_channel_desc">Thông báo cho các cập nhật ứng dụng mới</string>
-    <string name="update_notification_title">Cập nhật Có sẵn</string>
+    <string name="update_notification_title">Đã có bản cập nhật mới</string>
     <string name="update_notification_text">ArchiveTune %s hiện đã có sẵn</string>
     <string name="download">Tải xuống</string>
     <string name="permissions_title">Cho phép ArchiveTune hoạt động tốt nhất</string>
@@ -626,8 +626,8 @@ ArchiveTune sẽ chỉ trích xuất token của bạn, và mọi thứ khác đ
     <string name="restore_success">Khôi phục sao lưu thành công</string>
     <string name="status_active">ĐANG HOẠT ĐỘNG</string>
     <string name="status_inactive">KHÔNG HOẠT ĐỘNG</string>
-    <string name="last_start">Lần bắt đầu cuối</string>
-    <string name="last_end">Lần kết thúc cuối</string>
+    <string name="last_start">Lần bắt đầu mới nhất</string>
+    <string name="last_end">Lần kết thúc mơi nhất</string>
     <string name="debug_logs">Nhật ký gỡ lỗi</string>
     <string name="log_level_verbose">Verbose</string>
     <string name="log_level_debug">Debug</string>
@@ -711,11 +711,17 @@ ArchiveTune sẽ chỉ trích xuất token của bạn, và mọi thứ khác đ
     <string name="together_error_state">Lỗi</string>
     <string name="got_it">Đã hiểu</string>
     <string name="together_welcome_title">Chào mừng đến với ArchiveTune Music Together</string>
-    <string name="together_welcome_body">Music Together cho phép nhiều thiết bị cùng chia sẻ một phiên phát trực tiếp với hàng đợi và phát lại được đồng bộ hóa. Một thiết bị sẽ chủ trì phiên và chia sẻ liên kết, các thiết bị khác sẽ tham gia trên cùng mạng Wi-Fi.</string>
+    <string name="together_welcome_body">Music Together cho phép nhiều thiết bị cùng chia sẻ một phiên phát trực tiếp với hàng đợi và phát lại được đồng bộ hóa.</string>
     <string name="together_welcome_host_title">Chủ trì phiên</string>
     <string name="together_welcome_host_body">Nhấn Bắt đầu phiên, sau đó chia sẻ liên kết phiên. Giữ ArchiveTune mở ở chế độ nền trong khi tổ chức phiên.</string>
     <string name="together_welcome_join_title">Tham gia từ thiết bị khác</string>
-    <string name="together_welcome_join_body">Mở liên kết được chia sẻ, hoặc dán liên kết vào đây và nhấn Tham gia. Danh sách phát và quá trình phát lại của bạn sẽ được theo dõi từ máy chủ.</string>
+    <string name="together_welcome_join_body">Mở liên kết được chia sẻ, hoặc nhập mã và nhấn Tham gia. Danh sách phát và quá trình phát lại của bạn sẽ theo người chủ trì.</string>
     <string name="together_welcome_permissions_title">Quyền và an toàn</string>
     <string name="together_welcome_permissions_body">Người chủ trì có thể quyết định xem khách có thể thêm bài hát, điều khiển phát nhạc hay yêu cầu sự chấp thuận để tham gia hay không.</string>
+    <string name="together_waiting_approval">Đang chờ phê duyệt</string>
+    <string name="together_host_left_session">Người chủ trì đã rời khỏi phiên</string>
+    <string name="audio_offload">Tải âm thanh</string>
+    <string name="audio_offload_desc">Cho phép các thiết bị được hỗ trợ phát âm thanh bằng cách sử dụng giải mã phần cứng tiết kiệm năng lượng. Một số tính năng xử lý âm thanh bị vô hiệu hóa.</string>
+    <string name="joined">Đã tham gia</string>
+    <string name="together_dont_show_again">Đừng hiển thị lại cái này nữa</string>
 </resources>
