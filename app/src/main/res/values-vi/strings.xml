@@ -627,7 +627,7 @@ ArchiveTune sẽ chỉ trích xuất token của bạn, và mọi thứ khác đ
     <string name="status_active">ĐANG HOẠT ĐỘNG</string>
     <string name="status_inactive">KHÔNG HOẠT ĐỘNG</string>
     <string name="last_start">Lần bắt đầu mới nhất</string>
-    <string name="last_end">Lần kết thúc mơi nhất</string>
+    <string name="last_end">Lần kết thúc mới nhất</string>
     <string name="debug_logs">Nhật ký gỡ lỗi</string>
     <string name="log_level_verbose">Verbose</string>
     <string name="log_level_debug">Debug</string>
