@@ -651,7 +651,7 @@ ArchiveTune sẽ chỉ trích xuất token của bạn, và mọi thứ khác đ
     <string name="remove_playlist_cover">Loại bỏ cover</string>
     <string name="together_participants">Người tham gia</string>
     <string name="together_connected_count">%1$d đã được kết nối</string>
-    <string name="together_role_host">Người điều hành</string>
+    <string name="together_role_host">Chủ trì</string>
     <string name="together_role_guest">Khách</string>
     <string name="together_pending_approval">Đang chờ phê duyệt</string>
     <string name="together_kick">Đá ra ngoài</string>
