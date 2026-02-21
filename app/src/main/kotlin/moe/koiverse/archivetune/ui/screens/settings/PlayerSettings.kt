@@ -56,6 +56,7 @@ import moe.koiverse.archivetune.constants.SkipSilenceKey
 import moe.koiverse.archivetune.constants.StopMusicOnTaskClearKey
 import moe.koiverse.archivetune.constants.HistoryDuration
 import moe.koiverse.archivetune.constants.AudioCrossfadeDurationKey
+import moe.koiverse.archivetune.constants.PlayPauseFadeDurationKey
 import moe.koiverse.archivetune.constants.PlayerStreamClient
 import moe.koiverse.archivetune.constants.PlayerStreamClientKey
 import moe.koiverse.archivetune.constants.SeekExtraSeconds
@@ -68,6 +69,7 @@ import moe.koiverse.archivetune.ui.component.PreferenceEntry
 import moe.koiverse.archivetune.ui.component.PreferenceGroupTitle
 import moe.koiverse.archivetune.ui.component.SliderPreference
 import moe.koiverse.archivetune.ui.component.CrossfadeSliderPreference
+import moe.koiverse.archivetune.ui.component.PlayPauseFadeSliderPreference
 import moe.koiverse.archivetune.ui.component.SwitchPreference
 import moe.koiverse.archivetune.ui.utils.backToMain
 import moe.koiverse.archivetune.utils.rememberEnumPreference
@@ -145,6 +147,11 @@ fun PlayerSettings(
 
     val (audioCrossfadeSeconds, onAudioCrossfadeSecondsChange) = rememberPreference(
         AudioCrossfadeDurationKey,
+        defaultValue = 0
+    )
+
+    val (playPauseFadeSeconds, onPlayPauseFadeSecondsChange) = rememberPreference(
+        PlayPauseFadeDurationKey,
         defaultValue = 0
     )
 
@@ -285,6 +292,12 @@ fun PlayerSettings(
         CrossfadeSliderPreference(
             value = audioCrossfadeSeconds,
             onValueChange = onAudioCrossfadeSecondsChange,
+            isEnabled = !audioOffload,
+        )
+
+        PlayPauseFadeSliderPreference(
+            value = playPauseFadeSeconds,
+            onValueChange = onPlayPauseFadeSecondsChange,
             isEnabled = !audioOffload,
         )
 

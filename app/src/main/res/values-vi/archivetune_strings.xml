@@ -189,6 +189,12 @@
     </plurals>
     <string name="disable_load_more_when_repeat_all">Tắt tải thêm khi lặp tất cả</string>
     <string name="disable_load_more_when_repeat_all_desc">Không tự động tải thêm bài hát và nội dung tương tự khi chế độ lặp tất cả được bật</string>
+    <string name="audio_crossfade_title">Chế độ chuyển bài</string>
+    <string name="audio_crossfade_description">Chuyển mượt mà giữa các bài hát bằng cách làm mờ phần cuối mỗi bài.</string>
+    <string name="audio_crossfade_dialog_title">Thời lượng crossfade</string>
+    <string name="play_pause_fade_title">Mờ dần khi Phát/Tạm dừng</string>
+    <string name="play_pause_fade_description">Mờ dần âm lượng mượt mà khi nhấn phát hoặc tạm dừng.</string>
+    <string name="play_pause_fade_dialog_title">Thời lượng mờ dần</string>
     <string name="settings_section_ui">Giao diện Người dùng</string>
     <string name="settings_section_privacy">Quyền riêng tư &amp; Bảo mật</string>
     <string name="settings_section_player">Trình phát &amp; Phương tiện</string>
@@ -248,6 +254,8 @@
     <string name="player_stream_client_android_vr_desc">Phát trực tiếp mà không cần giải mã chữ ký, cung cấp tốc độ tối đa. Thích hợp cho đại đa số người dùng.</string>
     <string name="player_stream_client_web_remix">Web Remix</string>
     <string name="player_stream_client_web_remix_desc">Hỗ trợ định dạng mở rộng với chi phí là tốc độ. Giải mã chữ ký JavaScript gây ra độ trễ khởi động ~5–10 giây.</string>
+    <string name="player_stream_client_ios">iOS</string>
+    <string name="player_stream_client_ios_desc">Sử dụng client YouTube iOS. Đáng tin cậy nhất trước các hạn chế của YouTube.</string>
     <string name="backup_in_progress">Đang tiến hành sao lưu</string>
     <string name="restore_in_progress">Đang tiến hành khôi phục</string>
     <string name="backup_step_export_settings">Đang sao lưu cài đặt</string>

@@ -84,6 +84,7 @@ import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.constants.AudioNormalizationKey
 import moe.koiverse.archivetune.constants.AudioOffload
 import moe.koiverse.archivetune.constants.AudioCrossfadeDurationKey
+import moe.koiverse.archivetune.constants.PlayPauseFadeDurationKey
 import moe.koiverse.archivetune.constants.AudioQualityKey
 import moe.koiverse.archivetune.constants.AutoLoadMoreKey
 import moe.koiverse.archivetune.constants.AutoDownloadOnLikeKey
@@ -337,8 +338,10 @@ class MusicService :
     private val audioFocusVolumeFactor = MutableStateFlow(1f)
     private val playbackFadeFactor = MutableStateFlow(1f)
     private val crossfadeDurationMs = MutableStateFlow(0)
+    private val playPauseFadeDurationMs = MutableStateFlow(0)
     private val audioNormalizationEnabled = MutableStateFlow(true)
     private var crossfadeAudio: CrossfadeAudio? = null
+    private var playPauseFadeAudio: PlayPauseFadeAudio? = null
 
     lateinit var sleepTimer: SleepTimer
 
@@ -714,6 +717,19 @@ class MusicService :
                         .build()
                 },
             ).also { it.start(scope) }
+
+        dataStore.data
+            .map { (it[PlayPauseFadeDurationKey] ?: 0) * 1000 }
+            .distinctUntilChanged()
+            .collectLatest(scope) {
+                playPauseFadeDurationMs.value = it
+            }
+
+        playPauseFadeAudio = PlayPauseFadeAudio(
+            player = player,
+            playPauseFadeDurationMs = playPauseFadeDurationMs,
+            playbackFadeFactor = playbackFadeFactor,
+        ).also { it.start(scope) }
 
         dataStore.data
             .map(::readEqSettingsFromPrefs)
@@ -4069,6 +4085,10 @@ class MusicService :
         try {
             crossfadeAudio?.release()
             crossfadeAudio = null
+        } catch (_: Exception) {}
+        try {
+            playPauseFadeAudio?.release()
+            playPauseFadeAudio = null
         } catch (_: Exception) {}
         try {
             player.removeListener(this)

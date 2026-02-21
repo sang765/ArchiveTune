@@ -109,6 +109,8 @@
     <string name="together_ban">Cấm</string>
     <string name="together_kick_confirm">Đuổi %1$s?</string>
     <string name="together_ban_confirm">Cấm %1$s?</string>
+    <string name="together_requesting_song_change">Yêu cầu người tổ chức đổi bài hát…</string>
+    <string name="together_song_change_failed">Thay đổi bài hát không được áp dụng. Vui lòng thử lại.</string>
     <string name="remove_from_history">Xóa khỏi lịch sử</string>
     <string name="remove_from_playlist">Xóa khỏi danh sách phát</string>
     <string name="remove_from_queue">Xóa khỏi hàng đợi</string>
