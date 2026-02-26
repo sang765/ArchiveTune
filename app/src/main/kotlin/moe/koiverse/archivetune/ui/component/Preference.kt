@@ -444,6 +444,106 @@ fun CrossfadeSliderPreference(
 }
 
 @Composable
+fun PlayPauseFadeSliderPreference(
+    modifier: Modifier = Modifier,
+    value: Int,
+    onValueChange: (Int) -> Unit,
+    isEnabled: Boolean = true,
+) {
+    var showDialog by remember {
+        mutableStateOf(false)
+    }
+
+    var sliderValue by remember {
+        mutableFloatStateOf(value.toFloat())
+    }
+
+    if (showDialog) {
+        ActionPromptDialog(
+            titleBar = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.audio_play_pause_fade_dialog_title),
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
+                        style = MaterialTheme.typography.headlineSmall,
+                    )
+                }
+            },
+            onDismiss = { showDialog = false },
+            onConfirm = {
+                val rounded = sliderValue.roundToInt().coerceIn(0, 5)
+                sliderValue = rounded.toFloat()
+                showDialog = false
+                onValueChange.invoke(rounded)
+            },
+            onCancel = {
+                sliderValue = value.toFloat()
+                showDialog = false
+            },
+            onReset = {
+                sliderValue = 0f
+            },
+            content = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    val rounded = sliderValue.roundToInt().coerceIn(0, 5)
+                    Text(
+                        text =
+                        if (rounded == 0) {
+                            stringResource(R.string.dark_theme_off)
+                        } else {
+                            pluralStringResource(
+                                R.plurals.seconds,
+                                rounded,
+                                rounded
+                            )
+                        },
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+
+                    Spacer(Modifier.height(12.dp))
+
+                    Text(
+                        text = stringResource(R.string.audio_play_pause_fade_description),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+
+                    Spacer(Modifier.height(16.dp))
+
+                    Slider(
+                        value = sliderValue,
+                        onValueChange = { sliderValue = it.coerceIn(0f, 5f) },
+                        valueRange = 0f..5f,
+                        steps = 4,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+        )
+    }
+
+    val descriptionText =
+        if (value <= 0) {
+            stringResource(R.string.dark_theme_off)
+        } else {
+            pluralStringResource(R.plurals.seconds, value, value)
+        }
+
+    PreferenceEntry(
+        modifier = modifier,
+        title = { Text(stringResource(R.string.audio_play_pause_fade_title)) },
+        description = descriptionText,
+        icon = { Icon(painterResource(R.drawable.graphic_eq), null) },
+        onClick = { if (isEnabled) showDialog = true },
+        isEnabled = isEnabled,
+    )
+}
+
+@Composable
 fun NumberPickerPreference(
     modifier: Modifier = Modifier,
     title: @Composable () -> Unit,

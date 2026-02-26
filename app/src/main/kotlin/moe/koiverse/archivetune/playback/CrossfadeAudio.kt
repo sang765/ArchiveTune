@@ -35,6 +35,7 @@ internal class CrossfadeAudio(
     private val audioNormalizationEnabled: MutableStateFlow<Boolean>,
     private val maxSafeGainFactor: Float,
     private val overlapPlayerFactory: () -> ExoPlayer,
+    private val suppressFadeReset: MutableStateFlow<Boolean>,
 ) {
     private var loopJob: Job? = null
 
@@ -169,7 +170,7 @@ internal class CrossfadeAudio(
                 continue
             }
 
-            if (playbackFadeFactor.value != 1f) playbackFadeFactor.value = 1f
+            if (!suppressFadeReset.value && playbackFadeFactor.value != 1f) playbackFadeFactor.value = 1f
             delay(100)
         }
     }

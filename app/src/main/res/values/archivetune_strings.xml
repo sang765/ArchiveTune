@@ -201,6 +201,9 @@
     <string name="audio_crossfade_title">Crossfade</string>
     <string name="audio_crossfade_description">Smoothly transition between songs by fading out the end of each track.</string>
     <string name="audio_crossfade_dialog_title">Crossfade duration</string>
+    <string name="audio_play_pause_fade_title">Play/Pause Fade</string>
+    <string name="audio_play_pause_fade_description">Smoothly fade audio in when resuming and out when pausing.</string>
+    <string name="audio_play_pause_fade_dialog_title">Play/Pause fade duration</string>
     <string name="disable_load_more_when_repeat_all">Disable load more when repeat all</string>
     <string name="disable_load_more_when_repeat_all_desc">Don\'t auto load more songs and similar content when repeat all mode is enabled</string>
     <string name="player_stream_client">Playback client</string>

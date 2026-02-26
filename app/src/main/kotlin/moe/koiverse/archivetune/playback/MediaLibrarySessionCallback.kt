@@ -16,6 +16,7 @@ import androidx.annotation.DrawableRes
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.offline.Download
 import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaLibraryService
@@ -58,6 +59,9 @@ constructor(
     var toggleLike: () -> Unit = {}
     var toggleStartRadio: () -> Unit = {}
     var toggleLibrary: () -> Unit = {}
+    var onPlay: () -> Unit = {}
+    var onPause: () -> Unit = {}
+    var isFadeEnabled: () -> Boolean = { false }
 
     private fun browsableExtras(
         browsableHint: Int = CONTENT_STYLE_GRID_ITEM,
@@ -109,6 +113,34 @@ constructor(
             MediaSessionConstants.ACTION_TOGGLE_REPEAT_MODE -> session.player.toggleRepeatMode()
         }
         return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+    }
+
+    override fun onPlayerCommandRequest(
+        session: MediaSession,
+        controller: MediaSession.ControllerInfo,
+        command: Int,
+    ): Int {
+        if (isFadeEnabled()) {
+            when (command) {
+                0 -> { // COMMAND_PLAY_PAUSE
+                    if (session.player.playWhenReady) {
+                        onPause()
+                    } else {
+                        onPlay()
+                    }
+                    return 1 // COMMAND_RESULT_SUCCESS
+                }
+                1 -> { // COMMAND_PLAY
+                    onPlay()
+                    return 1 // COMMAND_RESULT_SUCCESS
+                }
+                2 -> { // COMMAND_PAUSE
+                    onPause()
+                    return 1 // COMMAND_RESULT_SUCCESS
+                }
+            }
+        }
+        return super.onPlayerCommandRequest(session, controller, command)
     }
 
     override fun onGetLibraryRoot(

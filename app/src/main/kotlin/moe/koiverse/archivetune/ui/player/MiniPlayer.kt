@@ -325,9 +325,13 @@ private fun LegacyMiniPlayer(
                 onClick = {
                     if (playbackState == Player.STATE_ENDED) {
                         playerConnection.player.seekTo(0, 0)
-                        playerConnection.player.playWhenReady = true
+                        playerConnection.fadePlay()
                     } else {
-                        playerConnection.player.togglePlayPause()
+                        if (isPlaying) {
+                            playerConnection.fadePause()
+                        } else {
+                            playerConnection.fadePlay()
+                        }
                     }
                 },
             ) {

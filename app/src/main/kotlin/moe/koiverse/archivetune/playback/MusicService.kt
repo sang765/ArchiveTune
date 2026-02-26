@@ -85,6 +85,7 @@ import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.constants.AudioNormalizationKey
 import moe.koiverse.archivetune.constants.AudioOffload
 import moe.koiverse.archivetune.constants.AudioCrossfadeDurationKey
+import moe.koiverse.archivetune.constants.AudioPlayPauseFadeDurationKey
 import moe.koiverse.archivetune.constants.AudioQualityKey
 import moe.koiverse.archivetune.constants.AutoLoadMoreKey
 import moe.koiverse.archivetune.constants.AutoDownloadOnLikeKey
@@ -332,6 +333,9 @@ class MusicService :
     private val audioFocusVolumeFactor = MutableStateFlow(1f)
     private val playbackFadeFactor = MutableStateFlow(1f)
     private val crossfadeDurationMs = MutableStateFlow(0)
+    private val playPauseFadeDurationMs = MutableStateFlow(0)
+    private val suppressFadeReset = MutableStateFlow(false)
+    private var playPauseFadeManager: PlayPauseFadeManager? = null
     private val audioNormalizationEnabled = MutableStateFlow(true)
     private var crossfadeAudio: CrossfadeAudio? = null
     private var lyricsPreloadManager: LyricsPreloadManager? = null
@@ -550,6 +554,9 @@ class MusicService :
             toggleLike = ::toggleLike
             toggleStartRadio = ::toggleStartRadio
             toggleLibrary = ::toggleLibrary
+            onPlay = ::fadePlay
+            onPause = ::fadePause
+            isFadeEnabled = { playPauseFadeDurationMs.value > 0 }
         }
         mediaSession =
             MediaLibrarySession
@@ -673,6 +680,10 @@ class MusicService :
                     if (crossfadeSeconds != 0) {
                         dataStore.edit { it[AudioCrossfadeDurationKey] = 0 }
                     }
+                    val playPauseFadeSeconds = dataStore.get(AudioPlayPauseFadeDurationKey, 0)
+                    if (playPauseFadeSeconds != 0) {
+                        dataStore.edit { it[AudioPlayPauseFadeDurationKey] = 0 }
+                    }
                 }
             }
         
@@ -681,6 +692,13 @@ class MusicService :
             .distinctUntilChanged()
             .collectLatest(scope) {
                 crossfadeDurationMs.value = it
+            }
+
+        dataStore.data
+            .map { (it[AudioPlayPauseFadeDurationKey] ?: 0) * 1000 }
+            .distinctUntilChanged()
+            .collectLatest(scope) {
+                playPauseFadeDurationMs.value = it
             }
 
         crossfadeAudio =
@@ -711,7 +729,15 @@ class MusicService :
                         .setSeekForwardIncrementMs(5000)
                         .build()
                 },
+                suppressFadeReset = suppressFadeReset,
             ).also { it.start(scope) }
+
+        playPauseFadeManager = PlayPauseFadeManager(
+            player = player,
+            playbackFadeFactor = playbackFadeFactor,
+            fadeDurationMs = playPauseFadeDurationMs,
+            suppressFadeReset = suppressFadeReset,
+        )
 
         // Initialize lyrics pre-load manager
         lyricsPreloadManager = LyricsPreloadManager(
@@ -2788,6 +2814,14 @@ class MusicService :
         startRadioSeamlessly()
     }
 
+    fun fadePlay() {
+        playPauseFadeManager?.requestPlay(scope)
+    }
+
+    fun fadePause() {
+        playPauseFadeManager?.requestPause(scope)
+    }
+
     private fun decodeBandLevelsMb(raw: String?): List<Int> {
         if (raw.isNullOrBlank()) return emptyList()
         return runCatching { EqualizerJson.json.decodeFromString<List<Int>>(raw) }.getOrNull() ?: emptyList()
@@ -4079,6 +4113,7 @@ class MusicService :
 
     override fun onDestroy() {
         super.onDestroy()
+        playPauseFadeManager?.cancel()
         try {
             scope.launch { stopTogetherInternal() }
         } catch (_: Exception) {}

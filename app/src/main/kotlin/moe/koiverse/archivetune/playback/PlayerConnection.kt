@@ -237,6 +237,14 @@ class PlayerConnection(
         }
     }
 
+    fun fadePlay() {
+        service.fadePlay()
+    }
+
+    fun fadePause() {
+        service.fadePause()
+    }
+
     fun dispose() {
         player.removeListener(this)
     }
