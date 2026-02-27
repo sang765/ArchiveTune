@@ -90,32 +90,6 @@ fun NewUpdateAvailableScreen(
         }
     }
 
-    DisposableEffect(Unit) {
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Context.RECEIVER_NOT_EXPORTED
-        } else {
-            0
-        }
-        context.registerReceiver(
-            downloadReceiver,
-            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
-            flags
-        )
-        onDispose {
-            context.unregisterReceiver(downloadReceiver)
-        }
-    }
-
-    LaunchedEffect(installIntent) {
-        installIntent?.let {
-            try {
-                context.startActivity(it)
-            } catch (e: ActivityNotFoundException) {
-                e.printStackTrace()
-            }
-        }
-    }
-
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
     ) { isGranted ->
@@ -134,6 +108,44 @@ fun NewUpdateAvailableScreen(
     ) { isGranted ->
         if (isGranted) {
             installIntent?.let {
+                try {
+                    context.startActivity(it)
+                } catch (e: ActivityNotFoundException) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    DisposableEffect(Unit) {
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Context.RECEIVER_NOT_EXPORTED
+        } else {
+            0
+        }
+        context.registerReceiver(
+            downloadReceiver,
+            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+            flags
+        )
+        onDispose {
+            context.unregisterReceiver(downloadReceiver)
+        }
+    }
+
+    LaunchedEffect(installIntent) {
+        installIntent?.let {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                if (context.packageManager.canRequestPackageInstalls()) {
+                    try {
+                        context.startActivity(it)
+                    } catch (e: ActivityNotFoundException) {
+                        e.printStackTrace()
+                    }
+                } else {
+                    installPermissionLauncher.launch(Manifest.permission.REQUEST_INSTALL_PACKAGES)
+                }
+            } else {
                 try {
                     context.startActivity(it)
                 } catch (e: ActivityNotFoundException) {
