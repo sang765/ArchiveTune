@@ -50,6 +50,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -101,6 +104,7 @@ fun UpdateScreen(
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     val nightlyInstallUrl = "https://nightly.link/koiverse/ArchiveTune/workflows/build/dev/app-universal-release"
 
     val (enableUpdateNotification, onEnableUpdateNotificationChange) = rememberPreference(
@@ -130,6 +134,7 @@ fun UpdateScreen(
             }
         )
     }
+    var isCheckingForUpdates by remember { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -330,7 +335,8 @@ fun UpdateScreen(
                 },
                 scrollBehavior = scrollBehavior
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -404,25 +410,42 @@ fun UpdateScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Button(
-                                onClick = {
-                                    coroutineScope.launch {
-                                        Updater.getLatestVersionName().onSuccess { latestVersionName ->
-                                            if (latestVersionName != BuildConfig.VERSION_NAME) {
-                                                navController.navigate("new_update_available")
-                                            } else {
-                                                // Hiển thị thông báo không có cập nhật
-                                                // Có thể sử dụng Snackbar hoặc AlertDialog
-                                            }
+                        Button(
+                            onClick = {
+                                isCheckingForUpdates = true
+                                coroutineScope.launch {
+                                    Updater.getLatestVersionName().onSuccess { latestVersionName ->
+                                        latestVersion = latestVersionName
+                                        if (latestVersionName != BuildConfig.VERSION_NAME) {
+                                            navController.navigate("new_update_available")
+                                        } else {
+                                            snackbarHostState.showSnackbar(
+                                                message = context.getString(R.string.no_updates_available),
+                                                duration = SnackbarDuration.Short
+                                            )
                                         }
+                                    }.onFailure { error ->
+                                        snackbarHostState.showSnackbar(
+                                            message = context.getString(R.string.update_check_failed, error.message ?: "Unknown error"),
+                                            duration = SnackbarDuration.Long
+                                        )
+                                    }.also {
+                                        isCheckingForUpdates = false
                                     }
-                                },
-                                modifier = Modifier.weight(1f)
-                            ) {
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            enabled = !isCheckingForUpdates
+                        ) {
+                            if (isCheckingForUpdates) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(18.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.onPrimary
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(stringResource(R.string.checking_for_updates))
+                            } else {
                                 Icon(
                                     painter = painterResource(R.drawable.update),
                                     contentDescription = null,
@@ -431,19 +454,21 @@ fun UpdateScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(stringResource(R.string.check_for_update))
                             }
+                        }
 
-                            Button(
-                                onClick = { navController.navigate("settings/changelog") },
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.history),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(stringResource(R.string.view_changelog))
-                            }
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Button(
+                            onClick = { navController.navigate("settings/changelog") },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.history),
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.view_changelog))
                         }
                     }
                 }
