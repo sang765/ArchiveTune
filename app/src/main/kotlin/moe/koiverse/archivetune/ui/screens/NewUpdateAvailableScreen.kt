@@ -90,19 +90,6 @@ fun NewUpdateAvailableScreen(
         }
     }
 
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-    ) { isGranted ->
-        if (isGranted) {
-            viewModel.startDownload()
-        } else {
-            // User denied permission, open browser to download
-            latestVersion?.let {
-                uriHandler.openUri(Updater.getLatestDownloadUrl(it))
-            }
-        }
-    }
-
     val installPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
     ) { isGranted ->
@@ -113,6 +100,44 @@ fun NewUpdateAvailableScreen(
                 } catch (e: ActivityNotFoundException) {
                     e.printStackTrace()
                 }
+            }
+        }
+    }
+
+    // Observe download done event
+    LaunchedEffect(Unit) {
+        viewModel.onDownloadDone.collect { intent ->
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val hasInstallPermission = context.packageManager.canRequestPackageInstalls()
+                if (hasInstallPermission) {
+                    try {
+                        context.startActivity(intent)
+                    } catch (e: ActivityNotFoundException) {
+                        // Handle error
+                    }
+                } else {
+                    // Request install permission
+                    installPermissionLauncher.launch(Manifest.permission.REQUEST_INSTALL_PACKAGES)
+                }
+            } else {
+                try {
+                    context.startActivity(intent)
+                } catch (e: ActivityNotFoundException) {
+                    // Handle error
+                }
+            }
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.startDownload()
+        } else {
+            // User denied permission, open browser to download
+            latestVersion?.let {
+                uriHandler.openUri(Updater.getLatestDownloadUrl(it))
             }
         }
     }

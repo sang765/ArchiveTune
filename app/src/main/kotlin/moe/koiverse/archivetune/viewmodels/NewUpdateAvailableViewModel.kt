@@ -12,7 +12,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
@@ -41,6 +43,9 @@ class NewUpdateAvailableViewModel @Inject constructor(
 
     private val _installIntent = MutableStateFlow<Intent?>(null)
     val installIntent = _installIntent.asStateFlow()
+
+    private val _onDownloadDone = MutableSharedFlow<Intent>()
+    val onDownloadDone = _onDownloadDone.asSharedFlow()
 
     private val _isDownloading = MutableStateFlow(false)
     val isDownloading = _isDownloading.asStateFlow()
@@ -95,6 +100,7 @@ class NewUpdateAvailableViewModel @Inject constructor(
             )
             installerIntent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
             _installIntent.update { installerIntent }
+            _onDownloadDone.emit(installerIntent)
         }
     }
 
