@@ -32,6 +32,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -234,18 +235,19 @@ fun NewUpdateAvailableScreen(
             }
 
             if (isDownloading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(48.dp),
+                LinearProgressIndicator(
+                    progress = downloadProgress,
+                    modifier = Modifier.fillMaxWidth(),
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                if (downloadProgress > 0f) {
-                    Text(
-                        text = stringResource(R.string.download_progress, (downloadProgress * 100).toInt()),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
+                Text(
+                    text = stringResource(R.string.download_progress, (downloadProgress * 100).toInt()),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
 
             Row(
