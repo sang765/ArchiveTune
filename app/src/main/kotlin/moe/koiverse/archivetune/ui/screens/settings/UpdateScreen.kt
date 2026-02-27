@@ -446,21 +446,48 @@ fun UpdateScreen(
                 )
             }
 
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = { navController.navigate("settings/changelog") },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.update),
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.view_changelog))
-                }
-            }
+             item {
+                 Spacer(modifier = Modifier.height(8.dp))
+                 Button(
+                     onClick = {
+                         coroutineScope.launch {
+                             Updater.getLatestVersionName().onSuccess { latestVersionName ->
+                                 if (latestVersionName != BuildConfig.VERSION_NAME) {
+                                     navController.navigate("new_update_available")
+                                 } else {
+                                     // Hiển thị thông báo không có cập nhật
+                                     // Có thể sử dụng Snackbar hoặc AlertDialog
+                                 }
+                             }
+                         }
+                     },
+                     modifier = Modifier.fillMaxWidth()
+                 ) {
+                     Icon(
+                         painter = painterResource(R.drawable.update),
+                         contentDescription = null,
+                         modifier = Modifier.size(18.dp)
+                     )
+                     Spacer(modifier = Modifier.width(8.dp))
+                     Text(stringResource(R.string.check_for_update))
+                 }
+             }
+
+             item {
+                 Spacer(modifier = Modifier.height(8.dp))
+                 Button(
+                     onClick = { navController.navigate("settings/changelog") },
+                     modifier = Modifier.fillMaxWidth()
+                 ) {
+                     Icon(
+                         painter = painterResource(R.drawable.update),
+                         contentDescription = null,
+                         modifier = Modifier.size(18.dp)
+                     )
+                     Spacer(modifier = Modifier.width(8.dp))
+                     Text(stringResource(R.string.view_changelog))
+                 }
+             }
 
             item {
                 AnimatedVisibility(visible = updateChannel == UpdateChannel.NIGHTLY) {
