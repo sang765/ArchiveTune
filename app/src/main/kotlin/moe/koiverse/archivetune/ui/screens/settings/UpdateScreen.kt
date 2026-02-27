@@ -353,49 +353,96 @@ fun UpdateScreen(
                         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
                     )
                 ) {
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(16.dp)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-                            contentAlignment = Alignment.Center
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                painter = painterResource(R.drawable.update),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp)
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.update),
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(16.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.current_version),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = BuildConfig.VERSION_NAME,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                latestVersion?.let { latest ->
+                                    if (latest != BuildConfig.VERSION_NAME) {
+                                        Spacer(modifier = Modifier.height(4.dp))
+                                        Text(
+                                            text = stringResource(R.string.latest_version_format, latest),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
+                            }
                         }
 
-                        Spacer(modifier = Modifier.width(16.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.current_version),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = BuildConfig.VERSION_NAME,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                            latestVersion?.let { latest ->
-                                if (latest != BuildConfig.VERSION_NAME) {
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(
-                                        text = stringResource(R.string.latest_version_format, latest),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Button(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        Updater.getLatestVersionName().onSuccess { latestVersionName ->
+                                            if (latestVersionName != BuildConfig.VERSION_NAME) {
+                                                navController.navigate("new_update_available")
+                                            } else {
+                                                // Hiển thị thông báo không có cập nhật
+                                                // Có thể sử dụng Snackbar hoặc AlertDialog
+                                            }
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.update),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(stringResource(R.string.check_for_update))
+                            }
+
+                            Button(
+                                onClick = { navController.navigate("settings/changelog") },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.update),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(stringResource(R.string.view_changelog))
                             }
                         }
                     }
@@ -446,48 +493,7 @@ fun UpdateScreen(
                 )
             }
 
-             item {
-                 Spacer(modifier = Modifier.height(8.dp))
-                 Button(
-                     onClick = {
-                         coroutineScope.launch {
-                             Updater.getLatestVersionName().onSuccess { latestVersionName ->
-                                 if (latestVersionName != BuildConfig.VERSION_NAME) {
-                                     navController.navigate("new_update_available")
-                                 } else {
-                                     // Hiển thị thông báo không có cập nhật
-                                     // Có thể sử dụng Snackbar hoặc AlertDialog
-                                 }
-                             }
-                         }
-                     },
-                     modifier = Modifier.fillMaxWidth()
-                 ) {
-                     Icon(
-                         painter = painterResource(R.drawable.update),
-                         contentDescription = null,
-                         modifier = Modifier.size(18.dp)
-                     )
-                     Spacer(modifier = Modifier.width(8.dp))
-                     Text(stringResource(R.string.check_for_update))
-                 }
-             }
 
-             item {
-                 Spacer(modifier = Modifier.height(8.dp))
-                 Button(
-                     onClick = { navController.navigate("settings/changelog") },
-                     modifier = Modifier.fillMaxWidth()
-                 ) {
-                     Icon(
-                         painter = painterResource(R.drawable.update),
-                         contentDescription = null,
-                         modifier = Modifier.size(18.dp)
-                     )
-                     Spacer(modifier = Modifier.width(8.dp))
-                     Text(stringResource(R.string.view_changelog))
-                 }
-             }
 
             item {
                 AnimatedVisibility(visible = updateChannel == UpdateChannel.NIGHTLY) {
