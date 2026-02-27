@@ -117,7 +117,7 @@ fun NewUpdateAvailableScreen(
 
     DisposableEffect(Unit) {
         val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Context.RECEIVER_NOT_EXPORTED
+            Context.RECEIVER_EXPORTED
         } else {
             0
         }
