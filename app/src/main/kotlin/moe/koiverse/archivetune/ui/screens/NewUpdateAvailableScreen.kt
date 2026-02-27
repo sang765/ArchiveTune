@@ -90,41 +90,13 @@ fun NewUpdateAvailableScreen(
         }
     }
 
-    val installPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-    ) { isGranted ->
-        if (isGranted) {
-            installIntent?.let {
-                try {
-                    context.startActivity(it)
-                } catch (e: ActivityNotFoundException) {
-                    e.printStackTrace()
-                }
-            }
-        }
-    }
-
     // Observe download done event
     LaunchedEffect(Unit) {
         viewModel.onDownloadDone.collect { intent ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val hasInstallPermission = context.packageManager.canRequestPackageInstalls()
-                if (hasInstallPermission) {
-                    try {
-                        context.startActivity(intent)
-                    } catch (e: ActivityNotFoundException) {
-                        // Handle error
-                    }
-                } else {
-                    // Request install permission
-                    installPermissionLauncher.launch(Manifest.permission.REQUEST_INSTALL_PACKAGES)
-                }
-            } else {
-                try {
-                    context.startActivity(intent)
-                } catch (e: ActivityNotFoundException) {
-                    // Handle error
-                }
+            try {
+                context.startActivity(intent)
+            } catch (e: ActivityNotFoundException) {
+                e.printStackTrace()
             }
         }
     }
@@ -167,8 +139,6 @@ fun NewUpdateAvailableScreen(
                     } catch (e: ActivityNotFoundException) {
                         e.printStackTrace()
                     }
-                } else {
-                    installPermissionLauncher.launch(Manifest.permission.REQUEST_INSTALL_PACKAGES)
                 }
             } else {
                 try {
@@ -305,14 +275,12 @@ fun NewUpdateAvailableScreen(
                                             } catch (e: ActivityNotFoundException) {
                                                 e.printStackTrace()
                                             }
-                                        }
-                                    } else {
-                                        installPermissionLauncher.launch(Manifest.permission.REQUEST_INSTALL_PACKAGES)
                                     }
-                                } else {
-                                    installIntent?.let {
-                                        try {
-                                            context.startActivity(it)
+                                }
+                            } else {
+                                installIntent?.let {
+                                    try {
+                                        context.startActivity(it)
                                         } catch (e: ActivityNotFoundException) {
                                             e.printStackTrace()
                                         }
