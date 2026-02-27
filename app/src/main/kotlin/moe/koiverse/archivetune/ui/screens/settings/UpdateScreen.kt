@@ -437,7 +437,7 @@ fun UpdateScreen(
                                 modifier = Modifier.weight(1f)
                             ) {
                                 Icon(
-                                    painter = painterResource(R.drawable.update),
+                                    painter = painterResource(R.drawable.history),
                                     contentDescription = null,
                                     modifier = Modifier.size(18.dp)
                                 )
