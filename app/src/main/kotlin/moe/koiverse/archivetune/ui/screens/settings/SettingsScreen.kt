@@ -45,6 +45,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.content.ContextCompat
+import androidx.compose.ui.Alignment
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.NavController
 import moe.koiverse.archivetune.BuildConfig
 import moe.koiverse.archivetune.R
@@ -67,6 +69,10 @@ fun SettingsScreen(
     var isSearching by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf(TextFieldValue()) }
     val focusRequester = remember { FocusRequester() }
+
+    var selectedRoute by rememberSaveable { mutableStateOf<String?>(null) }
+    val layoutMode = resolveLayoutMode()
+    val isExpanded = layoutMode == SettingsLayoutMode.EXPANDED
 
     LaunchedEffect(isSearching) {
         if (isSearching) {
@@ -117,10 +123,18 @@ fun SettingsScreen(
         focusManager.clearFocus()
     }
 
-    val quickActions = buildQuickActions(navController, resetSearch)
-    val integrationActions = buildIntegrationActions(navController, resetSearch)
-    val settingsGroups = buildSettingsGroups(navController, isAndroid12OrLater, hasUpdate, context, resetSearch)
-    val internalItems = buildInternalItems(navController, resetSearch)
+    val onNavigate: (String) -> Unit = { route ->
+        if (isExpanded) {
+            selectedRoute = route
+        } else {
+            navController.navigate(route)
+        }
+    }
+
+    val quickActions = buildQuickActions(onNavigate, resetSearch)
+    val integrationActions = buildIntegrationActions(onNavigate, resetSearch)
+    val settingsGroups = buildSettingsGroups(onNavigate, isAndroid12OrLater, hasUpdate, context, resetSearch)
+    val internalItems = buildInternalItems(onNavigate, resetSearch)
 
     val queryText = query.text.trim()
     val showSearchBar = isSearching || queryText.isNotBlank()
@@ -172,12 +186,50 @@ fun SettingsScreen(
                 permissionLauncher.launch(toRequest.toTypedArray())
             }
         },
-        onUpdateClick = { navController.navigate("settings/update") },
+        onUpdateClick = { onNavigate("settings/update") },
     )
+
+    val detailPane: (@Composable () -> Unit)? = if (isExpanded) {
+        {
+            Box(modifier = Modifier.fillMaxSize()) {
+                when (selectedRoute) {
+                    "settings/appearance" -> AppearanceSettings(navController, scrollBehavior)
+                    "settings/content" -> ContentSettings(navController, scrollBehavior)
+                    "settings/player" -> PlayerSettings(navController, scrollBehavior)
+                    "settings/storage" -> StorageSettings(navController, scrollBehavior)
+                    "settings/privacy" -> PrivacySettings(navController, scrollBehavior)
+                    "settings/backup_restore" -> BackupAndRestore(navController, scrollBehavior)
+                    "settings/discord" -> DiscordSettings(navController, scrollBehavior)
+                    "settings/integration" -> IntegrationScreen(navController, scrollBehavior)
+                    "settings/music_together" -> MusicTogetherScreen(navController, scrollBehavior)
+                    "settings/lastfm" -> LastFMSettings(navController, scrollBehavior)
+                    "settings/misc" -> DebugSettings(navController)
+                    "settings/update" -> UpdateScreen(navController, scrollBehavior)
+                    "settings/about" -> AboutScreen(navController, scrollBehavior)
+                    "settings/po_token" -> PoTokenScreen(navController, scrollBehavior)
+                    "settings/appearance/palette_picker" -> PalettePickerScreen(navController)
+                    "settings/appearance/theme_creator" -> ThemeCreatorScreen(navController)
+                    "customize_background" -> CustomizeBackground(navController)
+                    else -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.settings_select_item),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    } else null
 
     Scaffold(
         topBar = {
-            if (!showSearchBar) {
+            if (!showSearchBar && !isExpanded) {
                 LargeTopAppBar(
                     title = {
                         Text(
@@ -226,6 +278,7 @@ fun SettingsScreen(
                     listState = listState,
                     topPadding = innerPadding.calculateTopPadding(),
                     modifier = Modifier.fillMaxSize(),
+                    detailPane = detailPane,
                 )
             }
 
@@ -285,10 +338,10 @@ fun SettingsScreen(
                     AdaptiveSettingsLayout(
                         state = searchState,
                         modifier = Modifier.fillMaxWidth(),
+                        detailPane = if (isExpanded) detailPane else null,
                     )
                 }
             }
         }
     }
 }
-

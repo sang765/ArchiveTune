@@ -24,65 +24,65 @@ import moe.koiverse.archivetune.R
 
 @Composable
 fun buildQuickActions(
-    navController: NavController,
+    onNavigate: (String) -> Unit,
     resetSearch: () -> Unit,
 ): List<SettingsQuickAction> =
     listOf(
         SettingsQuickAction(
             icon = painterResource(R.drawable.palette),
             label = stringResource(R.string.appearance),
-            onClick = { resetSearch(); navController.navigate("settings/appearance") },
+            onClick = { resetSearch(); onNavigate("settings/appearance") },
             accentColor = MaterialTheme.colorScheme.primary,
         ),
         SettingsQuickAction(
             icon = painterResource(R.drawable.play),
             label = stringResource(R.string.player_and_audio),
-            onClick = { resetSearch(); navController.navigate("settings/player") },
+            onClick = { resetSearch(); onNavigate("settings/player") },
             accentColor = MaterialTheme.colorScheme.tertiary,
         ),
         SettingsQuickAction(
             icon = painterResource(R.drawable.storage),
             label = stringResource(R.string.storage),
-            onClick = { resetSearch(); navController.navigate("settings/storage") },
+            onClick = { resetSearch(); onNavigate("settings/storage") },
             accentColor = MaterialTheme.colorScheme.secondary,
         ),
         SettingsQuickAction(
             icon = painterResource(R.drawable.security),
             label = stringResource(R.string.privacy),
-            onClick = { resetSearch(); navController.navigate("settings/privacy") },
+            onClick = { resetSearch(); onNavigate("settings/privacy") },
             accentColor = MaterialTheme.colorScheme.error,
         ),
     )
 
 @Composable
 fun buildIntegrationActions(
-    navController: NavController,
+    onNavigate: (String) -> Unit,
     resetSearch: () -> Unit,
 ): List<SettingsIntegrationAction> =
     listOf(
         SettingsIntegrationAction(
             icon = painterResource(R.drawable.discord),
             label = stringResource(R.string.discord),
-            onClick = { resetSearch(); navController.navigate("settings/discord") },
+            onClick = { resetSearch(); onNavigate("settings/discord") },
             accentColor = Color(0xFF5865F2),
         ),
         SettingsIntegrationAction(
             icon = painterResource(R.drawable.integration),
             label = stringResource(R.string.integration),
-            onClick = { resetSearch(); navController.navigate("settings/integration") },
+            onClick = { resetSearch(); onNavigate("settings/integration") },
             accentColor = MaterialTheme.colorScheme.secondary,
         ),
         SettingsIntegrationAction(
             icon = painterResource(R.drawable.fire),
             label = stringResource(R.string.music_together),
-            onClick = { resetSearch(); navController.navigate("settings/music_together") },
+            onClick = { resetSearch(); onNavigate("settings/music_together") },
             accentColor = MaterialTheme.colorScheme.tertiary,
         ),
     )
 
 @Composable
 fun buildSettingsGroups(
-    navController: NavController,
+    onNavigate: (String) -> Unit,
     isAndroid12OrLater: Boolean,
     hasUpdate: Boolean,
     context: Context,
@@ -99,7 +99,7 @@ fun buildSettingsGroups(
                         subtitle = stringResource(R.string.dark_theme),
                         accentColor = MaterialTheme.colorScheme.primary,
                         keywords = listOf("theme", "palette", "material you", "dynamic color", "font", "ui"),
-                        onClick = { resetSearch(); navController.navigate("settings/appearance") },
+                        onClick = { resetSearch(); onNavigate("settings/appearance") },
                     ),
                 ),
             ),
@@ -115,7 +115,7 @@ fun buildSettingsGroups(
                         subtitle = stringResource(R.string.audio_quality),
                         accentColor = MaterialTheme.colorScheme.tertiary,
                         keywords = listOf("audio", "playback", "volume", "quality", "equalizer", "crossfade"),
-                        onClick = { resetSearch(); navController.navigate("settings/player") },
+                        onClick = { resetSearch(); onNavigate("settings/player") },
                     ),
                     SettingsItem(
                         icon = painterResource(R.drawable.language),
@@ -123,7 +123,7 @@ fun buildSettingsGroups(
                         subtitle = stringResource(R.string.content_language),
                         accentColor = MaterialTheme.colorScheme.secondary,
                         keywords = listOf("language", "content", "lyrics", "translation", "region"),
-                        onClick = { resetSearch(); navController.navigate("settings/content") },
+                        onClick = { resetSearch(); onNavigate("settings/content") },
                     ),
                     SettingsItem(
                         icon = painterResource(R.drawable.token),
@@ -131,7 +131,7 @@ fun buildSettingsGroups(
                         subtitle = stringResource(R.string.po_token_generation_subtitle),
                         accentColor = MaterialTheme.colorScheme.tertiary,
                         keywords = listOf("po token", "token", "web client", "visitor data", "gvs", "player"),
-                        onClick = { resetSearch(); navController.navigate("settings/po_token") },
+                        onClick = { resetSearch(); onNavigate("settings/po_token") },
                     ),
                 ),
             ),
@@ -147,7 +147,7 @@ fun buildSettingsGroups(
                         subtitle = stringResource(R.string.pause_listen_history),
                         accentColor = MaterialTheme.colorScheme.error,
                         keywords = listOf("privacy", "history", "tracking", "security", "permissions"),
-                        onClick = { resetSearch(); navController.navigate("settings/privacy") },
+                        onClick = { resetSearch(); onNavigate("settings/privacy") },
                     ),
                 ),
             ),
@@ -163,7 +163,7 @@ fun buildSettingsGroups(
                         subtitle = stringResource(R.string.cache),
                         accentColor = MaterialTheme.colorScheme.secondary,
                         keywords = listOf("storage", "cache", "offline", "downloads", "cleanup"),
-                        onClick = { resetSearch(); navController.navigate("settings/storage") },
+                        onClick = { resetSearch(); onNavigate("settings/storage") },
                     ),
                     SettingsItem(
                         icon = painterResource(R.drawable.restore),
@@ -171,7 +171,7 @@ fun buildSettingsGroups(
                         subtitle = stringResource(R.string.action_backup),
                         accentColor = MaterialTheme.colorScheme.tertiary,
                         keywords = listOf("backup", "restore", "import", "export", "migration"),
-                        onClick = { resetSearch(); navController.navigate("settings/backup_restore") },
+                        onClick = { resetSearch(); onNavigate("settings/backup_restore") },
                     ),
                 ),
             ),
@@ -229,7 +229,7 @@ fun buildSettingsGroups(
                             subtitle = stringResource(R.string.misc),
                             accentColor = MaterialTheme.colorScheme.tertiary,
                             keywords = listOf("experimental", "debug", "developer", "labs", "internal"),
-                            onClick = { resetSearch(); navController.navigate("settings/misc") },
+                            onClick = { resetSearch(); onNavigate("settings/misc") },
                         ),
                     )
                     add(
@@ -248,7 +248,7 @@ fun buildSettingsGroups(
                                 MaterialTheme.colorScheme.primary
                             },
                             keywords = listOf("update", "version", "release", "changelog"),
-                            onClick = { resetSearch(); navController.navigate("settings/update") },
+                            onClick = { resetSearch(); onNavigate("settings/update") },
                         ),
                     )
                     add(
@@ -258,7 +258,7 @@ fun buildSettingsGroups(
                             subtitle = "ArchiveTune",
                             accentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                             keywords = listOf("about", "app info", "license", "contributors"),
-                            onClick = { resetSearch(); navController.navigate("settings/about") },
+                            onClick = { resetSearch(); onNavigate("settings/about") },
                         ),
                     )
                 },
@@ -268,7 +268,7 @@ fun buildSettingsGroups(
 
 @Composable
 fun buildInternalItems(
-    navController: NavController,
+    onNavigate: (String) -> Unit,
     resetSearch: () -> Unit,
 ): List<SettingsItem> =
     listOf(
@@ -278,7 +278,7 @@ fun buildInternalItems(
             subtitle = stringResource(R.string.theme_creator_subtitle),
             accentColor = MaterialTheme.colorScheme.primary,
             keywords = listOf("theme", "creator", "seed", "material", "palette", "import", "export"),
-            onClick = { resetSearch(); navController.navigate("settings/appearance/theme_creator") },
+            onClick = { resetSearch(); onNavigate("settings/appearance/theme_creator") },
         ),
         SettingsItem(
             icon = painterResource(R.drawable.palette),
@@ -286,7 +286,7 @@ fun buildInternalItems(
             subtitle = stringResource(R.string.appearance),
             accentColor = MaterialTheme.colorScheme.primary,
             keywords = listOf("palette", "color", "accent", "tone", "dynamic color"),
-            onClick = { resetSearch(); navController.navigate("settings/appearance/palette_picker") },
+            onClick = { resetSearch(); onNavigate("settings/appearance/palette_picker") },
         ),
         SettingsItem(
             icon = painterResource(R.drawable.image),
@@ -294,7 +294,7 @@ fun buildInternalItems(
             subtitle = stringResource(R.string.appearance),
             accentColor = MaterialTheme.colorScheme.secondary,
             keywords = listOf("background", "wallpaper", "image", "blur", "gradient"),
-            onClick = { resetSearch(); navController.navigate("customize_background") },
+            onClick = { resetSearch(); onNavigate("customize_background") },
         ),
         SettingsItem(
             icon = painterResource(R.drawable.discord),
@@ -302,7 +302,7 @@ fun buildInternalItems(
             subtitle = stringResource(R.string.integration),
             accentColor = Color(0xFF5865F2),
             keywords = listOf("discord", "rpc", "rich presence", "status", "activity"),
-            onClick = { resetSearch(); navController.navigate("settings/discord") },
+            onClick = { resetSearch(); onNavigate("settings/discord") },
         ),
         SettingsItem(
             icon = painterResource(R.drawable.security),
@@ -310,7 +310,7 @@ fun buildInternalItems(
             subtitle = stringResource(R.string.discord),
             accentColor = Color(0xFF5865F2),
             keywords = listOf("token", "login", "authentication", "discord login"),
-            onClick = { resetSearch(); navController.navigate("settings/discord/login") },
+            onClick = { resetSearch(); onNavigate("settings/discord/login") },
         ),
         SettingsItem(
             icon = painterResource(R.drawable.experiment),
@@ -318,7 +318,7 @@ fun buildInternalItems(
             subtitle = stringResource(R.string.experimental_features_description),
             accentColor = MaterialTheme.colorScheme.tertiary,
             keywords = listOf("experimental", "labs", "advanced", "discord experimental", "internal"),
-            onClick = { resetSearch(); navController.navigate("settings/discord/experimental") },
+            onClick = { resetSearch(); onNavigate("settings/discord/experimental") },
         ),
         SettingsItem(
             icon = painterResource(R.drawable.integration),
@@ -326,7 +326,7 @@ fun buildInternalItems(
             subtitle = stringResource(R.string.integration),
             accentColor = MaterialTheme.colorScheme.secondary,
             keywords = listOf("lastfm", "last.fm", "scrobble", "listening history"),
-            onClick = { resetSearch(); navController.navigate("settings/lastfm") },
+            onClick = { resetSearch(); onNavigate("settings/lastfm") },
         ),
         SettingsItem(
             icon = painterResource(R.drawable.fire),
@@ -334,6 +334,6 @@ fun buildInternalItems(
             subtitle = stringResource(R.string.integration),
             accentColor = MaterialTheme.colorScheme.tertiary,
             keywords = listOf("together", "session", "sync", "party", "join", "host"),
-            onClick = { resetSearch(); navController.navigate("settings/music_together") },
+            onClick = { resetSearch(); onNavigate("settings/music_together") },
         ),
     )

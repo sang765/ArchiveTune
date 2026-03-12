@@ -24,6 +24,9 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.background
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -79,6 +82,7 @@ fun AdaptiveSettingsLayout(
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
     topPadding: Dp = 0.dp,
+    detailPane: (@Composable () -> Unit)? = null,
 ) {
     val layoutMode = resolveLayoutMode()
 
@@ -137,19 +141,181 @@ fun AdaptiveSettingsLayout(
             )
         }
         SettingsLayoutMode.EXPANDED -> {
-            ExpandedSettingsLayout(
-                state = state,
-                quickActionColumns = quickActionColumns,
-                heroVisible = heroVisible,
-                bannerVisible = bannerVisible,
-                quickActionsVisible = quickActionsVisible,
-                integrationsVisible = integrationsVisible,
-                categoriesVisible = categoriesVisible,
-                topPadding = topPadding,
-                modifier = modifier,
-            )
+            if (detailPane != null) {
+                TwoPaneSettingsLayout(
+                    state = state,
+                    detailPane = detailPane,
+                    quickActionColumns = quickActionColumns,
+                    heroVisible = heroVisible,
+                    bannerVisible = bannerVisible,
+                    quickActionsVisible = quickActionsVisible,
+                    integrationsVisible = integrationsVisible,
+                    categoriesVisible = categoriesVisible,
+                    topPadding = topPadding,
+                    modifier = modifier,
+                )
+            } else {
+                ExpandedSettingsLayout(
+                    state = state,
+                    quickActionColumns = quickActionColumns,
+                    heroVisible = heroVisible,
+                    bannerVisible = bannerVisible,
+                    quickActionsVisible = quickActionsVisible,
+                    integrationsVisible = integrationsVisible,
+                    categoriesVisible = categoriesVisible,
+                    topPadding = topPadding,
+                    modifier = modifier,
+                )
+            }
         }
     }
+}
+
+@Composable
+private fun TwoPaneSettingsLayout(
+    state: SettingsContentState,
+    detailPane: @Composable () -> Unit,
+    quickActionColumns: Int,
+    heroVisible: Boolean,
+    bannerVisible: Boolean,
+    quickActionsVisible: Boolean,
+    integrationsVisible: Boolean,
+    categoriesVisible: Boolean,
+    topPadding: Dp,
+    modifier: Modifier = Modifier,
+) {
+    val pad = SettingsDimensions.ScreenHorizontalPadding
+    val spacing = SettingsDimensions.SectionSpacing
+
+    Row(
+        modifier = modifier
+            .fillMaxSize()
+            .windowInsetsPadding(
+                LocalPlayerAwareWindowInsets.current.only(
+                    WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
+                )
+            ),
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .width(SettingsDimensions.ExpandedListPaneWidth)
+                .fillMaxHeight()
+                .padding(horizontal = pad),
+            contentPadding = PaddingValues(top = topPadding, bottom = 32.dp),
+        ) {
+            item(key = "hero") {
+                AnimatedVisibility(
+                    visible = heroVisible,
+                    enter = fadeIn(SettingsAnimations.entranceSpring()),
+                ) {
+                    SettingsProfileHeader(
+                        modifier = Modifier.padding(top = 4.dp, bottom = spacing),
+                    )
+                }
+            }
+
+            if (!state.isSearchActive) {
+                item(key = "permission") {
+                    AnimatedVisibility(
+                        visible = bannerVisible && state.showPermissionBanner,
+                        enter = fadeIn(SettingsAnimations.entranceSpring()) +
+                            expandVertically(SettingsAnimations.entranceSpring()),
+                        exit = fadeOut(tween(300)) + shrinkVertically(tween(300)),
+                    ) {
+                        SettingsPermissionBanner(
+                            onRequestPermission = state.onRequestPermission,
+                            modifier = Modifier.padding(bottom = spacing),
+                        )
+                    }
+                }
+
+                item(key = "update") {
+                    AnimatedVisibility(
+                        visible = bannerVisible && state.showUpdateBanner,
+                        enter = fadeIn(SettingsAnimations.entranceSpring()) +
+                            expandVertically(SettingsAnimations.entranceSpring()),
+                        exit = fadeOut(tween(300)) + shrinkVertically(tween(300)),
+                    ) {
+                        SettingsUpdateBanner(
+                            latestVersion = state.latestVersion,
+                            onClick = state.onUpdateClick,
+                            modifier = Modifier.padding(bottom = spacing),
+                        )
+                    }
+                }
+            }
+
+            if (state.isSearchActive && !state.hasSearchResults) {
+                item(key = "empty") {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    SettingsSearchEmpty()
+                }
+            } else {
+                if (state.internalGroup != null && state.internalGroup.items.isNotEmpty()) {
+                    item(key = "internalSearchResults") {
+                        SettingsGroupCard(
+                            group = state.internalGroup,
+                            modifier = Modifier.padding(bottom = spacing),
+                        )
+                    }
+                }
+
+                items(
+                    count = state.groups.size,
+                    key = { state.groups[it].title },
+                ) { index ->
+                    AnimatedVisibility(
+                        visible = categoriesVisible,
+                        enter = fadeIn(
+                            tween(
+                                SettingsAnimations.EntranceSlideDuration,
+                                delayMillis = index * SettingsAnimations.StaggerDelayPerItem,
+                            )
+                        ) + slideInVertically(
+                            initialOffsetY = { it / 5 },
+                            animationSpec = tween(
+                                SettingsAnimations.EntranceSlideDuration,
+                                delayMillis = index * SettingsAnimations.StaggerDelayPerItem,
+                            ),
+                        ),
+                    ) {
+                        SettingsGroupCard(
+                            group = state.groups[index],
+                            modifier = Modifier.padding(bottom = spacing),
+                        )
+                    }
+                }
+            }
+        }
+
+        VerticalDivider(
+            modifier = Modifier.fillMaxHeight(),
+            thickness = SettingsDimensions.DividerThickness,
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+        )
+
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+        ) {
+            detailPane()
+        }
+    }
+}
+
+@Composable
+fun VerticalDivider(
+    modifier: Modifier = Modifier,
+    thickness: Dp = 1.dp,
+    color: Color = MaterialTheme.colorScheme.outlineVariant,
+) {
+    Box(
+        modifier
+            .fillMaxHeight()
+            .width(thickness)
+            .background(color = color)
+    )
 }
 
 @Composable
