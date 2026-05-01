@@ -4660,11 +4660,34 @@ class MusicService :
                             10,
                             150.toShort(),
                         ),
-                        CrossfadeAudioProcessor().also { onCrossfadeProcessorCreated?.invoke(it) },
+                        CrossfadeAudioProcessor().also { processor ->
+                            processor.onCrossfadeStartListener =
+                                CrossfadeAudioProcessor.OnCrossfadeStartListener {
+                                    handleCrossfadeStart()
+                                }
+                            onCrossfadeProcessorCreated?.invoke(processor)
+                        },
                         SonicAudioProcessor(),
                     ),
                 ).build()
         }
+
+    /**
+     * Called when crossfade starts playing the next track.
+     * Updates metadata early so lyrics and seekbar show the next song immediately.
+     */
+    private fun handleCrossfadeStart() {
+        val nextIndex = player.nextMediaItemIndex
+        if (nextIndex == C.INDEX_UNSET) return
+
+        val nextMediaItem = player.getMediaItemAt(nextIndex)
+        val nextMetadata = nextMediaItem.metadata ?: return
+
+        scope.launch {
+            currentMediaMetadata.value = nextMetadata
+            updateNotification()
+        }
+    }
 
     override fun onPlaybackStatsReady(
         eventTime: AnalyticsListener.EventTime,

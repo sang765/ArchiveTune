@@ -23,6 +23,18 @@ import kotlin.math.min
  */
 @UnstableApi
 class CrossfadeAudioProcessor : AudioProcessor {
+
+    /**
+     * Listener interface for crossfade events
+     */
+    fun interface OnCrossfadeStartListener {
+        fun onCrossfadeStart()
+    }
+
+    var onCrossfadeStartListener: OnCrossfadeStartListener? = null
+
+    @Volatile
+    private var hasInvokedCrossfadeStart: Boolean = false
     private var inputAudioFormat = AudioFormat.NOT_SET
     private var outputAudioFormat = AudioFormat.NOT_SET
 
@@ -159,6 +171,13 @@ class CrossfadeAudioProcessor : AudioProcessor {
         framesOutputInStream += tailFrames.toLong()
 
         shouldFadeInNextStream = true
+
+        // Invoke callback when crossfade starts (only once per transition)
+        if (!hasInvokedCrossfadeStart) {
+            hasInvokedCrossfadeStart = true
+            onCrossfadeStartListener?.onCrossfadeStart()
+        }
+
         enqueueOutput(scratch, 0, alignedTailBytes)
 
         return dequeueOutputToByteBuffer(outSizeBytes)
@@ -174,6 +193,7 @@ class CrossfadeAudioProcessor : AudioProcessor {
         isEnding = false
         shouldFadeInThisStream = false
         shouldFadeInNextStream = preserveFadeInForNextStream
+        hasInvokedCrossfadeStart = false
         tailStartIndex = 0
         tailSizeBytes = 0
         outStartIndex = 0
