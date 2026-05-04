@@ -10,12 +10,14 @@
 
 package moe.koiverse.archivetune.ui.player
 
+import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.gestures.Orientation
@@ -59,8 +61,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -87,6 +89,10 @@ import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
+import coil3.toBitmap
 import androidx.compose.material3.Icon
 import moe.koiverse.archivetune.LocalPlayerConnection
 import moe.koiverse.archivetune.R
@@ -108,6 +114,7 @@ import moe.koiverse.archivetune.extensions.metadata
 import moe.koiverse.archivetune.extensions.toMediaItem
 import moe.koiverse.archivetune.innertube.YouTube
 import moe.koiverse.archivetune.innertube.models.YouTubeClient
+import moe.koiverse.archivetune.utils.BitmapUtils
 import moe.koiverse.archivetune.utils.rememberEnumPreference
 import moe.koiverse.archivetune.utils.rememberPreference
 import kotlinx.coroutines.CoroutineScope
@@ -680,17 +687,12 @@ fun Thumbnail(
                                             cropThumbnailToSquare &&
                                                 playerDesignStyle != PlayerDesignStyle.V7
 
-                                        AsyncImage(
-                                            model = item.mediaMetadata.artworkUri?.toString(),
-                                            contentDescription = null,
-                                            contentScale = ContentScale.FillBounds,
+                                        BlurredBackdrop(
+                                            artworkUri = item.mediaMetadata.artworkUri?.toString(),
                                             modifier = Modifier
                                                 .fillMaxSize()
                                                 .let { if (shouldCropArtwork) it.aspectRatio(1f) else it }
-                                                .graphicsLayer(
-                                                    renderEffect = BlurEffect(radiusX = 60f, radiusY = 60f),
-                                                    alpha = 0.6f
-                                                )
+                                                .alpha(0.6f)
                                         )
 
                                         AsyncImage(
@@ -744,6 +746,44 @@ fun Thumbnail(
                     .padding(8.dp)
             )
         }
+    }
+}
+
+@Composable
+private fun BlurredBackdrop(
+    artworkUri: String?,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    var blurredBitmap by remember(artworkUri) { mutableStateOf<Bitmap?>(null) }
+
+    LaunchedEffect(artworkUri) {
+        if (artworkUri == null) {
+            blurredBitmap = null
+            return@LaunchedEffect
+        }
+        withContext(Dispatchers.IO) {
+            val imageLoader = context.imageLoader
+            val request = ImageRequest.Builder(context)
+                .data(artworkUri)
+                .size(128) // Scale down for performance
+                .allowHardware(false)
+                .build()
+            val result = imageLoader.execute(request)
+            if (result is SuccessResult) {
+                val bitmap = result.image.toBitmap()
+                blurredBitmap = BitmapUtils.blurBitmap(bitmap, 25f)
+            }
+        }
+    }
+
+    blurredBitmap?.let {
+        Image(
+            bitmap = it.asImageBitmap(),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = modifier
+        )
     }
 }
 

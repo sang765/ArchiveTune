@@ -119,12 +119,12 @@ object ComposeToImage {
             (targetWidth != null && targetWidth > 0 && targetWidth != original.width) ||
             (targetHeight != null && targetHeight > 0 && targetHeight != original.height)
         val base = if (needsScale) {
-            val safeOriginal = ensureSoftwareBitmap(original)
+            val safeOriginal = BitmapUtils.ensureSoftwareBitmap(original)
             val tw = targetWidth ?: original.width
             val th = targetHeight ?: (original.height * tw / original.width)
-            ensureSoftwareBitmap(Bitmap.createScaledBitmap(safeOriginal, tw, th, true))
+            BitmapUtils.ensureSoftwareBitmap(Bitmap.createScaledBitmap(safeOriginal, tw, th, true))
         } else {
-            ensureSoftwareBitmap(original)
+            BitmapUtils.ensureSoftwareBitmap(original)
         }
         if (backgroundColor != null) {
             val out = Bitmap.createBitmap(base.width, base.height, Bitmap.Config.ARGB_8888)
@@ -137,12 +137,12 @@ object ComposeToImage {
     }
 
     fun cropBitmap(source: Bitmap, left: Int, top: Int, width: Int, height: Int): Bitmap {
-        val safeSource = ensureSoftwareBitmap(source)
+        val safeSource = BitmapUtils.ensureSoftwareBitmap(source)
         val safeLeft = left.coerceIn(0, safeSource.width.coerceAtLeast(1) - 1)
         val safeTop = top.coerceIn(0, safeSource.height.coerceAtLeast(1) - 1)
         val safeWidth = width.coerceIn(1, safeSource.width - safeLeft)
         val safeHeight = height.coerceIn(1, safeSource.height - safeTop)
-        return ensureSoftwareBitmap(Bitmap.createBitmap(safeSource, safeLeft, safeTop, safeWidth, safeHeight))
+        return BitmapUtils.ensureSoftwareBitmap(Bitmap.createBitmap(safeSource, safeLeft, safeTop, safeWidth, safeHeight))
     }
 
     fun fitBitmap(
@@ -151,7 +151,7 @@ object ComposeToImage {
         targetHeight: Int,
         backgroundColor: Int,
     ): Bitmap {
-        val safeSource = ensureSoftwareBitmap(source)
+        val safeSource = BitmapUtils.ensureSoftwareBitmap(source)
         val out = Bitmap.createBitmap(targetWidth, targetHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(out)
         canvas.drawColor(backgroundColor)
@@ -163,7 +163,7 @@ object ComposeToImage {
         val scaledW = (safeSource.width * scale).toInt().coerceAtLeast(1)
         val scaledH = (safeSource.height * scale).toInt().coerceAtLeast(1)
         val scaled = if (scaledW != safeSource.width || scaledH != safeSource.height) {
-            ensureSoftwareBitmap(Bitmap.createScaledBitmap(safeSource, scaledW, scaledH, true))
+            BitmapUtils.ensureSoftwareBitmap(Bitmap.createScaledBitmap(safeSource, scaledW, scaledH, true))
         } else {
             safeSource
         }
@@ -237,7 +237,7 @@ object ComposeToImage {
             }
 
         if (fittedArt != null) {
-            val blurredBackground = blurBitmap(fittedArt, shareOptions.sanitizedBlurRadius)
+            val blurredBackground = BitmapUtils.blurBitmap(fittedArt, shareOptions.sanitizedBlurRadius)
             canvas.drawBitmap(blurredBackground, 0f, 0f, Paint(Paint.FILTER_BITMAP_FLAG))
         } else {
             canvas.drawColor(bgColor)
@@ -266,7 +266,7 @@ object ComposeToImage {
         }
 
         if (fittedArt != null) {
-            val frostedCrop = blurBitmap(fittedArt, (shareOptions.sanitizedBlurRadius + 10f).coerceIn(8f, 48f))
+            val frostedCrop = BitmapUtils.blurBitmap(fittedArt, (shareOptions.sanitizedBlurRadius + 10f).coerceIn(8f, 48f))
             canvas.withClip(glassPath) {
                 drawBitmap(frostedCrop, 0f, 0f, Paint(Paint.FILTER_BITMAP_FLAG))
             }
@@ -429,202 +429,6 @@ object ComposeToImage {
         return@withContext bitmap
     }
 
-    private fun blurBitmap(source: Bitmap, radius: Float): Bitmap {
-        val safe = ensureSoftwareBitmap(source)
-        val safeRadius = radius.coerceIn(0f, 48f)
-        if (safeRadius <= 0.5f) return safe
-        return stackBlur(safe, safeRadius.roundToInt().coerceAtLeast(1))
-    }
-
-    private fun stackBlur(source: Bitmap, radius: Int): Bitmap {
-        val bitmap = ensureSoftwareBitmap(source.copy(Bitmap.Config.ARGB_8888, true))
-        val width = bitmap.width
-        val height = bitmap.height
-        val pixels = IntArray(width * height)
-        bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
-
-        val wm = width - 1
-        val hm = height - 1
-        val div = radius + radius + 1
-        val red = IntArray(width * height)
-        val green = IntArray(width * height)
-        val blue = IntArray(width * height)
-        val vMin = IntArray(max(width, height))
-        val divSum = ((div + 1) shr 1).let { it * it }
-        val divTable = IntArray(256 * divSum) { it / divSum }
-        val stack = Array(div) { IntArray(3) }
-
-        var yi = 0
-        var yw = 0
-        for (y in 0 until height) {
-            var rinsum = 0
-            var ginsum = 0
-            var binsum = 0
-            var routsum = 0
-            var goutsum = 0
-            var boutsum = 0
-            var rsum = 0
-            var gsum = 0
-            var bsum = 0
-
-            for (i in -radius..radius) {
-                val p = pixels[yi + i.coerceIn(0, wm)]
-                val sir = stack[i + radius]
-                sir[0] = p shr 16 and 0xFF
-                sir[1] = p shr 8 and 0xFF
-                sir[2] = p and 0xFF
-                val rbs = radius + 1 - kotlin.math.abs(i)
-                rsum += sir[0] * rbs
-                gsum += sir[1] * rbs
-                bsum += sir[2] * rbs
-                if (i > 0) {
-                    rinsum += sir[0]
-                    ginsum += sir[1]
-                    binsum += sir[2]
-                } else {
-                    routsum += sir[0]
-                    goutsum += sir[1]
-                    boutsum += sir[2]
-                }
-            }
-
-            var stackPointer = radius
-            for (x in 0 until width) {
-                red[yi] = divTable[rsum]
-                green[yi] = divTable[gsum]
-                blue[yi] = divTable[bsum]
-
-                rsum -= routsum
-                gsum -= goutsum
-                bsum -= boutsum
-
-                val stackStart = (stackPointer - radius + div) % div
-                val sir = stack[stackStart]
-
-                routsum -= sir[0]
-                goutsum -= sir[1]
-                boutsum -= sir[2]
-
-                if (y == 0) {
-                    vMin[x] = (x + radius + 1).coerceAtMost(wm)
-                }
-                val p = pixels[yw + vMin[x]]
-                sir[0] = p shr 16 and 0xFF
-                sir[1] = p shr 8 and 0xFF
-                sir[2] = p and 0xFF
-
-                rinsum += sir[0]
-                ginsum += sir[1]
-                binsum += sir[2]
-
-                rsum += rinsum
-                gsum += ginsum
-                bsum += binsum
-
-                stackPointer = (stackPointer + 1) % div
-                val nextSir = stack[stackPointer]
-
-                routsum += nextSir[0]
-                goutsum += nextSir[1]
-                boutsum += nextSir[2]
-
-                rinsum -= nextSir[0]
-                ginsum -= nextSir[1]
-                binsum -= nextSir[2]
-                yi++
-            }
-            yw += width
-        }
-
-        for (x in 0 until width) {
-            var rinsum = 0
-            var ginsum = 0
-            var binsum = 0
-            var routsum = 0
-            var goutsum = 0
-            var boutsum = 0
-            var rsum = 0
-            var gsum = 0
-            var bsum = 0
-            var yp = -radius * width
-
-            for (i in -radius..radius) {
-                val yiIndex = max(0, yp) + x
-                val sir = stack[i + radius]
-                sir[0] = red[yiIndex]
-                sir[1] = green[yiIndex]
-                sir[2] = blue[yiIndex]
-                val rbs = radius + 1 - kotlin.math.abs(i)
-                rsum += red[yiIndex] * rbs
-                gsum += green[yiIndex] * rbs
-                bsum += blue[yiIndex] * rbs
-                if (i > 0) {
-                    rinsum += sir[0]
-                    ginsum += sir[1]
-                    binsum += sir[2]
-                } else {
-                    routsum += sir[0]
-                    goutsum += sir[1]
-                    boutsum += sir[2]
-                }
-                if (i < hm) yp += width
-            }
-
-            var yiIndex = x
-            var stackPointer = radius
-            for (y in 0 until height) {
-                pixels[yiIndex] =
-                    pixels[yiIndex] and -0x1000000 or
-                        (divTable[rsum] shl 16) or
-                        (divTable[gsum] shl 8) or
-                        divTable[bsum]
-
-                rsum -= routsum
-                gsum -= goutsum
-                bsum -= boutsum
-
-                val stackStart = (stackPointer - radius + div) % div
-                val sir = stack[stackStart]
-
-                routsum -= sir[0]
-                goutsum -= sir[1]
-                boutsum -= sir[2]
-
-                if (x == 0) {
-                    vMin[y] = ((y + radius + 1).coerceAtMost(hm)) * width
-                }
-                val p = x + vMin[y]
-                sir[0] = red[p]
-                sir[1] = green[p]
-                sir[2] = blue[p]
-
-                rinsum += sir[0]
-                ginsum += sir[1]
-                binsum += sir[2]
-
-                rsum += rinsum
-                gsum += ginsum
-                bsum += binsum
-
-                stackPointer = (stackPointer + 1) % div
-                val nextSir = stack[stackPointer]
-
-                routsum += nextSir[0]
-                goutsum += nextSir[1]
-                boutsum += nextSir[2]
-
-                rinsum -= nextSir[0]
-                ginsum -= nextSir[1]
-                binsum -= nextSir[2]
-
-                yiIndex += width
-            }
-        }
-
-        bitmap.setPixels(pixels, 0, width, 0, 0, width, height)
-        return bitmap
-    }
-
     private fun AppLogo(
         context: Context,
         canvas: Canvas,
@@ -683,7 +487,7 @@ object ComposeToImage {
     }
 
     fun saveBitmapAsFile(context: Context, bitmap: Bitmap, fileName: String): Uri {
-        val safeBitmap = ensureSoftwareBitmap(bitmap)
+        val safeBitmap = BitmapUtils.ensureSoftwareBitmap(bitmap)
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val contentValues = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, "$fileName.png")
