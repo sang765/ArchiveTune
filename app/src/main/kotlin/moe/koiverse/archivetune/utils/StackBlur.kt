@@ -23,7 +23,15 @@ object StackBlur {
             return sentBitmap
         }
 
-        val bitmap = if (canModifySource) sentBitmap else sentBitmap.copy(sentBitmap.config ?: Bitmap.Config.ARGB_8888, true)
+        val config = sentBitmap.config ?: Bitmap.Config.ARGB_8888
+        val isHardware = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O && 
+                config == Bitmap.Config.HARDWARE
+
+        val bitmap = if (canModifySource && sentBitmap.isMutable && !isHardware) {
+            sentBitmap
+        } else {
+            sentBitmap.copy(if (isHardware) Bitmap.Config.ARGB_8888 else config, true)
+        }
         val w = bitmap.width
         val h = bitmap.height
 
@@ -51,10 +59,8 @@ object StackBlur {
         val vmin = IntArray(maxOf(w, h))
 
         val divsum = (div + 1) shr 1
-        val dv = IntArray(256 * divsum * divsum)
-        for (idx in 0 until 256 * divsum * divsum) {
-            dv[idx] = idx / (divsum * divsum)
-        }
+        val divsum2 = divsum * divsum
+        val dv = IntArray(256 * divsum2) { it / divsum2 }
 
         yi = 0
         yw = 0

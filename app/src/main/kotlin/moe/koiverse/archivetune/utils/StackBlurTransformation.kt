@@ -18,6 +18,11 @@ import kotlin.math.roundToInt
  */
 class StackBlurTransformation(
     private val radius: Float,
+    /** 
+     * The maximum dimension (width or height) of the bitmap before blurring.
+     * Scaling down significantly improves performance on low-end devices while
+     * maintaining visual quality for a blur effect.
+     */
     private val maxDimension: Int = 150
 ) : Transformation() {
 
@@ -36,16 +41,22 @@ class StackBlurTransformation(
         }
 
         val intermediate = if (scale < 1.0f) {
-            val targetWidth = (width * scale).roundToInt().coerceAtLeast(1)
-            val targetHeight = (height * scale).roundToInt().coerceAtLeast(1)
-            Bitmap.createScaledBitmap(input, targetWidth, targetHeight, true)
+            try {
+                val targetWidth = (width * scale).roundToInt().coerceAtLeast(1)
+                val targetHeight = (height * scale).roundToInt().coerceAtLeast(1)
+                Bitmap.createScaledBitmap(input, targetWidth, targetHeight, true)
+            } catch (e: OutOfMemoryError) {
+                // If we can't scale it down, try to use the original. 
+                // StackBlur will handle it, though it might be slow or OOM there too.
+                input
+            }
         } else {
             input
         }
 
         // Apply stack blur.
         // If intermediate is a new bitmap (intermediate !== input), we can modify it directly.
-        // Otherwise, StackBlur.blur will create a copy to avoid modifying the original input.
+        // Otherwise, StackBlur.blur will create a copy if needed.
         return StackBlur.blur(intermediate, radius.roundToInt(), canModifySource = intermediate !== input)
     }
 
