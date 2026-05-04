@@ -19,7 +19,7 @@ import kotlin.math.roundToInt
 class StackBlurTransformation(
     private val radius: Float,
     private val maxDimension: Int = 150
-) : Transformation {
+) : Transformation() {
 
     override val cacheKey: String = "${StackBlurTransformation::class.java.name}-$radius-$maxDimension"
 

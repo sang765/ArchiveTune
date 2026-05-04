@@ -94,6 +94,7 @@ import androidx.media3.common.Player.STATE_ENDED
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import coil3.request.transformations
 import moe.koiverse.archivetune.utils.StackBlurTransformation
 import androidx.compose.ui.platform.LocalContext
 import me.saket.squiggles.SquigglySlider
@@ -1875,7 +1876,7 @@ fun PlayerBackground(
                                     .data(thumbnailUrl)
                                     .let { builder ->
                                         if (shouldApplyBlur) {
-                                            builder.transformations(StackBlurTransformation(radius = effectiveBlurRadius))
+                                            builder.transformations(listOf(StackBlurTransformation(radius = effectiveBlurRadius)))
                                         } else builder
                                     }
                                     .build(),
@@ -1981,7 +1982,7 @@ fun PlayerBackground(
                                     .data(thumbnailUrl)
                                     .let { builder ->
                                         if (shouldApplyBlur) {
-                                            builder.transformations(StackBlurTransformation(radius = effectiveBlurRadius))
+                                            builder.transformations(listOf(StackBlurTransformation(radius = effectiveBlurRadius)))
                                         } else builder
                                     }
                                     .build(),
@@ -2035,7 +2036,7 @@ fun PlayerBackground(
                                     .data(Uri.parse(uri))
                                     .let { builder ->
                                         if (!disableBlur) {
-                                            builder.transformations(StackBlurTransformation(radius = blurPx))
+                                            builder.transformations(listOf(StackBlurTransformation(radius = blurPx)))
                                         } else builder
                                     }
                                     .build(),

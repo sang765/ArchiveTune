@@ -23,7 +23,7 @@ object StackBlur {
             return sentBitmap
         }
 
-        val bitmap = if (canModifySource) sentBitmap else sentBitmap.copy(sentBitmap.config, true)
+        val bitmap = if (canModifySource) sentBitmap else sentBitmap.copy(sentBitmap.config ?: Bitmap.Config.ARGB_8888, true)
         val w = bitmap.width
         val h = bitmap.height
 

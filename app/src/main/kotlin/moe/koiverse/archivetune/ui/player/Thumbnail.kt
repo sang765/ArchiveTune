@@ -86,6 +86,7 @@ import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import coil3.request.transformations
 import moe.koiverse.archivetune.utils.StackBlurTransformation
 import androidx.compose.material3.Icon
 import moe.koiverse.archivetune.LocalPlayerConnection
@@ -683,7 +684,7 @@ fun Thumbnail(
                                         AsyncImage(
                                             model = ImageRequest.Builder(LocalContext.current)
                                                 .data(item.mediaMetadata.artworkUri?.toString())
-                                                .transformations(StackBlurTransformation(radius = 25f))
+                                                .transformations(listOf(StackBlurTransformation(radius = 25f)))
                                                 .build(),
                                             contentDescription = null,
                                             contentScale = ContentScale.FillBounds,
