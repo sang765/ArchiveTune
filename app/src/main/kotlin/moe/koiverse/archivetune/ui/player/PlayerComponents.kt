@@ -70,7 +70,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
@@ -94,6 +93,9 @@ import androidx.media3.common.Player
 import androidx.media3.common.Player.STATE_ENDED
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import moe.koiverse.archivetune.utils.StackBlurTransformation
+import androidx.compose.ui.platform.LocalContext
 import me.saket.squiggles.SquigglySlider
 import moe.koiverse.archivetune.LocalPlayerConnection
 import moe.koiverse.archivetune.R
@@ -1869,12 +1871,17 @@ fun PlayerBackground(
                     if (thumbnailUrl != null) {
                         Box(modifier = Modifier.fillMaxSize()) {
                             AsyncImage(
-                                model = thumbnailUrl,
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(thumbnailUrl)
+                                    .let { builder ->
+                                        if (shouldApplyBlur) {
+                                            builder.transformations(StackBlurTransformation(radius = effectiveBlurRadius))
+                                        } else builder
+                                    }
+                                    .build(),
                                 contentDescription = "Blurred background",
                                 contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize().let {
-                                    if (shouldApplyBlur) it.blur(radius = effectiveBlurRadius.dp) else it
-                                }
+                                modifier = Modifier.fillMaxSize()
                             )
                             val overlayStops = PlayerBackgroundColorUtils.buildBlurOverlayStops(gradientColors)
                             Box(
@@ -1970,12 +1977,17 @@ fun PlayerBackground(
                     if (thumbnailUrl != null) {
                         Box(modifier = Modifier.fillMaxSize()) {
                             AsyncImage(
-                                model = thumbnailUrl,
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(thumbnailUrl)
+                                    .let { builder ->
+                                        if (shouldApplyBlur) {
+                                            builder.transformations(StackBlurTransformation(radius = effectiveBlurRadius))
+                                        } else builder
+                                    }
+                                    .build(),
                                 contentDescription = "Blurred background",
                                 contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize().let {
-                                    if (shouldApplyBlur) it.blur(radius = effectiveBlurRadius.dp) else it
-                                }
+                                modifier = Modifier.fillMaxSize()
                             )
                             val gradientColorStops =
                                 PlayerBackgroundColorUtils.buildBlurGradientStops(gradientColors)
@@ -2019,12 +2031,17 @@ fun PlayerBackground(
                             val cm = ColorMatrix(matrix)
 
                             AsyncImage(
-                                model = Uri.parse(uri),
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(Uri.parse(uri))
+                                    .let { builder ->
+                                        if (!disableBlur) {
+                                            builder.transformations(StackBlurTransformation(radius = blurPx))
+                                        } else builder
+                                    }
+                                    .build(),
                                 contentDescription = "Custom background",
                                 contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize().let {
-                                    if (disableBlur) it else it.blur(radius = blurPx.dp)
-                                },
+                                modifier = Modifier.fillMaxSize(),
                                 colorFilter = ColorFilter.colorMatrix(cm)
                             )
                             Box(

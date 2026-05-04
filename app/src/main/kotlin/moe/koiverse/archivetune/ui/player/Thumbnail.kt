@@ -59,9 +59,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -87,6 +85,8 @@ import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import moe.koiverse.archivetune.utils.StackBlurTransformation
 import androidx.compose.material3.Icon
 import moe.koiverse.archivetune.LocalPlayerConnection
 import moe.koiverse.archivetune.R
@@ -681,16 +681,16 @@ fun Thumbnail(
                                                 playerDesignStyle != PlayerDesignStyle.V7
 
                                         AsyncImage(
-                                            model = item.mediaMetadata.artworkUri?.toString(),
+                                            model = ImageRequest.Builder(LocalContext.current)
+                                                .data(item.mediaMetadata.artworkUri?.toString())
+                                                .transformations(StackBlurTransformation(radius = 25f))
+                                                .build(),
                                             contentDescription = null,
                                             contentScale = ContentScale.FillBounds,
                                             modifier = Modifier
                                                 .fillMaxSize()
                                                 .let { if (shouldCropArtwork) it.aspectRatio(1f) else it }
-                                                .graphicsLayer(
-                                                    renderEffect = BlurEffect(radiusX = 60f, radiusY = 60f),
-                                                    alpha = 0.6f
-                                                )
+                                                .alpha(0.6f)
                                         )
 
                                         AsyncImage(
