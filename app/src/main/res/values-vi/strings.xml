@@ -654,6 +654,12 @@ ArchiveTune sẽ chỉ trích xuất token của bạn, và mọi thứ khác đ
     <string name="update_notification_title">Cập nhật Có sẵn</string>
     <string name="update_notification_text">ArchiveTune %s hiện đã có sẵn</string>
     <string name="download">Tải xuống</string>
+
+    <string name="github_pat">GitHub Personal Access Token (PAT)</string>
+    <string name="github_pat_desc">PAT cho phép vượt qua giới hạn tỷ lệ GitHub API. Nó chỉ được lưu trữ cục bộ trên thiết bị của bạn.</string>
+    <string name="set_github_pat">Thiết lập GitHub PAT</string>
+    <string name="remove_github_pat">Xóa GitHub PAT</string>
+
     <string name="permissions_title">Cho phép ArchiveTune hoạt động tốt nhất</string>
     <string name="permissions_subtitle">Chúng tôi sử dụng một số quyền để phát và quản lý nhạc của bạn một cách đáng tin cậy. Bạn có thể thay đổi những quyền này bất cứ lúc nào trong cài đặt hệ thống.</string>
     <string name="permission_storage_title">Truy cập lưu trữ</string>

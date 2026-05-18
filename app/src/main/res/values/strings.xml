@@ -767,6 +767,11 @@ ArchiveTune will only extract your token, and everything else is stored locally.
     <string name="update_notification_text">ArchiveTune %s is now available</string>
     <string name="download">Download</string>
 
+    <string name="github_pat">GitHub Personal Access Token (PAT)</string>
+    <string name="github_pat_desc">A PAT allows bypassing GitHub API rate limits. It is only stored locally on your device.</string>
+    <string name="set_github_pat">Set GitHub PAT</string>
+    <string name="remove_github_pat">Remove GitHub PAT</string>
+
     <string name="permissions_title">Allow ArchiveTune to work best</string>
     <string name="permissions_subtitle">We use a few permissions to play and manage your music reliably. You can change these anytime in system settings.</string>
     <string name="permission_storage_title">Storage access</string>

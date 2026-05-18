@@ -14,6 +14,7 @@ package moe.koiverse.archivetune.utils
 import androidx.datastore.preferences.core.edit
 import moe.koiverse.archivetune.BuildConfig
 import moe.koiverse.archivetune.App
+import moe.koiverse.archivetune.constants.GitHubPATKey
 import moe.koiverse.archivetune.constants.GitHubReleasesEtagKey
 import moe.koiverse.archivetune.constants.GitHubReleasesFingerprintKey
 import moe.koiverse.archivetune.constants.GitHubReleasesJsonKey
@@ -212,11 +213,15 @@ object Updater {
         perPage: Int,
         cachedEtag: String?,
     ): ReleasesNetworkResult {
+        val pat = App.instance.dataStore.getAsync(GitHubPATKey)
         val response: HttpResponse =
             client.get("https://api.github.com/repos/koiverse/ArchiveTune/releases?per_page=$perPage") {
                 headers {
                     append("Accept", "application/vnd.github+json")
                     append("User-Agent", "ArchiveTune")
+                    if (!pat.isNullOrBlank()) {
+                        append("Authorization", "Bearer $pat")
+                    }
                     if (!cachedEtag.isNullOrBlank()) {
                         append("If-None-Match", cachedEtag)
                     }
@@ -267,8 +272,17 @@ object Updater {
 
     suspend fun getCommitHistory(count: Int = 20, branch: String = "dev"): Result<List<GitCommit>> =
         runCatching {
+            val pat = App.instance.dataStore.getAsync(GitHubPATKey)
             val response =
-                client.get("https://api.github.com/repos/koiverse/ArchiveTune/commits?sha=$branch&per_page=$count")
+                client.get("https://api.github.com/repos/koiverse/ArchiveTune/commits?sha=$branch&per_page=$count") {
+                    headers {
+                        append("Accept", "application/vnd.github+json")
+                        append("User-Agent", "ArchiveTune")
+                        if (!pat.isNullOrBlank()) {
+                            append("Authorization", "Bearer $pat")
+                        }
+                    }
+                }
                     .bodyAsText()
             val jsonArray = JSONArray(response)
             val commits = mutableListOf<GitCommit>()

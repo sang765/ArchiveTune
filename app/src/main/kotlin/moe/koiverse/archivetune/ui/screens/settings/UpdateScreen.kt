@@ -41,6 +41,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
@@ -81,6 +83,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -89,10 +92,12 @@ import moe.koiverse.archivetune.BuildConfig
 import moe.koiverse.archivetune.LocalPlayerAwareWindowInsets
 import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.constants.EnableUpdateNotificationKey
+import moe.koiverse.archivetune.constants.GitHubPATKey
 import moe.koiverse.archivetune.constants.UpdateChannel
 import moe.koiverse.archivetune.constants.UpdateChannelKey
 import moe.koiverse.archivetune.ui.component.IconButton
 import moe.koiverse.archivetune.ui.component.PreferenceGroupTitle
+import moe.koiverse.archivetune.ui.component.TextFieldDialog
 import moe.koiverse.archivetune.ui.utils.backToMain
 import moe.koiverse.archivetune.utils.GitCommit
 import moe.koiverse.archivetune.utils.UpdateNotificationManager
@@ -121,6 +126,10 @@ fun UpdateScreen(
         UpdateChannelKey,
         defaultValue = UpdateChannel.STABLE
     )
+    val (githubPat, onGithubPatChange) = rememberPreference(
+        GitHubPATKey,
+        defaultValue = ""
+    )
 
     var commits by remember { mutableStateOf<List<GitCommit>>(emptyList()) }
     var isLoadingCommits by remember { mutableStateOf(true) }
@@ -128,6 +137,8 @@ fun UpdateScreen(
     var isExpanded by rememberSaveable { mutableStateOf(true) }
     var showNightlyChannelConfirmDialog by rememberSaveable { mutableStateOf(false) }
     var showEnableUpdateNotificationConfirmDialog by rememberSaveable { mutableStateOf(false) }
+    var showPatDialog by rememberSaveable { mutableStateOf(false) }
+    var showPatMenu by rememberSaveable { mutableStateOf(false) }
     var hasNotificationPermission by remember {
         mutableStateOf(
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -313,6 +324,49 @@ fun UpdateScreen(
         )
     }
 
+    if (showPatDialog) {
+        var patValue by remember {
+            mutableStateOf(TextFieldValue(githubPat))
+        }
+
+        TextFieldDialog(
+            title = { Text(stringResource(R.string.github_pat)) },
+            initialTextFieldValue = patValue,
+            onDismiss = { showPatDialog = false },
+            onDone = { onGithubPatChange(it.trim()) },
+            extraContent = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = stringResource(R.string.github_pat_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    if (githubPat.isNotEmpty()) {
+                        TextButton(
+                            onClick = {
+                                onGithubPatChange("")
+                                showPatDialog = false
+                            },
+                            modifier = Modifier.align(Alignment.Start),
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error
+                            )
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.delete),
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.remove_github_pat))
+                        }
+                    }
+                }
+            }
+        )
+    }
+
     LaunchedEffect(Unit) {
         Updater.getLatestVersionName().onSuccess {
             latestVersion = it
@@ -367,7 +421,36 @@ fun UpdateScreen(
                         )
                     }
                 },
-                actions = {},
+                actions = {
+                    Box {
+                        IconButton(onClick = { showPatMenu = true }) {
+                            Icon(
+                                painter = painterResource(R.drawable.more_vert),
+                                contentDescription = null
+                            )
+                        }
+
+                        DropdownMenu(
+                            expanded = showPatMenu,
+                            onDismissRequest = { showPatMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.github_pat)) },
+                                onClick = {
+                                    showPatMenu = false
+                                    showPatDialog = true
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(R.drawable.token),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            )
+                        }
+                    }
+                },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.largeTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
