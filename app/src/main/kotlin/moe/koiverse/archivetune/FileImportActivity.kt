@@ -18,16 +18,19 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -35,12 +38,15 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -54,6 +60,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -67,17 +74,41 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import moe.koiverse.archivetune.constants.DarkModeKey
+import moe.koiverse.archivetune.constants.DisableAnimationsKey
+import moe.koiverse.archivetune.constants.PureBlackKey
+import moe.koiverse.archivetune.db.MusicDatabase
 import moe.koiverse.archivetune.db.entities.Song
+import moe.koiverse.archivetune.playback.DownloadUtil
+import moe.koiverse.archivetune.ui.component.BottomSheetPageState
 import moe.koiverse.archivetune.ui.component.DefaultDialog
+import moe.koiverse.archivetune.ui.component.LocalBottomSheetPageState
+import moe.koiverse.archivetune.ui.component.LocalMenuState
+import moe.koiverse.archivetune.ui.component.MenuState
+import moe.koiverse.archivetune.ui.component.rememberPreference
 import moe.koiverse.archivetune.ui.menu.AddToPlaylistDialogOnline
 import moe.koiverse.archivetune.ui.menu.LoadingScreen
+import moe.koiverse.archivetune.ui.screens.settings.DarkMode
 import moe.koiverse.archivetune.ui.theme.ArchiveTuneTheme
+import moe.koiverse.archivetune.utils.SyncUtils
+import moe.koiverse.archivetune.utils.isLowRamDevice
+import moe.koiverse.archivetune.utils.rememberEnumPreference
 import moe.koiverse.archivetune.viewmodels.BackupCategory
 import moe.koiverse.archivetune.viewmodels.BackupRestoreViewModel
+import javax.inject.Inject
 import kotlin.math.floor
 
 @AndroidEntryPoint
 class FileImportActivity : ComponentActivity() {
+    @Inject
+    lateinit var database: MusicDatabase
+
+    @Inject
+    lateinit var downloadUtil: DownloadUtil
+
+    @Inject
+    lateinit var syncUtils: SyncUtils
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -88,8 +119,42 @@ class FileImportActivity : ComponentActivity() {
         }
 
         setContent {
-            ArchiveTuneTheme {
-                FileImportScreen(uri = uri, onFinish = { finish() })
+            val defaultDisableAnimations = remember(this@FileImportActivity) { applicationContext.isLowRamDevice() }
+            val disableAnimations by rememberPreference(
+                DisableAnimationsKey,
+                defaultValue = defaultDisableAnimations,
+            )
+
+            val pureBlackEnabled by rememberPreference(PureBlackKey, defaultValue = false)
+            val darkTheme by rememberEnumPreference(DarkModeKey, defaultValue = DarkMode.AUTO)
+            val isSystemInDarkTheme = isSystemInDarkTheme()
+            val useDarkTheme =
+                remember(darkTheme, isSystemInDarkTheme) {
+                    if (darkTheme == DarkMode.AUTO) isSystemInDarkTheme else darkTheme == DarkMode.ON
+                }
+            val pureBlack = pureBlackEnabled && useDarkTheme
+
+            val bottomSheetPageState = remember { BottomSheetPageState() }
+            val menuState = remember { MenuState() }
+
+            ArchiveTuneTheme(
+                darkTheme = useDarkTheme,
+                pureBlack = pureBlack,
+                disableAnimations = disableAnimations
+            ) {
+                CompositionLocalProvider(
+                    LocalDatabase provides database,
+                    LocalDownloadUtil provides downloadUtil,
+                    LocalSyncUtils provides syncUtils,
+                    LocalAnimationsDisabled provides disableAnimations,
+                    LocalContentColor provides if (pureBlack) Color.White else contentColorFor(MaterialTheme.colorScheme.surface),
+                    LocalBottomSheetPageState provides bottomSheetPageState,
+                    LocalMenuState provides menuState,
+                    LocalPlayerConnection provides null,
+                    LocalPlayerAwareWindowInsets provides WindowInsets.systemBars,
+                ) {
+                    FileImportScreen(uri = uri, onFinish = { finish() })
+                }
             }
         }
     }
