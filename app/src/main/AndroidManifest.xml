@@ -222,6 +222,30 @@
             android:name=".ui.screens.settings.PoTokenExtractionActivity"
             android:exported="false"
             android:theme="@style/Theme.ArchiveTune" />
+
+        <activity
+            android:name=".FileImportActivity"
+            android:exported="true"
+            android:theme="@style/Theme.ArchiveTune">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="text/csv" />
+                <data android:mimeType="text/comma-separated-values" />
+                <data android:mimeType="audio/x-mpegurl" />
+                <data android:mimeType="audio/mpegurl" />
+                <data android:host="*" />
+                <data android:pathPattern=".*\\.backup" />
+                <data android:pathPattern=".*\\.m3u" />
+                <data android:pathPattern=".*\\.csv" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
