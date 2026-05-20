@@ -23,6 +23,7 @@ import java.time.ZoneOffset
 val DynamicThemeKey = booleanPreferencesKey("dynamicTheme")
 val CustomThemeColorKey = stringPreferencesKey("customThemeColor")
 val RandomThemeOnStartupKey = booleanPreferencesKey("randomThemeOnStartup")
+val RandomThemeStyleKey = stringPreferencesKey("randomThemeStyle")
 val DarkModeKey = stringPreferencesKey("darkMode")
 val PureBlackKey = booleanPreferencesKey("pureBlack")
 val DisableAnimationsKey = booleanPreferencesKey("disableAnimations")
@@ -47,6 +48,19 @@ enum class SliderStyle {
     Thick,
     Circular,
     Simple,
+}
+
+enum class ThemeStyle {
+    TONAL_SPOT,
+    NEUTRAL,
+    VIBRANT,
+    EXPRESSIVE,
+    RAINBOW,
+    FRUIT_SALAD,
+    MONOCHROME,
+    FIDELITY,
+    CONTENT,
+    CHAOS,
 }
 
 const val SYSTEM_DEFAULT = "SYSTEM_DEFAULT"

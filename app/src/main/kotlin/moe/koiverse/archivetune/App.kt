@@ -164,13 +164,8 @@ class App : Application(), SingletonImageLoader.Factory {
                 
                 // Apply random theme on startup if enabled
                 if (prefs[RandomThemeOnStartupKey] == true) {
-                    val randomPalette = ThemePalettes.generateRandomPalette()
-                    val seedPalette = ThemeSeedPalette(
-                        primary = randomPalette.primary,
-                        secondary = randomPalette.secondary,
-                        tertiary = randomPalette.tertiary,
-                        neutral = randomPalette.neutral
-                    )
+                    val style = prefs[RandomThemeStyleKey].toEnum(defaultValue = ThemeStyle.TONAL_SPOT)
+                    val seedPalette = ThemePalettes.generateRandomTheme(style)
                     val encodedPalette = ThemeSeedPaletteCodec.encodeForPreference(seedPalette, "Random")
                     dataStore.edit { settings ->
                         settings[CustomThemeColorKey] = encodedPalette

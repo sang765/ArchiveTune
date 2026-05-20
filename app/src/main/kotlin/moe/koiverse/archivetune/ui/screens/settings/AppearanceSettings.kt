@@ -76,7 +76,10 @@ import moe.koiverse.archivetune.constants.PlayerDesignStyle
 import moe.koiverse.archivetune.constants.PlayerDesignStyleKey
 import moe.koiverse.archivetune.constants.PlayerBackgroundStyle
 import moe.koiverse.archivetune.constants.PlayerBackgroundStyleKey
-import moe.koiverse.archivetune.constants.PureBlackKey
+import moe.koiverse.archivetune.constants.CustomThemeColorKey
+import moe.koiverse.archivetune.constants.RandomThemeStyleKey
+import moe.koiverse.archivetune.constants.ThemeStyle
+import moe.koiverse.archivetune.ui.theme.ThemeSeedPaletteCodec
 import moe.koiverse.archivetune.constants.RandomThemeOnStartupKey
 import moe.koiverse.archivetune.constants.UseSystemFontKey
 import moe.koiverse.archivetune.constants.PlayerButtonsStyle
@@ -130,6 +133,14 @@ fun AppearanceSettings(
     val (randomThemeOnStartup, onRandomThemeOnStartupChange) = rememberPreference(
         RandomThemeOnStartupKey,
         defaultValue = false
+    )
+    val (randomThemeStyle, onRandomThemeStyleChange) = rememberEnumPreference(
+        RandomThemeStyleKey,
+        defaultValue = ThemeStyle.TONAL_SPOT
+    )
+    val (customThemeColor, onCustomThemeColorChange) = rememberPreference(
+        CustomThemeColorKey,
+        defaultValue = ThemePalettes.Default.id
     )
     val (darkMode, onDarkModeChange) = rememberEnumPreference(
         DarkModeKey,
@@ -318,6 +329,41 @@ fun AppearanceSettings(
                     icon = { Icon(painterResource(R.drawable.shuffle), null) },
                     checked = randomThemeOnStartup,
                     onCheckedChange = onRandomThemeOnStartupChange,
+                )
+            }
+
+            item(visible = randomThemeOnStartup && (!dynamicTheme || Build.VERSION.SDK_INT < Build.VERSION_CODES.S)) {
+                EnumListPreference(
+                    title = { Text(stringResource(R.string.random_theme_style)) },
+                    icon = { Icon(painterResource(R.drawable.palette), null) },
+                    selectedValue = randomThemeStyle,
+                    onValueSelected = onRandomThemeStyleChange,
+                    valueText = {
+                        when (it) {
+                            ThemeStyle.TONAL_SPOT -> stringResource(R.string.theme_style_tonal_spot)
+                            ThemeStyle.NEUTRAL -> stringResource(R.string.theme_style_neutral)
+                            ThemeStyle.VIBRANT -> stringResource(R.string.theme_style_vibrant)
+                            ThemeStyle.EXPRESSIVE -> stringResource(R.string.theme_style_expressive)
+                            ThemeStyle.RAINBOW -> stringResource(R.string.theme_style_rainbow)
+                            ThemeStyle.FRUIT_SALAD -> stringResource(R.string.theme_style_fruit_salad)
+                            ThemeStyle.MONOCHROME -> stringResource(R.string.theme_style_monochrome)
+                            ThemeStyle.FIDELITY -> stringResource(R.string.theme_style_fidelity)
+                            ThemeStyle.CONTENT -> stringResource(R.string.theme_style_content)
+                            ThemeStyle.CHAOS -> stringResource(R.string.theme_style_chaos)
+                        }
+                    }
+                )
+            }
+
+            item(visible = randomThemeOnStartup && (!dynamicTheme || Build.VERSION.SDK_INT < Build.VERSION_CODES.S)) {
+                PreferenceEntry(
+                    title = { Text(stringResource(R.string.change_theme_now)) },
+                    icon = { Icon(painterResource(R.drawable.shuffle), null) },
+                    onClick = {
+                        val newPalette = ThemePalettes.generateRandomTheme(randomThemeStyle)
+                        val encoded = ThemeSeedPaletteCodec.encodeForPreference(newPalette, "Random")
+                        onCustomThemeColorChange(encoded)
+                    }
                 )
             }
 

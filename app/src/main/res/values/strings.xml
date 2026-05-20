@@ -890,4 +890,16 @@ ArchiveTune will only extract your token, and everything else is stored locally.
     <string name="save_current_account">Save current account</string>
     <string name="no_saved_accounts">No saved accounts yet</string>
     <string name="remove_account">Remove account</string>
+    <string name="random_theme_style">Color Style</string>
+    <string name="change_theme_now">Change theme now</string>
+    <string name="theme_style_tonal_spot">Tonal Spot</string>
+    <string name="theme_style_neutral">Neutral</string>
+    <string name="theme_style_vibrant">Vibrant</string>
+    <string name="theme_style_expressive">Expressive</string>
+    <string name="theme_style_rainbow">Rainbow</string>
+    <string name="theme_style_fruit_salad">Fruit Salad</string>
+    <string name="theme_style_monochrome">Monochrome</string>
+    <string name="theme_style_fidelity">Fidelity</string>
+    <string name="theme_style_content">Content</string>
+    <string name="theme_style_chaos">Chaos</string>
 </resources>
