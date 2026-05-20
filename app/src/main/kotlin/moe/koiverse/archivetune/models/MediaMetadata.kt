@@ -84,7 +84,7 @@ fun Song.toMediaMetadata() =
             )
         },
         duration = song.duration,
-        thumbnailUrl = song.thumbnailUrl,
+        thumbnailUrl = song.thumbnailUrl?.resize(1080, 1080),
         album =
         album?.let {
             MediaMetadata.Album(

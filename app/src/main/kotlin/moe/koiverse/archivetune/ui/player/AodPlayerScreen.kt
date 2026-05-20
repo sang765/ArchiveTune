@@ -52,6 +52,7 @@ import moe.koiverse.archivetune.models.MediaMetadata
 import moe.koiverse.archivetune.utils.makeTimeString
 import moe.koiverse.archivetune.utils.rememberPreference
 import moe.koiverse.archivetune.constants.CropThumbnailToSquareKey
+import moe.koiverse.archivetune.ui.utils.highRes
 
 private val White70 = Color.White.copy(alpha = 0.70f)
 private val White65 = Color.White.copy(alpha = 0.65f)
@@ -119,7 +120,7 @@ fun AodPlayerScreen(
                 .padding(horizontal = 40.dp),
         ) {
             AsyncImage(
-                model = mediaMetadata.thumbnailUrl,
+                model = mediaMetadata.thumbnailUrl?.highRes(),
                 contentDescription = null,
                 contentScale = if (shouldApplySquareCrop) ContentScale.Crop else ContentScale.Fit,
                 modifier = Modifier

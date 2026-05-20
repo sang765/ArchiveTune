@@ -1682,7 +1682,7 @@ fun LocalThumbnail(
         val heightPx = if (maxHeight == Dp.Infinity) null else with(density) { maxHeight.roundToPx().coerceAtLeast(1) }
         val request = remember(thumbnailUrl, widthPx, heightPx) {
             ImageRequest.Builder(context)
-                .data(thumbnailUrl)
+                .data(thumbnailUrl?.resize(widthPx, heightPx))
                 .allowHardware(true)
                 .apply {
                     if (widthPx != null && heightPx != null) {
