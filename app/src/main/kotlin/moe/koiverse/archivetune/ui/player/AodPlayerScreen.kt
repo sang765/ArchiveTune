@@ -50,6 +50,8 @@ import coil3.compose.AsyncImage
 import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.models.MediaMetadata
 import moe.koiverse.archivetune.utils.makeTimeString
+import moe.koiverse.archivetune.utils.rememberPreference
+import moe.koiverse.archivetune.constants.CropThumbnailToSquareKey
 
 private val White70 = Color.White.copy(alpha = 0.70f)
 private val White65 = Color.White.copy(alpha = 0.65f)
@@ -76,6 +78,14 @@ fun AodPlayerScreen(
     modifier: Modifier = Modifier,
 ) {
     val haptic = LocalHapticFeedback.current
+    val (cropThumbnailToSquare, _) = rememberPreference(CropThumbnailToSquareKey, false)
+    val isYouTubeThumb = mediaMetadata.thumbnailUrl?.let {
+        it.contains("googleusercontent.com", ignoreCase = true) ||
+        it.contains("ggpht.com", ignoreCase = true) ||
+        it.contains("ytimg.com", ignoreCase = true)
+    } == true
+    val shouldApplySquareCrop = cropThumbnailToSquare && isYouTubeThumb
+
     val thumbnailShape = remember(thumbnailCornerRadius) {
         RoundedCornerShape(thumbnailCornerRadius.dp)
     }
@@ -111,7 +121,7 @@ fun AodPlayerScreen(
             AsyncImage(
                 model = mediaMetadata.thumbnailUrl,
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
+                contentScale = if (shouldApplySquareCrop) ContentScale.Crop else ContentScale.Fit,
                 modifier = Modifier
                     .size(260.dp)
                     .clip(thumbnailShape),

@@ -36,7 +36,7 @@ fun String.resize(
         }
 
         wHParamRegex.find(this)?.let {
-            return "${split("=w")[0]}=w$w-h$h-p-l90-rj"
+            return "${split("=w")[0]}=w$w-h$h-l90-rj"
         }
 
         sParamRegex.find(this)?.let { match ->

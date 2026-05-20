@@ -642,15 +642,20 @@ fun Thumbnail(
                                         val primaryCanvasUrl = canvasArtwork?.animated
                                         val fallbackCanvasUrl = canvasArtwork?.videoUrl
                                         
+                                        val isYouTubeThumb = (item.metadata?.thumbnailUrl ?: item.mediaMetadata.artworkUri?.toString())?.let {
+                                            it.contains("googleusercontent.com", ignoreCase = true) ||
+                                            it.contains("ggpht.com", ignoreCase = true) ||
+                                            it.contains("ytimg.com", ignoreCase = true)
+                                        } == true
                                         val shouldCropArtwork =
-                                            cropThumbnailToSquare &&
+                                            cropThumbnailToSquare && isYouTubeThumb &&
                                                 playerDesignStyle != PlayerDesignStyle.V7
 
                                         AsyncImage(
                                             model = item.metadata?.thumbnailUrl?.highRes()
                                                 ?: item.mediaMetadata.artworkUri?.toString(),
                                             contentDescription = null,
-                                            contentScale = ContentScale.FillBounds,
+                                            contentScale = ContentScale.Crop,
                                             modifier = Modifier
                                                 .fillMaxSize()
                                                 .let { if (shouldCropArtwork) it.aspectRatio(1f) else it }
