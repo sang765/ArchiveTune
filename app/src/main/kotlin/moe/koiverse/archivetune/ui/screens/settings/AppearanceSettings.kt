@@ -76,6 +76,7 @@ import moe.koiverse.archivetune.constants.PlayerDesignStyle
 import moe.koiverse.archivetune.constants.PlayerDesignStyleKey
 import moe.koiverse.archivetune.constants.PlayerBackgroundStyle
 import moe.koiverse.archivetune.constants.PlayerBackgroundStyleKey
+import moe.koiverse.archivetune.constants.PureBlackKey
 import moe.koiverse.archivetune.constants.CustomThemeColorKey
 import moe.koiverse.archivetune.constants.RandomThemeStyleKey
 import moe.koiverse.archivetune.constants.ThemeStyle
