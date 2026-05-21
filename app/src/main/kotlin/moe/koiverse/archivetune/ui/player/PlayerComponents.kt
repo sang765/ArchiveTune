@@ -18,6 +18,7 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
@@ -34,6 +35,7 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -68,6 +70,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -98,6 +101,7 @@ import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.common.Player.STATE_ENDED
 import androidx.navigation.NavController
+import kotlin.math.abs
 import coil3.compose.AsyncImage
 import me.saket.squiggles.SquigglySlider
 import moe.koiverse.archivetune.LocalPlayerConnection
@@ -707,17 +711,36 @@ fun PlayerSlider(
     onValueChange: (Long) -> Unit,
     onValueChangeFinished: () -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isDragged by interactionSource.collectIsDraggedAsState()
+
     val safeDuration = if (duration <= 0L) 0f else duration.toFloat()
     val safeValue = (sliderPosition ?: position).toFloat().coerceIn(0f, maxOf(0f, safeDuration))
-    
+
+    val animatedValue = remember { Animatable(safeValue) }
+
+    LaunchedEffect(safeValue, isDragged) {
+        if (isDragged) {
+            animatedValue.snapTo(safeValue)
+        } else {
+            val diff = abs(safeValue - animatedValue.value)
+            if (diff > 1000f) {
+                animatedValue.animateTo(safeValue, animationSpec = tween(300))
+            } else {
+                animatedValue.snapTo(safeValue)
+            }
+        }
+    }
+
     StyledPlaybackSlider(
         sliderStyle = sliderStyle,
-        value = safeValue,
+        value = if (isDragged) safeValue else animatedValue.value,
         valueRange = 0f..maxOf(1f, safeDuration),
         onValueChange = { onValueChange(it.toLong()) },
         onValueChangeFinished = onValueChangeFinished,
         activeColor = textButtonColor,
         isPlaying = isPlaying,
+        interactionSource = interactionSource,
         modifier = Modifier.padding(horizontal = PlayerHorizontalPadding)
     )
 }
@@ -732,6 +755,7 @@ fun StyledPlaybackSlider(
     onValueChangeFinished: () -> Unit,
     activeColor: Color,
     isPlaying: Boolean,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     modifier: Modifier = Modifier
 ) {
     when (sliderStyle) {
@@ -742,6 +766,7 @@ fun StyledPlaybackSlider(
                 onValueChange = onValueChange,
                 onValueChangeFinished = onValueChangeFinished,
                 colors = PlayerSliderColors.standardSliderColors(activeColor),
+                interactionSource = interactionSource,
                 modifier = modifier
             )
         }
@@ -753,6 +778,7 @@ fun StyledPlaybackSlider(
                 onValueChange = onValueChange,
                 onValueChangeFinished = onValueChangeFinished,
                 colors = PlayerSliderColors.wavySliderColors(activeColor),
+                interactionSource = interactionSource,
                 modifier = modifier,
                 squigglesSpec = SquigglySlider.SquigglesSpec(
                     amplitude = if (isPlaying) 2.dp else 0.dp,
@@ -768,6 +794,7 @@ fun StyledPlaybackSlider(
                 onValueChange = onValueChange,
                 onValueChangeFinished = onValueChangeFinished,
                 colors = PlayerSliderColors.thickSliderColors(activeColor),
+                interactionSource = interactionSource,
                 thumb = { Spacer(modifier = Modifier.size(0.dp)) },
                 track = { sliderState ->
                     PlayerSliderTrack(
@@ -787,6 +814,7 @@ fun StyledPlaybackSlider(
                 onValueChange = onValueChange,
                 onValueChangeFinished = onValueChangeFinished,
                 colors = PlayerSliderColors.circularSliderColors(activeColor),
+                interactionSource = interactionSource,
                 modifier = modifier,
                 squigglesSpec = SquigglySlider.SquigglesSpec(
                     amplitude = if (isPlaying) 2.dp else 0.dp,
@@ -802,6 +830,7 @@ fun StyledPlaybackSlider(
                 onValueChange = onValueChange,
                 onValueChangeFinished = onValueChangeFinished,
                 colors = PlayerSliderColors.simpleSliderColors(activeColor),
+                interactionSource = interactionSource,
                 thumb = { Spacer(modifier = Modifier.size(0.dp)) },
                 track = { sliderState ->
                     PlayerSliderTrack(
