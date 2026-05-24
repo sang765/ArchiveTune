@@ -291,12 +291,9 @@ object Updater {
 
     fun getLatestDownloadUrl(): String {
         val baseUrl = "https://github.com/koiverse/ArchiveTune/releases/latest/download/"
+        val device = BuildConfig.DEVICE
         val architecture = BuildConfig.ARCHITECTURE
-        return if (architecture == "universal") {
-            baseUrl + "app-mobile-universal-release.apk"
-        } else {
-            baseUrl + "app-${architecture}-release.apk"
-        }
+        return "${baseUrl}app-$device-$architecture-release.apk"
     }
 
     suspend fun getAllReleases(
