@@ -111,7 +111,7 @@ fun UpdateScreen(
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
-    val nightlyInstallUrl = "https://nightly.link/koiverse/ArchiveTune/workflows/build/dev/app-mobile-universal-release"
+    val nightlyInstallUrl = "https://nightly.link/koiverse/ArchiveTune/workflows/build/dev/app-${BuildConfig.DEVICE}-${BuildConfig.ARCHITECTURE}-release"
 
     val (enableUpdateNotification, onEnableUpdateNotificationChange) = rememberPreference(
         EnableUpdateNotificationKey,
@@ -896,3 +896,9 @@ private fun formatCommitDate(isoDate: String): String {
         isoDate.take(10)
     }
 }
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'

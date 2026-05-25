@@ -65,9 +65,11 @@ android {
     productFlavors {
         create("mobile") {
             dimension = "device"
+            buildConfigField("String", "DEVICE", "\"mobile\"")
         }
         create("tv") {
             dimension = "device"
+            buildConfigField("String", "DEVICE", "\"tv\"")
         }
         create("universal") {
             dimension = "abi"
@@ -300,3 +302,9 @@ configurations.configureEach {
         "androidx.compose.animation:animation-graphics:${libs.versions.compose.get()}",
     )
 }
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'

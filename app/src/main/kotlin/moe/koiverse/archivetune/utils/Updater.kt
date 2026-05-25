@@ -292,11 +292,8 @@ object Updater {
     fun getLatestDownloadUrl(): String {
         val baseUrl = "https://github.com/koiverse/ArchiveTune/releases/latest/download/"
         val architecture = BuildConfig.ARCHITECTURE
-        return if (architecture == "universal") {
-            baseUrl + "app-mobile-universal-release.apk"
-        } else {
-            baseUrl + "app-${architecture}-release.apk"
-        }
+        val device = BuildConfig.DEVICE
+        return baseUrl + "app-$device-$architecture-release.apk"
     }
 
     suspend fun getAllReleases(
@@ -384,3 +381,9 @@ object Updater {
             }
         }
 }
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
+/home/engine/.bashrc: line 1: syntax error near unexpected token `('
+/home/engine/.bashrc: line 1: `. /etc/profile.d/workload-containment.shn# ~/.bashrc: executed by bash(1) for non-login shells.'
