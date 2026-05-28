@@ -1800,6 +1800,78 @@ class MusicService :
         }
     }
 
+    private suspend fun awaitPrimaryCrossfadeHandoffReady(
+        incomingPlayer: ExoPlayer,
+    ): Boolean {
+        val deadlineMs = android.os.SystemClock.elapsedRealtime() + CROSSFADE_HANDOFF_READY_TIMEOUT_MS
+        while (kotlinx.coroutines.currentCoroutineContext().isActive && android.os.SystemClock.elapsedRealtime() < deadlineMs) {
+            if (player.playbackState == Player.STATE_READY && canHandoffWithoutRebuffer(incomingPlayer)) {
+                return true
+            }
+            if (player.playbackState == Player.STATE_IDLE || player.playbackState == Player.STATE_ENDED) {
+                return false
+            }
+            delay(25L)
+        }
+        return player.playbackState == Player.STATE_READY && canHandoffWithoutRebuffer(incomingPlayer)
+    }
+
+    private fun canHandoffWithoutRebuffer(incomingPlayer: ExoPlayer): Boolean {
+        if (player.currentMediaItem?.localConfiguration?.uri?.shouldBypassPlayerCache() == true) return true
+        if (hasBufferedForSmoothStart(player, CROSSFADE_HANDOFF_BUFFER_MS)) {
+            val bufferedPosition = player.bufferedPosition
+            val incomingPosition = incomingPlayer.currentPosition.coerceAtLeast(0L)
+            return bufferedPosition == C.TIME_UNSET ||
+                incomingPosition + CROSSFADE_HANDOFF_SEEK_GUARD_MS <= bufferedPosition
+        }
+        return false
+    }
+
+    private fun requiredCrossfadeStartBufferMs(durationMs: Long): Long =
+        (durationMs + CROSSFADE_HANDOFF_BUFFER_MS)
+            .coerceAtLeast(CROSSFADE_MIN_BUFFER_BEFORE_START_MS)
+            .coerceAtMost(CROSSFADE_MAX_BUFFER_BEFORE_START_MS)
+
+    private fun hasBufferedForSmoothStart(
+        targetPlayer: ExoPlayer,
+        minimumBufferedMs: Long,
+    ): Boolean {
+        if (minimumBufferedMs <= 0L) return true
+        if (targetPlayer.currentMediaItem?.localConfiguration?.uri?.shouldBypassPlayerCache() == true) return true
+
+        val duration = targetPlayer.duration
+        val currentPosition = targetPlayer.currentPosition.coerceAtLeast(0L)
+        val remainingDuration =
+            if (duration != C.TIME_UNSET && duration > currentPosition) {
+                duration - currentPosition
+            } else {
+                Long.MAX_VALUE
+            }
+        val requiredBufferedMs = minimumBufferedMs.coerceAtMost(remainingDuration)
+        if (requiredBufferedMs <= 0L) return true
+
+        val bufferedDuration = targetPlayer.totalBufferedDuration.coerceAtLeast(0L)
+        if (bufferedDuration >= requiredBufferedMs) return true
+
+        return duration != C.TIME_UNSET &&
+            targetPlayer.bufferedPosition >= duration - CROSSFADE_END_GUARD_MS
+    }
+
+    private fun resolveCrossfadeTargetIndex(target: CrossfadeTarget): Int {
+        if (target.index in 0 until player.mediaItemCount &&
+            player.getMediaItemAt(target.index).mediaId == target.mediaId
+        ) {
+            return target.index
+        }
+
+        for (index in 0 until player.mediaItemCount) {
+            if (player.getMediaItemAt(index).mediaId == target.mediaId) {
+                return index
+            }
+        }
+        return C.INDEX_UNSET
+    }
+
     private fun releaseSecondaryCrossfadePlayer() {
         val playerToRelease = secondaryCrossfadePlayer ?: return
         secondaryCrossfadePlayer = null
