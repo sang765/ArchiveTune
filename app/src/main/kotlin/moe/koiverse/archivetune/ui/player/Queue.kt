@@ -562,10 +562,8 @@ fun Queue(
         var shouldScrollToCurrent by remember { mutableStateOf(false) }
         var lastScrolledUid by remember { mutableStateOf<Long?>(null) }
 
-        val currentPlayingUid = remember(currentWindowIndex, queueWindows) {
-            if (currentWindowIndex in queueWindows.indices) {
-                queueWindows[currentWindowIndex].uid
-            } else null
+        val currentPlayingMediaId = remember(mediaMetadata) {
+            mediaMetadata?.id
         }
 
         val reorderableState = rememberReorderableLazyListState(
@@ -615,9 +613,9 @@ fun Queue(
             }
         }
 
-        LaunchedEffect(currentPlayingUid, shouldScrollToCurrent) {
-            if (currentPlayingUid != null && shouldScrollToCurrent) {
-                val indexInMutableList = mutableQueueWindows.indexOfFirst { it.uid == currentPlayingUid }
+        LaunchedEffect(currentPlayingMediaId, shouldScrollToCurrent) {
+            if (currentPlayingMediaId != null && shouldScrollToCurrent) {
+                val indexInMutableList = mutableQueueWindows.indexOfFirst { it.mediaItem.mediaId == currentPlayingMediaId }
                 if (indexInMutableList != -1) {
                     lazyListState.scrollToItem(indexInMutableList + 1)
                 }
@@ -656,8 +654,8 @@ fun Queue(
         }
 
         LaunchedEffect(state.isCollapsed) {
-            if (!state.isCollapsed && currentPlayingUid != null) {
-                val indexInMutableList = mutableQueueWindows.indexOfFirst { it.uid == currentPlayingUid }
+            if (!state.isCollapsed && currentPlayingMediaId != null) {
+                val indexInMutableList = mutableQueueWindows.indexOfFirst { it.mediaItem.mediaId == currentPlayingMediaId }
                 if (indexInMutableList != -1) {
                     // Scroll to the item + headerItems (Spacer)
                     // The Spacer is at index 0, so the first song is at index 1.
@@ -769,7 +767,7 @@ fun Queue(
                         key = window.uid.hashCode(),
                     ) {
                         val currentItem by rememberUpdatedState(window)
-                        val isActive = window.uid == currentPlayingUid
+                        val isActive = window.mediaItem.mediaId == currentPlayingMediaId
                         val dismissBoxState =
                             rememberSwipeToDismissBoxState(
                                 positionalThreshold = { totalDistance -> totalDistance }

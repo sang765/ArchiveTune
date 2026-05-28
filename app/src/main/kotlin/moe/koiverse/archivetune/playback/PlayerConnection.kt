@@ -59,6 +59,8 @@ class PlayerConnection(
             SharingStarted.Lazily,
             player.playWhenReady && player.playbackState != STATE_ENDED
         )
+    val isCrossfading = service.isCrossfadingState
+    val crossfadeIncomingPosition = service.crossfadeIncomingPosition
     val mediaMetadata = service.currentMediaMetadata
     val currentSong =
         mediaMetadata.flatMapLatest {

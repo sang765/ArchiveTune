@@ -410,10 +410,14 @@ class MusicService :
     private var secondaryCrossfadePlayer: ExoPlayer? = null
     private var secondaryCrossfadeTarget: CrossfadeTarget? = null
     private var isCrossfading = false
+    val isCrossfadingState = MutableStateFlow(false)
     private var crossfadeHandoffInProgress = false
     private var crossfadeBaseVolume = 1f
     private var crossfadeProgress = 0f
     private var crossfadePlaybackRequested = false
+    private var previousCrossfadeMetadata: moe.koiverse.archivetune.models.MediaMetadata? = null
+    private var crossfadeRestoreMetadataOnCancel = false
+    val crossfadeIncomingPosition = MutableStateFlow(-1L)
     private var lyricsPreloadManager: LyricsPreloadManager? = null
 
     private val secondaryCrossfadeListener =
@@ -1289,7 +1293,13 @@ class MusicService :
                 DiscordPresenceManager.start(
                     context = this@MusicService,
                     token = key,
-                    songProvider = { player.currentMetadata?.let { createTransientSongFromMedia(it) } ?: currentSong.value },
+                    songProvider = {
+                        if (isCrossfading) {
+                            currentMediaMetadata.value?.let { createTransientSongFromMedia(it) } ?: currentSong.value
+                        } else {
+                            player.currentMetadata?.let { createTransientSongFromMedia(it) } ?: currentSong.value
+                        }
+                    },
                     positionProvider = { player.currentPosition },
                     isPausedProvider = { !player.isPlaying },
                     intervalProvider = { getPresenceIntervalMillis(this@MusicService) }
@@ -1626,6 +1636,7 @@ class MusicService :
         crossfadeJob =
             scope.launch {
                 isCrossfading = true
+                isCrossfadingState.value = true
                 crossfadeProgress = 0f
                 crossfadeBaseVolume = currentEffectivePlayerVolume()
                 crossfadePlaybackRequested = player.playWhenReady
@@ -1645,6 +1656,23 @@ class MusicService :
                         incomingPlayer.play()
                     }
 
+                    // Update metadata to the incoming song immediately
+                    previousCrossfadeMetadata = currentMediaMetadata.value
+                    crossfadeRestoreMetadataOnCancel = true
+                    player.getMediaItemAt(target.index).metadata?.let { incomingMediaMetadata ->
+                        currentMediaMetadata.value = incomingMediaMetadata
+                    }
+
+                    // Immediately update Discord presence to the incoming song
+                    if (DiscordPresenceManager.isRunning()) {
+                        try {
+                            DiscordPresenceManager.restart()
+                        } catch (_: Exception) {}
+                    }
+
+                    // Force notification to update with new song metadata
+                    refreshPlaybackNotification()
+
                     var elapsedMs = 0L
                     var lastTickMs = android.os.SystemClock.elapsedRealtime()
                     while (isActive && elapsedMs < durationMs) {
@@ -1662,7 +1690,9 @@ class MusicService :
                         } else {
                             incomingPlayer.pause()
                         }
+                        crossfadeIncomingPosition.value = incomingPlayer.currentPosition
                         lastTickMs = nowMs
+
                         delay(CROSSFADE_FRAME_MS)
                     }
 
@@ -1725,9 +1755,13 @@ class MusicService :
         currentMediaMetadata.value = player.getMediaItemAt(targetIndex).metadata
 
         isCrossfading = false
+        isCrossfadingState.value = false
         crossfadeHandoffInProgress = false
         crossfadeProgress = 0f
         crossfadePlaybackRequested = false
+        crossfadeIncomingPosition.value = -1L
+        crossfadeRestoreMetadataOnCancel = false
+        previousCrossfadeMetadata = null
         releaseSecondaryCrossfadePlayer()
         applyEffectiveVolume()
         scheduleCrossfade()
@@ -1814,9 +1848,17 @@ class MusicService :
         crossfadeJob?.cancel()
         crossfadeJob = null
         isCrossfading = false
+        isCrossfadingState.value = false
         crossfadeHandoffInProgress = false
         crossfadeProgress = 0f
         crossfadePlaybackRequested = false
+        crossfadeIncomingPosition.value = -1L
+        // Restore old metadata if crossfade was cancelled before handoff
+        if (crossfadeRestoreMetadataOnCancel) {
+            crossfadeRestoreMetadataOnCancel = false
+            previousCrossfadeMetadata?.let { currentMediaMetadata.value = it }
+            previousCrossfadeMetadata = null
+        }
         if (::player.isInitialized && resetPauseAtEnd) {
             player.pauseAtEndOfMediaItems = false
         }
@@ -4422,8 +4464,10 @@ class MusicService :
         }
     }
 
-    val timelineEmpty = player.currentTimeline.isEmpty || player.mediaItemCount == 0 || player.currentMediaItem == null
-    currentMediaMetadata.value = if (timelineEmpty) null else (mediaItem?.metadata ?: player.currentMetadata)
+    if (!crossfadeHandoffInProgress) {
+        val timelineEmpty = player.currentTimeline.isEmpty || player.mediaItemCount == 0 || player.currentMediaItem == null
+        currentMediaMetadata.value = if (timelineEmpty) null else (mediaItem?.metadata ?: player.currentMetadata)
+    }
 
     widgetUpdater.update()
 
