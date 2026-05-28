@@ -135,6 +135,19 @@ enum class SliderStyle {
 const val SYSTEM_DEFAULT = "SYSTEM_DEFAULT"
 const val FOLLOW_APP_LANGUAGE = "FOLLOW_APP_LANGUAGE"
 
+fun resolveContentLanguage(appLanguage: String): String {
+    val languageTag = java.util.Locale.getDefault().toLanguageTag().replace("-Hant", "")
+    val systemLang = java.util.Locale.getDefault().language
+    val systemTag = languageTag
+    val effective = when {
+        appLanguage != SYSTEM_DEFAULT -> appLanguage
+        systemLang in LanguageCodeToName -> systemLang
+        systemTag in LanguageCodeToName -> systemTag
+        else -> "en"
+    }
+    return effective
+}
+
 fun resolveContentCountry(appLanguage: String): String {
     if (appLanguage == SYSTEM_DEFAULT) {
         return java.util.Locale.getDefault().country

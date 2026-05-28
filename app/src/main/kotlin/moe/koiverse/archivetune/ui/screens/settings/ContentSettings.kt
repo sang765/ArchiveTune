@@ -92,26 +92,10 @@ fun ContentSettings(
                         }
                     },
                     onValueSelected = { newValue ->
-                        val effectiveHl = when (newValue) {
-                            FOLLOW_APP_LANGUAGE -> {
-                                if (appLanguage == SYSTEM_DEFAULT) {
-                                    val locale = Locale.getDefault()
-                                    val languageTag = locale.toLanguageTag().replace("-Hant", "")
-                                    locale.language.takeIf { it in LanguageCodeToName }
-                                        ?: languageTag.takeIf { it in LanguageCodeToName }
-                                        ?: "en"
-                                } else appLanguage
-                            }
-                            SYSTEM_DEFAULT -> {
-                                val locale = Locale.getDefault()
-                                val languageTag = locale.toLanguageTag().replace("-Hant", "")
-                                locale.language.takeIf { it in LanguageCodeToName }
-                                    ?: languageTag.takeIf { it in LanguageCodeToName }
-                                    ?: "en"
-                            }
-                            else -> newValue
-                        }
-                        YouTube.locale = YouTube.locale.copy(hl = effectiveHl)
+                        YouTube.locale = YouTube.locale.copy(
+                            hl = newValue.takeUnless { it == SYSTEM_DEFAULT || it == FOLLOW_APP_LANGUAGE }
+                                ?: resolveContentLanguage(appLanguage)
+                        )
                         onContentLanguageChange(newValue)
                     }
                 )
@@ -131,15 +115,10 @@ fun ContentSettings(
                         }
                     },
                     onValueSelected = { newValue ->
-                        val effectiveGl = when (newValue) {
-                            FOLLOW_APP_LANGUAGE -> resolveContentCountry(appLanguage)
-                            SYSTEM_DEFAULT -> {
-                                Locale.getDefault().country.takeIf { it in CountryCodeToName }
-                                    ?: "US"
-                            }
-                            else -> newValue
-                        }
-                        YouTube.locale = YouTube.locale.copy(gl = effectiveGl)
+                        YouTube.locale = YouTube.locale.copy(
+                            gl = newValue.takeUnless { it == SYSTEM_DEFAULT || it == FOLLOW_APP_LANGUAGE }
+                                ?: resolveContentCountry(appLanguage)
+                        )
                         onContentCountryChange(newValue)
                     }
                 )
@@ -217,6 +196,13 @@ fun ContentSettings(
 
                             onAppLanguageChange(langTag)
                             setAppLocale(context, newLocale)
+
+                            if (contentLanguage == FOLLOW_APP_LANGUAGE) {
+                                YouTube.locale = YouTube.locale.copy(hl = resolveContentLanguage(langTag))
+                            }
+                            if (contentCountry == FOLLOW_APP_LANGUAGE) {
+                                YouTube.locale = YouTube.locale.copy(gl = resolveContentCountry(langTag))
+                            }
                         }
                     )
                 }
