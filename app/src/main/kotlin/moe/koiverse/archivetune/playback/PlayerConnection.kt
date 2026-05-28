@@ -33,6 +33,7 @@ import moe.koiverse.archivetune.utils.reportException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
@@ -59,8 +60,8 @@ class PlayerConnection(
             SharingStarted.Lazily,
             player.playWhenReady && player.playbackState != STATE_ENDED
         )
-    val isCrossfading = service.isCrossfadingState
-    val crossfadeIncomingPosition = service.crossfadeIncomingPosition
+    val isCrossfading: StateFlow<Boolean> = service.isCrossfadingState
+    val crossfadeIncomingPosition: StateFlow<Long> = service.crossfadeIncomingPosition
     val mediaMetadata = service.currentMediaMetadata
     val currentSong =
         mediaMetadata.flatMapLatest {

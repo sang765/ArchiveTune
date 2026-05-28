@@ -214,6 +214,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -410,14 +411,16 @@ class MusicService :
     private var secondaryCrossfadePlayer: ExoPlayer? = null
     private var secondaryCrossfadeTarget: CrossfadeTarget? = null
     private var isCrossfading = false
-    val isCrossfadingState = MutableStateFlow(false)
+    private val _isCrossfadingState = MutableStateFlow(false)
+    val isCrossfadingState = _isCrossfadingState.asStateFlow()
     private var crossfadeHandoffInProgress = false
     private var crossfadeBaseVolume = 1f
     private var crossfadeProgress = 0f
     private var crossfadePlaybackRequested = false
     private var previousCrossfadeMetadata: moe.koiverse.archivetune.models.MediaMetadata? = null
     private var crossfadeRestoreMetadataOnCancel = false
-    val crossfadeIncomingPosition = MutableStateFlow(-1L)
+    private val _crossfadeIncomingPosition = MutableStateFlow(-1L)
+    val crossfadeIncomingPosition = _crossfadeIncomingPosition.asStateFlow()
     private var lyricsPreloadManager: LyricsPreloadManager? = null
 
     private val secondaryCrossfadeListener =
@@ -1636,7 +1639,7 @@ class MusicService :
         crossfadeJob =
             scope.launch {
                 isCrossfading = true
-                isCrossfadingState.value = true
+                _isCrossfadingState.value = true
                 crossfadeProgress = 0f
                 crossfadeBaseVolume = currentEffectivePlayerVolume()
                 crossfadePlaybackRequested = player.playWhenReady
@@ -1659,7 +1662,7 @@ class MusicService :
                     // Update metadata to the incoming song immediately
                     previousCrossfadeMetadata = currentMediaMetadata.value
                     crossfadeRestoreMetadataOnCancel = true
-                    player.getMediaItemAt(target.index).metadata?.let { incomingMediaMetadata ->
+                    incomingPlayer.currentMediaItem?.metadata?.let { incomingMediaMetadata ->
                         currentMediaMetadata.value = incomingMediaMetadata
                     }
 
@@ -1677,6 +1680,7 @@ class MusicService :
                     var lastTickMs = android.os.SystemClock.elapsedRealtime()
                     while (isActive && elapsedMs < durationMs) {
                         if (player.currentMediaItem?.mediaId != outgoingMediaId) {
+                            crossfadeRestoreMetadataOnCancel = false
                             cancelCrossfade(resetVolume = true, resetPauseAtEnd = true)
                             return@launch
                         }
@@ -1690,7 +1694,7 @@ class MusicService :
                         } else {
                             incomingPlayer.pause()
                         }
-                        crossfadeIncomingPosition.value = incomingPlayer.currentPosition
+                        _crossfadeIncomingPosition.value = incomingPlayer.currentPosition
                         lastTickMs = nowMs
 
                         delay(CROSSFADE_FRAME_MS)
@@ -1755,88 +1759,16 @@ class MusicService :
         currentMediaMetadata.value = player.getMediaItemAt(targetIndex).metadata
 
         isCrossfading = false
-        isCrossfadingState.value = false
+        _isCrossfadingState.value = false
         crossfadeHandoffInProgress = false
         crossfadeProgress = 0f
         crossfadePlaybackRequested = false
-        crossfadeIncomingPosition.value = -1L
+        _crossfadeIncomingPosition.value = -1L
         crossfadeRestoreMetadataOnCancel = false
         previousCrossfadeMetadata = null
         releaseSecondaryCrossfadePlayer()
         applyEffectiveVolume()
         scheduleCrossfade()
-    }
-
-    private suspend fun awaitPrimaryCrossfadeHandoffReady(
-        incomingPlayer: ExoPlayer,
-    ): Boolean {
-        val deadlineMs = android.os.SystemClock.elapsedRealtime() + CROSSFADE_HANDOFF_READY_TIMEOUT_MS
-        while (kotlinx.coroutines.currentCoroutineContext().isActive && android.os.SystemClock.elapsedRealtime() < deadlineMs) {
-            if (player.playbackState == Player.STATE_READY && canHandoffWithoutRebuffer(incomingPlayer)) {
-                return true
-            }
-            if (player.playbackState == Player.STATE_IDLE || player.playbackState == Player.STATE_ENDED) {
-                return false
-            }
-            delay(25L)
-        }
-        return player.playbackState == Player.STATE_READY && canHandoffWithoutRebuffer(incomingPlayer)
-    }
-
-    private fun canHandoffWithoutRebuffer(incomingPlayer: ExoPlayer): Boolean {
-        if (player.currentMediaItem?.localConfiguration?.uri?.shouldBypassPlayerCache() == true) return true
-        if (hasBufferedForSmoothStart(player, CROSSFADE_HANDOFF_BUFFER_MS)) {
-            val bufferedPosition = player.bufferedPosition
-            val incomingPosition = incomingPlayer.currentPosition.coerceAtLeast(0L)
-            return bufferedPosition == C.TIME_UNSET ||
-                incomingPosition + CROSSFADE_HANDOFF_SEEK_GUARD_MS <= bufferedPosition
-        }
-        return false
-    }
-
-    private fun requiredCrossfadeStartBufferMs(durationMs: Long): Long =
-        (durationMs + CROSSFADE_HANDOFF_BUFFER_MS)
-            .coerceAtLeast(CROSSFADE_MIN_BUFFER_BEFORE_START_MS)
-            .coerceAtMost(CROSSFADE_MAX_BUFFER_BEFORE_START_MS)
-
-    private fun hasBufferedForSmoothStart(
-        targetPlayer: ExoPlayer,
-        minimumBufferedMs: Long,
-    ): Boolean {
-        if (minimumBufferedMs <= 0L) return true
-        if (targetPlayer.currentMediaItem?.localConfiguration?.uri?.shouldBypassPlayerCache() == true) return true
-
-        val duration = targetPlayer.duration
-        val currentPosition = targetPlayer.currentPosition.coerceAtLeast(0L)
-        val remainingDuration =
-            if (duration != C.TIME_UNSET && duration > currentPosition) {
-                duration - currentPosition
-            } else {
-                Long.MAX_VALUE
-            }
-        val requiredBufferedMs = minimumBufferedMs.coerceAtMost(remainingDuration)
-        if (requiredBufferedMs <= 0L) return true
-
-        val bufferedDuration = targetPlayer.totalBufferedDuration.coerceAtLeast(0L)
-        if (bufferedDuration >= requiredBufferedMs) return true
-
-        return duration != C.TIME_UNSET &&
-            targetPlayer.bufferedPosition >= duration - CROSSFADE_END_GUARD_MS
-    }
-
-    private fun resolveCrossfadeTargetIndex(target: CrossfadeTarget): Int {
-        if (target.index in 0 until player.mediaItemCount &&
-            player.getMediaItemAt(target.index).mediaId == target.mediaId
-        ) {
-            return target.index
-        }
-
-        for (index in 0 until player.mediaItemCount) {
-            if (player.getMediaItemAt(index).mediaId == target.mediaId) {
-                return index
-            }
-        }
-        return C.INDEX_UNSET
     }
 
     private fun cancelCrossfade(
@@ -1848,11 +1780,11 @@ class MusicService :
         crossfadeJob?.cancel()
         crossfadeJob = null
         isCrossfading = false
-        isCrossfadingState.value = false
+        _isCrossfadingState.value = false
         crossfadeHandoffInProgress = false
         crossfadeProgress = 0f
         crossfadePlaybackRequested = false
-        crossfadeIncomingPosition.value = -1L
+        _crossfadeIncomingPosition.value = -1L
         // Restore old metadata if crossfade was cancelled before handoff
         if (crossfadeRestoreMetadataOnCancel) {
             crossfadeRestoreMetadataOnCancel = false
@@ -4464,8 +4396,8 @@ class MusicService :
         }
     }
 
+    val timelineEmpty = player.currentTimeline.isEmpty || player.mediaItemCount == 0 || player.currentMediaItem == null
     if (!crossfadeHandoffInProgress) {
-        val timelineEmpty = player.currentTimeline.isEmpty || player.mediaItemCount == 0 || player.currentMediaItem == null
         currentMediaMetadata.value = if (timelineEmpty) null else (mediaItem?.metadata ?: player.currentMetadata)
     }
 
@@ -4947,6 +4879,7 @@ private fun onMediaItemTransitionInternal() {
             reason == Player.DISCONTINUITY_REASON_SEEK || reason == Player.DISCONTINUITY_REASON_SEEK_ADJUSTMENT
         if (isSeekDiscontinuity) {
             if (!crossfadeHandoffInProgress) {
+                crossfadeRestoreMetadataOnCancel = false
                 cancelCrossfade(resetVolume = true, resetPauseAtEnd = true)
             }
         }
