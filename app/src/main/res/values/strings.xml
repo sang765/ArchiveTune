@@ -463,6 +463,7 @@
     <string name="content_language">Default content language</string>
     <string name="content_country">Default content country</string>
     <string name="system_default">System default</string>
+    <string name="follow_app_language">Follow App Language</string>
     <string name="enable_proxy">Enable proxy</string>
     <string name="internet">Internet</string>
     <string name="internet_warning_title">Security &amp; Usage Warning</string>

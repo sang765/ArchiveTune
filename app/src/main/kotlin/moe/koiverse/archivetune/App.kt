@@ -137,11 +137,37 @@ class App : Application(), SingletonImageLoader.Factory {
             try {
                 val prefs = dataStore.data.first()
                 
-                prefs[ContentCountryKey]?.takeIf { it != SYSTEM_DEFAULT }?.let { country ->
-                    YouTube.locale = YouTube.locale.copy(gl = country)
+                val appLanguage = prefs[AppLanguageKey] ?: SYSTEM_DEFAULT
+
+                prefs[ContentCountryKey]?.let { country ->
+                    val effectiveCountry = when (country) {
+                        SYSTEM_DEFAULT -> null
+                        FOLLOW_APP_LANGUAGE -> {
+                            when (appLanguage) {
+                                SYSTEM_DEFAULT -> null
+                                else -> resolveContentCountry(appLanguage)
+                            }
+                        }
+                        else -> country
+                    }
+                    effectiveCountry?.let { gl ->
+                        YouTube.locale = YouTube.locale.copy(gl = gl)
+                    }
                 }
-                prefs[ContentLanguageKey]?.takeIf { it != SYSTEM_DEFAULT }?.let { lang ->
-                    YouTube.locale = YouTube.locale.copy(hl = lang)
+                prefs[ContentLanguageKey]?.let { lang ->
+                    val effectiveLang = when (lang) {
+                        SYSTEM_DEFAULT -> null
+                        FOLLOW_APP_LANGUAGE -> {
+                            when (appLanguage) {
+                                SYSTEM_DEFAULT -> null
+                                else -> appLanguage
+                            }
+                        }
+                        else -> lang
+                    }
+                    effectiveLang?.let { hl ->
+                        YouTube.locale = YouTube.locale.copy(hl = hl)
+                    }
                 }
                 
                 LastFM.sessionKey = prefs[LastFMSessionKey]

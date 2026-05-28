@@ -83,21 +83,35 @@ fun ContentSettings(
                     title = { Text(stringResource(R.string.content_language)) },
                     icon = { Icon(painterResource(R.drawable.language), null) },
                     selectedValue = contentLanguage,
-                    values = listOf(SYSTEM_DEFAULT) + LanguageCodeToName.keys.toList(),
+                    values = listOf(FOLLOW_APP_LANGUAGE, SYSTEM_DEFAULT) + LanguageCodeToName.keys.toList(),
                     valueText = {
-                        LanguageCodeToName.getOrElse(it) { stringResource(R.string.system_default) }
+                        when (it) {
+                            FOLLOW_APP_LANGUAGE -> stringResource(R.string.follow_app_language)
+                            SYSTEM_DEFAULT -> stringResource(R.string.system_default)
+                            else -> LanguageCodeToName[it] ?: it
+                        }
                     },
                     onValueSelected = { newValue ->
-                        val locale = Locale.getDefault()
-                        val languageTag = locale.toLanguageTag().replace("-Hant", "")
-
-                        YouTube.locale = YouTube.locale.copy(
-                            hl = newValue.takeIf { it != SYSTEM_DEFAULT }
-                                ?: locale.language.takeIf { it in LanguageCodeToName }
-                                ?: languageTag.takeIf { it in LanguageCodeToName }
-                                ?: "en"
-                        )
-
+                        val effectiveHl = when (newValue) {
+                            FOLLOW_APP_LANGUAGE -> {
+                                if (appLanguage == SYSTEM_DEFAULT) {
+                                    val locale = Locale.getDefault()
+                                    val languageTag = locale.toLanguageTag().replace("-Hant", "")
+                                    locale.language.takeIf { it in LanguageCodeToName }
+                                        ?: languageTag.takeIf { it in LanguageCodeToName }
+                                        ?: "en"
+                                } else appLanguage
+                            }
+                            SYSTEM_DEFAULT -> {
+                                val locale = Locale.getDefault()
+                                val languageTag = locale.toLanguageTag().replace("-Hant", "")
+                                locale.language.takeIf { it in LanguageCodeToName }
+                                    ?: languageTag.takeIf { it in LanguageCodeToName }
+                                    ?: "en"
+                            }
+                            else -> newValue
+                        }
+                        YouTube.locale = YouTube.locale.copy(hl = effectiveHl)
                         onContentLanguageChange(newValue)
                     }
                 )
@@ -108,19 +122,24 @@ fun ContentSettings(
                     title = { Text(stringResource(R.string.content_country)) },
                     icon = { Icon(painterResource(R.drawable.location_on), null) },
                     selectedValue = contentCountry,
-                    values = listOf(SYSTEM_DEFAULT) + CountryCodeToName.keys.toList(),
+                    values = listOf(FOLLOW_APP_LANGUAGE, SYSTEM_DEFAULT) + CountryCodeToName.keys.toList(),
                     valueText = {
-                        CountryCodeToName.getOrElse(it) { stringResource(R.string.system_default) }
+                        when (it) {
+                            FOLLOW_APP_LANGUAGE -> stringResource(R.string.follow_app_language)
+                            SYSTEM_DEFAULT -> stringResource(R.string.system_default)
+                            else -> CountryCodeToName[it] ?: it
+                        }
                     },
                     onValueSelected = { newValue ->
-                        val locale = Locale.getDefault()
-
-                        YouTube.locale = YouTube.locale.copy(
-                            gl = newValue.takeIf { it != SYSTEM_DEFAULT }
-                                ?: locale.country.takeIf { it in CountryCodeToName }
-                                ?: "US"
-                        )
-
+                        val effectiveGl = when (newValue) {
+                            FOLLOW_APP_LANGUAGE -> resolveContentCountry(appLanguage)
+                            SYSTEM_DEFAULT -> {
+                                Locale.getDefault().country.takeIf { it in CountryCodeToName }
+                                    ?: "US"
+                            }
+                            else -> newValue
+                        }
+                        YouTube.locale = YouTube.locale.copy(gl = effectiveGl)
                         onContentCountryChange(newValue)
                     }
                 )

@@ -133,6 +133,62 @@ enum class SliderStyle {
 }
 
 const val SYSTEM_DEFAULT = "SYSTEM_DEFAULT"
+const val FOLLOW_APP_LANGUAGE = "FOLLOW_APP_LANGUAGE"
+
+fun resolveContentCountry(appLanguage: String): String {
+    if (appLanguage == SYSTEM_DEFAULT) {
+        return java.util.Locale.getDefault().country
+            .takeIf { it in CountryCodeToName } ?: "US"
+    }
+    val locale = java.util.Locale.forLanguageTag(appLanguage)
+    return locale.country.takeIf { it.isNotEmpty() && it in CountryCodeToName }
+        ?: LanguageCodeToDefaultCountry[locale.language]
+        ?: "US"
+}
+
+val LanguageCodeToDefaultCountry =
+    mapOf(
+        "en" to "US",
+        "en-GB" to "GB",
+        "ja" to "JP",
+        "ko" to "KR",
+        "vi" to "VN",
+        "zh" to "CN",
+        "zh-CN" to "CN",
+        "zh-TW" to "TW",
+        "fr" to "FR",
+        "de" to "DE",
+        "es" to "ES",
+        "pt" to "PT",
+        "pt-BR" to "BR",
+        "ru" to "RU",
+        "it" to "IT",
+        "nl" to "NL",
+        "pl" to "PL",
+        "tr" to "TR",
+        "ar" to "SA",
+        "hi" to "IN",
+        "th" to "TH",
+        "id" to "ID",
+        "ms" to "MY",
+        "uk" to "UA",
+        "cs" to "CZ",
+        "el" to "GR",
+        "he" to "IL",
+        "hu" to "HU",
+        "ro" to "RO",
+        "fi" to "FI",
+        "da" to "DK",
+        "no" to "NO",
+        "sv" to "SE",
+        "sk" to "SK",
+        "bg" to "BG",
+        "hr" to "HR",
+        "sr" to "RS",
+        "lt" to "LT",
+        "lv" to "LV",
+        "et" to "EE",
+    )
 
 enum class PlaylistSuggestionSource {
     PLAYLIST_TITLE,
