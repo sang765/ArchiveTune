@@ -77,7 +77,7 @@ import javax.inject.Singleton
 class DownloadUtil
 @Inject
 constructor(
-    @ApplicationContext context: Context,
+    @ApplicationContext private val context: Context,
     val database: MusicDatabase,
     val databaseProvider: DatabaseProvider,
     @DownloadCache val downloadCache: Cache,
