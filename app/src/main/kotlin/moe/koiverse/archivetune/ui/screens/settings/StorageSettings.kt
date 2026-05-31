@@ -9,6 +9,9 @@
 
 package moe.koiverse.archivetune.ui.screens.settings
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -50,6 +53,8 @@ import coil3.imageLoader
 import moe.koiverse.archivetune.LocalPlayerAwareWindowInsets
 import moe.koiverse.archivetune.LocalPlayerConnection
 import moe.koiverse.archivetune.R
+import moe.koiverse.archivetune.constants.DownloadAudioOutputEnabledKey
+import moe.koiverse.archivetune.constants.DownloadCustomPathKey
 import moe.koiverse.archivetune.constants.MaxCanvasCacheSizeKey
 import moe.koiverse.archivetune.constants.MaxImageCacheSizeKey
 import moe.koiverse.archivetune.constants.MaxSongCacheSizeKey
@@ -104,10 +109,30 @@ fun StorageSettings(
         key = MaxCanvasCacheSizeKey,
         defaultValue = 256,
     )
+    val (saveAsAudioFiles, onSaveAsAudioFilesChange) = rememberPreference(
+        key = DownloadAudioOutputEnabledKey,
+        defaultValue = false
+    )
+    val (downloadPath, onDownloadPathChange) = rememberPreference(
+        key = DownloadCustomPathKey,
+        defaultValue = ""
+    )
     var clearCacheDialog by remember { mutableStateOf(false) }
     var clearDownloads by remember { mutableStateOf(false) }
     var clearImageCacheDialog by remember { mutableStateOf(false) }
     var clearCanvasCacheDialog by remember { mutableStateOf(false) }
+
+    val folderPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocumentTree()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            // Take persistable permission so we can keep writing
+            val takeFlags = android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            context.contentResolver.takePersistableUriPermission(uri, takeFlags)
+            onDownloadPathChange(uri.toString())
+        }
+    }
 
     var imageCacheSize by remember {
         mutableStateOf(imageDiskCache.size)
@@ -258,6 +283,62 @@ fun StorageSettings(
                     Text(text = stringResource(R.string.clear_downloads_dialog))
                 }
             )
+        }
+
+        // --- Section: Audio output ---
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
+            shape = MaterialTheme.shapes.large
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Card(
+                        modifier = Modifier.padding(end = 12.dp),
+                        shape = MaterialTheme.shapes.small,
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                    ) {
+                        androidx.compose.foundation.layout.Box(modifier = Modifier.padding(8.dp), contentAlignment = Alignment.Center) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_download),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
+                    Column {
+                        Text(stringResource(R.string.download), style = MaterialTheme.typography.titleMedium)
+                        Text(stringResource(R.string.storage_downloads_detail), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+                Spacer(Modifier.padding(4.dp))
+                PreferenceGroup {
+                    item {
+                        SwitchPreference(
+                            title = { Text(stringResource(R.string.save_as_audio_files)) },
+                            description = stringResource(R.string.save_as_audio_files_desc),
+                            checked = saveAsAudioFiles,
+                            onCheckedChange = onSaveAsAudioFilesChange,
+                        )
+                    }
+                    item {
+                        PreferenceEntry(
+                            title = { Text(stringResource(R.string.download_path)) },
+                            description = if (downloadPath.isNotBlank()) {
+                                stringResource(R.string.download_path_custom)
+                            } else {
+                                stringResource(R.string.download_path_default)
+                            },
+                            onClick = { folderPickerLauncher.launch(null) },
+                        )
+                    }
+                }
+            }
         }
 
         // --- Section: Song cache ---

@@ -306,6 +306,7 @@ dependencies {
     implementation("androidx.compose.material3.adaptive:adaptive:1.3.0-beta02")
     implementation(libs.accompanist.lyrics.ui)
     implementation(libs.accompanist.lyrics.core)
+    implementation("androidx.documentfile:documentfile:1.0.1")
 
     if (discordSocialSdkAar.exists()) {
         implementation(files(discordSocialSdkAar))

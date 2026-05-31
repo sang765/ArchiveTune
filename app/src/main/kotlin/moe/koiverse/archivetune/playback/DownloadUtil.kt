@@ -8,10 +8,12 @@
 package moe.koiverse.archivetune.playback
 
 import android.content.Context
-import android.media.MediaCodecList
 import android.net.ConnectivityManager
+import android.net.Uri
+import android.os.Environment
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
+import androidx.documentfile.provider.DocumentFile
 import androidx.media3.database.DatabaseProvider
 import androidx.media3.datasource.ResolvingDataSource
 import androidx.media3.datasource.cache.Cache
@@ -22,6 +24,8 @@ import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadNotificationHelper
 import moe.koiverse.archivetune.constants.AudioQuality
 import moe.koiverse.archivetune.constants.AudioQualityKey
+import moe.koiverse.archivetune.constants.DownloadAudioOutputEnabledKey
+import moe.koiverse.archivetune.constants.DownloadCustomPathKey
 import moe.koiverse.archivetune.constants.PlayerStreamClient
 import moe.koiverse.archivetune.constants.PlayerStreamClientKey
 import moe.koiverse.archivetune.db.MusicDatabase
@@ -33,6 +37,7 @@ import moe.koiverse.archivetune.innertube.YouTube
 import moe.koiverse.archivetune.utils.AuthScopedCacheValue
 import moe.koiverse.archivetune.utils.StreamClientUtils
 import moe.koiverse.archivetune.utils.YTPlayerUtils
+import moe.koiverse.archivetune.utils.dataStore
 import moe.koiverse.archivetune.utils.enumPreference
 import moe.koiverse.archivetune.utils.get
 import moe.koiverse.archivetune.utils.isLowDataModeActive
@@ -56,6 +61,11 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
+import kotlinx.coroutines.SupervisorJob
+import okhttp3.Request
+import okhttp3.Response
+import java.io.File
+import java.io.FileOutputStream
 import java.time.LocalDateTime
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
@@ -253,6 +263,9 @@ constructor(
                             registerThrottleSignal(finalException)
                         } else if (download.state == Download.STATE_COMPLETED) {
                             clearThrottleSignal()
+                            audioExportScope.launch {
+                                exportCompletedDownload(download)
+                            }
                         }
 
                         downloads.update { map ->
@@ -264,6 +277,12 @@ constructor(
                 },
             )
         }
+
+    private val audioExportScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    @Volatile
+    private var audioOutputEnabled = false
+    @Volatile
+    private var customDownloadPath = ""
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
@@ -286,9 +305,125 @@ constructor(
                     previousFingerprint = fingerprint
                 }
         }
+        CoroutineScope(Dispatchers.IO).launch {
+            context.dataStore.data.map { prefs ->
+                prefs[DownloadAudioOutputEnabledKey] ?: false
+            }.distinctUntilChanged().collect { enabled ->
+                audioOutputEnabled = enabled
+            }
+        }
+        CoroutineScope(Dispatchers.IO).launch {
+            context.dataStore.data.map { prefs ->
+                prefs[DownloadCustomPathKey] ?: ""
+            }.distinctUntilChanged().collect { path ->
+                customDownloadPath = path
+            }
+        }
     }
 
     fun getDownload(songId: String): Flow<Download?> = downloads.map { it[songId] }
+
+    private suspend fun exportCompletedDownload(download: Download) {
+        if (!audioOutputEnabled) return
+        val mediaId = download.request.id
+        val song = database.withTransaction { getSongById(mediaId) } ?: return
+        val songEntity = song.song
+        val format = song.format
+
+        val streamUrl = resolveStreamUrl(mediaId) ?: return
+        val mimeType = format?.mimeType ?: "audio/mp4"
+        val extension = mimeTypeToExtension(mimeType)
+        val artistName = song.artists.firstOrNull()?.name?.let { sanitizeFileName(it) + " - " } ?: ""
+        val fileName = "$artistName${sanitizeFileName(songEntity.title)}$extension"
+
+        try {
+            val outputStream = resolveDownloadOutputStream(fileName) ?: return
+            val request = Request.Builder().url(streamUrl).build()
+            val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                mediaOkHttpClient.newCall(request).execute()
+            }
+            response.use { resp ->
+                if (!resp.isSuccessful) return@use
+                kotlinx.coroutines.withContext(Dispatchers.IO) {
+                    resp.body?.byteStream()?.use { input ->
+                        outputStream.use { out ->
+                            input.copyTo(out)
+                        }
+                    }
+                }
+            }
+        } catch (_: Exception) {
+            // export failed, resources cleaned up by use blocks
+        }
+    }
+
+    private suspend fun resolveStreamUrl(mediaId: String): String? {
+        val lowDataModeActive = context.isLowDataModeActive()
+        return try {
+            context.retryWithoutPlaybackLoginContext {
+                YTPlayerUtils.playerResponseForPlayback(
+                    mediaId,
+                    audioQuality = if (lowDataModeActive) AudioQuality.LOW else audioQuality,
+                    preferredStreamClient = preferredStreamClient,
+                    connectivityManager = connectivityManager,
+                    networkMetered = lowDataModeActive,
+                )
+            }.getOrNull()?.streamUrl
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun resolveDownloadOutputStream(fileName: String): java.io.OutputStream? {
+        val customPath = customDownloadPath
+        return if (customPath.isNotBlank() && Uri.parse(customPath).scheme == "content") {
+            val treeUri = Uri.parse(customPath)
+            val docFile = DocumentFile.fromTreeUri(context, treeUri) ?: return null
+            val baseName = fileName.removeSuffix(".${fileName.substringAfterLast('.')}")
+            val mimeType = when {
+                fileName.endsWith(".m4a") -> "audio/mp4"
+                fileName.endsWith(".mp3") -> "audio/mpeg"
+                fileName.endsWith(".opus") -> "audio/opus"
+                fileName.endsWith(".ogg") -> "audio/ogg"
+                fileName.endsWith(".flac") -> "audio/flac"
+                fileName.endsWith(".wav") -> "audio/wav"
+                fileName.endsWith(".webm") -> "audio/webm"
+                fileName.endsWith(".aac") -> "audio/aac"
+                else -> "audio/*"
+            }
+            val created = docFile.createFile(mimeType, baseName) ?: return null
+            context.contentResolver.openOutputStream(created.uri)
+        } else {
+            val dir = if (customPath.isNotBlank()) {
+                File(customPath)
+            } else {
+                context.getExternalFilesDir(Environment.DIRECTORY_MUSIC)
+            } ?: return null
+            if (!dir.exists()) dir.mkdirs()
+            val file = java.io.File(dir, fileName)
+            if (file.exists()) return null
+            FileOutputStream(file)
+        }
+    }
+
+    private fun mimeTypeToExtension(mimeType: String): String = when {
+        mimeType.contains("mp4") || mimeType.contains("m4a") -> ".m4a"
+        mimeType.contains("webm") -> ".webm"
+        mimeType.contains("ogg") -> ".ogg"
+        mimeType.contains("opus") -> ".opus"
+        mimeType.contains("mp3") -> ".mp3"
+        mimeType.contains("aac") -> ".aac"
+        mimeType.contains("flac") -> ".flac"
+        mimeType.contains("wav") -> ".wav"
+        else -> ".m4a"
+    }
+
+    private fun sanitizeFileName(name: String): String {
+        return name.replace(Regex("[\\\\/:*?\"<>|]"), "_")
+            .trim()
+            .take(200)
+            .ifBlank { "download" }
+    }
 
     private suspend fun awaitStreamInfoCooldown() {
         val remainingMs = cooldownUntilMs - System.currentTimeMillis()
