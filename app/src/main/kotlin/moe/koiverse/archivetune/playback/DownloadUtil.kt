@@ -25,6 +25,7 @@ import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadNotificationHelper
 import moe.koiverse.archivetune.constants.AudioQuality
 import moe.koiverse.archivetune.constants.AudioQualityKey
+import moe.koiverse.archivetune.constants.DownloadAudioFormatKey
 import moe.koiverse.archivetune.constants.DownloadAudioOutputEnabledKey
 import moe.koiverse.archivetune.constants.DownloadCustomPathKey
 import moe.koiverse.archivetune.constants.PlayerStreamClient
@@ -283,6 +284,8 @@ constructor(
     private var audioOutputEnabled = false
     @Volatile
     private var customDownloadPath = ""
+    @Volatile
+    private var audioOutputFormat = ".m4a"
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
@@ -319,6 +322,13 @@ constructor(
                 customDownloadPath = path
             }
         }
+        audioExportScope.launch {
+            context.dataStore.data.map { prefs ->
+                prefs[DownloadAudioFormatKey] ?: ".m4a"
+            }.distinctUntilChanged().collect { format ->
+                audioOutputFormat = format
+            }
+        }
     }
 
     fun getDownload(songId: String): Flow<Download?> = downloads.map { it[songId] }
@@ -328,10 +338,8 @@ constructor(
         val mediaId = download.request.id
         val song = database.withTransaction { getSongById(mediaId) } ?: return
         val songEntity = song.song
-        val format = song.format
 
-        val mimeType = format?.mimeType ?: "audio/mp4"
-        val extension = mimeTypeToExtension(mimeType)
+        val extension = audioOutputFormat
         val artistName = song.artists.firstOrNull()?.name?.let { sanitizeFileName(it) + " - " } ?: ""
         val fileName = "$artistName${sanitizeFileName(songEntity.title)}$extension"
 
@@ -364,20 +372,10 @@ constructor(
 
     private fun resolveDownloadOutputStream(fileName: String): java.io.OutputStream? {
         val customPath = customDownloadPath
+        val mimeType = extensionToMimeType(fileName.substringAfterLast('.'))
         return if (customPath.isNotBlank() && Uri.parse(customPath).scheme == "content") {
             val treeUri = Uri.parse(customPath)
             val docFile = DocumentFile.fromTreeUri(context, treeUri) ?: return null
-            val mimeType = when {
-                fileName.endsWith(".m4a") -> "audio/mp4"
-                fileName.endsWith(".mp3") -> "audio/mpeg"
-                fileName.endsWith(".opus") -> "audio/opus"
-                fileName.endsWith(".ogg") -> "audio/ogg"
-                fileName.endsWith(".flac") -> "audio/flac"
-                fileName.endsWith(".wav") -> "audio/wav"
-                fileName.endsWith(".webm") -> "audio/webm"
-                fileName.endsWith(".aac") -> "audio/aac"
-                else -> "audio/*"
-            }
             if (docFile.findFile(fileName) != null) return null
             val created = docFile.createFile(mimeType, fileName) ?: return null
             context.contentResolver.openOutputStream(created.uri)
@@ -394,16 +392,16 @@ constructor(
         }
     }
 
-    private fun mimeTypeToExtension(mimeType: String): String = when {
-        mimeType.contains("mp4") || mimeType.contains("m4a") -> ".m4a"
-        mimeType.contains("webm") -> ".webm"
-        mimeType.contains("ogg") -> ".ogg"
-        mimeType.contains("opus") -> ".opus"
-        mimeType.contains("mp3") -> ".mp3"
-        mimeType.contains("aac") -> ".aac"
-        mimeType.contains("flac") -> ".flac"
-        mimeType.contains("wav") -> ".wav"
-        else -> ".m4a"
+    private fun extensionToMimeType(ext: String): String = when (ext) {
+        "m4a", "mp4" -> "audio/mp4"
+        "mp3" -> "audio/mpeg"
+        "opus" -> "audio/opus"
+        "ogg" -> "audio/ogg"
+        "flac" -> "audio/flac"
+        "wav" -> "audio/wav"
+        "webm" -> "audio/webm"
+        "aac" -> "audio/aac"
+        else -> "audio/mp4"
     }
 
     private fun sanitizeFileName(name: String): String {

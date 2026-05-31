@@ -250,6 +250,7 @@ val ExternalDownloaderEnabledKey = booleanPreferencesKey("externalDownloaderEnab
 val ExternalDownloaderPackageKey = stringPreferencesKey("externalDownloaderPackage")
 val DownloadAudioOutputEnabledKey = booleanPreferencesKey("downloadAudioOutputEnabled")
 val DownloadCustomPathKey = stringPreferencesKey("downloadCustomPath")
+val DownloadAudioFormatKey = stringPreferencesKey("downloadAudioFormat")
 val PlaylistTagsFilterKey = stringPreferencesKey("playlistTagsFilter")
 val ShowHomeCategoryChipsKey = booleanPreferencesKey("showHomeCategoryChips")
 val ShowTagsInLibraryKey = booleanPreferencesKey("showTagsInLibrary")

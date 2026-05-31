@@ -965,4 +965,6 @@
     <string name="download_path_desc">Choose where audio files are saved</string>
     <string name="download_path_default">App-specific Music folder</string>
     <string name="download_path_custom">Custom folder</string>
+    <string name="audio_output_format">Output format</string>
+    <string name="audio_output_format_desc">Choose the file extension for exported audio</string>
 </resources>

@@ -53,6 +53,7 @@ import coil3.imageLoader
 import moe.koiverse.archivetune.LocalPlayerAwareWindowInsets
 import moe.koiverse.archivetune.LocalPlayerConnection
 import moe.koiverse.archivetune.R
+import moe.koiverse.archivetune.constants.DownloadAudioFormatKey
 import moe.koiverse.archivetune.constants.DownloadAudioOutputEnabledKey
 import moe.koiverse.archivetune.constants.DownloadCustomPathKey
 import moe.koiverse.archivetune.constants.MaxCanvasCacheSizeKey
@@ -116,6 +117,10 @@ fun StorageSettings(
     val (downloadPath, onDownloadPathChange) = rememberPreference(
         key = DownloadCustomPathKey,
         defaultValue = ""
+    )
+    val (downloadFormat, onDownloadFormatChange) = rememberPreference(
+        key = DownloadAudioFormatKey,
+        defaultValue = ".m4a"
     )
     var clearCacheDialog by remember { mutableStateOf(false) }
     var clearDownloads by remember { mutableStateOf(false) }
@@ -335,6 +340,15 @@ fun StorageSettings(
                                 stringResource(R.string.download_path_default)
                             },
                             onClick = { folderPickerLauncher.launch(null) },
+                        )
+                    }
+                    item {
+                        ListPreference(
+                            title = { Text(stringResource(R.string.audio_output_format)) },
+                            selectedValue = downloadFormat,
+                            values = listOf(".m4a", ".opus", ".ogg", ".mp3", ".aac", ".flac", ".wav", ".webm"),
+                            valueText = { it },
+                            onValueSelected = onDownloadFormatChange,
                         )
                     }
                 }
