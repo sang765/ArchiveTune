@@ -16,6 +16,7 @@ import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import androidx.media3.database.DatabaseProvider
 import androidx.media3.datasource.ResolvingDataSource
+import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.okhttp.OkHttpDataSource
@@ -62,8 +63,7 @@ import kotlinx.coroutines.sync.withPermit
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import kotlinx.coroutines.SupervisorJob
-import okhttp3.Request
-import okhttp3.Response
+import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.time.LocalDateTime
@@ -305,14 +305,14 @@ constructor(
                     previousFingerprint = fingerprint
                 }
         }
-        CoroutineScope(Dispatchers.IO).launch {
+        audioExportScope.launch {
             context.dataStore.data.map { prefs ->
                 prefs[DownloadAudioOutputEnabledKey] ?: false
             }.distinctUntilChanged().collect { enabled ->
                 audioOutputEnabled = enabled
             }
         }
-        CoroutineScope(Dispatchers.IO).launch {
+        audioExportScope.launch {
             context.dataStore.data.map { prefs ->
                 prefs[DownloadCustomPathKey] ?: ""
             }.distinctUntilChanged().collect { path ->
@@ -330,47 +330,35 @@ constructor(
         val songEntity = song.song
         val format = song.format
 
-        val streamUrl = resolveStreamUrl(mediaId) ?: return
         val mimeType = format?.mimeType ?: "audio/mp4"
         val extension = mimeTypeToExtension(mimeType)
         val artistName = song.artists.firstOrNull()?.name?.let { sanitizeFileName(it) + " - " } ?: ""
         val fileName = "$artistName${sanitizeFileName(songEntity.title)}$extension"
 
-        try {
-            val outputStream = resolveDownloadOutputStream(fileName) ?: return
-            val request = Request.Builder().url(streamUrl).build()
-            val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
-                mediaOkHttpClient.newCall(request).execute()
-            }
-            response.use { resp ->
-                if (!resp.isSuccessful) return@use
-                kotlinx.coroutines.withContext(Dispatchers.IO) {
-                    resp.body?.byteStream()?.use { input ->
-                        outputStream.use { out ->
-                            input.copyTo(out)
+        kotlinx.coroutines.withContext(Dispatchers.IO) {
+            val cacheDataSource = CacheDataSource.Factory()
+                .setCache(downloadCache)
+                .setUpstreamDataSourceFactory(null)
+                .createDataSource()
+            try {
+                val dataSpec = DataSpec(download.request.uri)
+                cacheDataSource.open(dataSpec)
+                val outputStream = resolveDownloadOutputStream(fileName)
+                if (outputStream != null) {
+                    outputStream.use { out ->
+                        val buffer = ByteArray(8192)
+                        while (true) {
+                            val read = cacheDataSource.read(buffer, 0, buffer.size)
+                            if (read <= 0) break
+                            out.write(buffer, 0, read)
                         }
                     }
                 }
+            } catch (e: Exception) {
+                Timber.w(e, "Failed to export audio file for mediaId=%s", mediaId)
+            } finally {
+                cacheDataSource.close()
             }
-        } catch (_: Exception) {
-            // export failed, resources cleaned up by use blocks
-        }
-    }
-
-    private suspend fun resolveStreamUrl(mediaId: String): String? {
-        val lowDataModeActive = context.isLowDataModeActive()
-        return try {
-            context.retryWithoutPlaybackLoginContext {
-                YTPlayerUtils.playerResponseForPlayback(
-                    mediaId,
-                    audioQuality = if (lowDataModeActive) AudioQuality.LOW else audioQuality,
-                    preferredStreamClient = preferredStreamClient,
-                    connectivityManager = connectivityManager,
-                    networkMetered = lowDataModeActive,
-                )
-            }.getOrNull()?.streamUrl
-        } catch (_: Exception) {
-            null
         }
     }
 
@@ -379,7 +367,6 @@ constructor(
         return if (customPath.isNotBlank() && Uri.parse(customPath).scheme == "content") {
             val treeUri = Uri.parse(customPath)
             val docFile = DocumentFile.fromTreeUri(context, treeUri) ?: return null
-            val baseName = fileName.removeSuffix(".${fileName.substringAfterLast('.')}")
             val mimeType = when {
                 fileName.endsWith(".m4a") -> "audio/mp4"
                 fileName.endsWith(".mp3") -> "audio/mpeg"
@@ -391,7 +378,8 @@ constructor(
                 fileName.endsWith(".aac") -> "audio/aac"
                 else -> "audio/*"
             }
-            val created = docFile.createFile(mimeType, baseName) ?: return null
+            if (docFile.findFile(fileName) != null) return null
+            val created = docFile.createFile(mimeType, fileName) ?: return null
             context.contentResolver.openOutputStream(created.uri)
         } else {
             val dir = if (customPath.isNotBlank()) {
