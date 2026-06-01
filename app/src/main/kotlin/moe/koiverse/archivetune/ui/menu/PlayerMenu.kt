@@ -852,7 +852,7 @@ fun PlayerMenu(
                                 Text(
                                     text = stringResource(R.string.tempo_pitch_display,
                                         formatMultiplier(playbackParameters.speed),
-                                        formatMultiplier(playbackParameters.pitch)
+                                        formatMultiplier(playbackParameters.pitch)),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                 )
@@ -1131,7 +1131,7 @@ fun TempoPitchDialog(onDismiss: () -> Unit) {
                                 tempo = preset
                                 applyPlaybackParameters(tempo, pitch)
                             },
-                                    label = { Text(stringResource(R.string.pitch_multiplier, formatMultiplier(preset))) },
+                                    label = { Text(stringResource(R.string.tempo_multiplier, formatMultiplier(preset))) },
                         )
                     }
                 }
@@ -1293,7 +1293,7 @@ fun TempoPitchDialog(onDismiss: () -> Unit) {
                                         pitch = preset
                                         applyPlaybackParameters(tempo, pitch)
                                     },
-                            label = { Text(stringResource(R.string.tempo_multiplier, formatMultiplier(preset))) },
+                            label = { Text(stringResource(R.string.pitch_multiplier, formatMultiplier(preset))) },
                                 )
                             }
                         }
