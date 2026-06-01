@@ -472,7 +472,7 @@ fun LyricsSettings(
 
             item(visible = enablePaxsenixLyrics) {
                 SwitchPreference(
-                    title = { Text("Paxsenix: Apple Music") },
+                    title = { Text(stringResource(R.string.paxsenix_apple_music)) },
                     icon = { Icon(painterResource(R.drawable.lyrics), null) },
                     checked = enablePaxsenixAppleMusicLyrics,
                     onCheckedChange = onEnablePaxsenixAppleMusicLyricsChange,
@@ -481,7 +481,7 @@ fun LyricsSettings(
 
             item(visible = enablePaxsenixLyrics) {
                 SwitchPreference(
-                    title = { Text("Paxsenix: NetEase") },
+                    title = { Text(stringResource(R.string.paxsenix_netease)) },
                     icon = { Icon(painterResource(R.drawable.lyrics), null) },
                     checked = enablePaxsenixNeteaseLyrics,
                     onCheckedChange = onEnablePaxsenixNeteaseLyricsChange,
@@ -490,7 +490,7 @@ fun LyricsSettings(
 
             item(visible = enablePaxsenixLyrics) {
                 SwitchPreference(
-                    title = { Text("Paxsenix: Spotify") },
+                    title = { Text(stringResource(R.string.paxsenix_spotify)) },
                     icon = { Icon(painterResource(R.drawable.lyrics), null) },
                     checked = enablePaxsenixSpotifyLyrics,
                     onCheckedChange = onEnablePaxsenixSpotifyLyricsChange,
@@ -499,7 +499,7 @@ fun LyricsSettings(
 
             item(visible = enablePaxsenixLyrics) {
                 SwitchPreference(
-                    title = { Text("Paxsenix: Musixmatch") },
+                    title = { Text(stringResource(R.string.paxsenix_musixmatch)) },
                     icon = { Icon(painterResource(R.drawable.lyrics), null) },
                     checked = enablePaxsenixMusixmatchLyrics,
                     onCheckedChange = onEnablePaxsenixMusixmatchLyricsChange,
@@ -508,7 +508,7 @@ fun LyricsSettings(
 
             item(visible = enablePaxsenixLyrics) {
                 SwitchPreference(
-                    title = { Text("Paxsenix: KuGou") },
+                    title = { Text(stringResource(R.string.paxsenix_kugou)) },
                     icon = { Icon(painterResource(R.drawable.lyrics), null) },
                     checked = enablePaxsenixKuGouLyrics,
                     onCheckedChange = onEnablePaxsenixKuGouLyricsChange,
@@ -590,7 +590,7 @@ fun LyricsSettings(
                     onValueChange = onQueueLyricsPreloadCountChange,
                     minValue = 0,
                     maxValue = 10,
-                    valueText = { if (it == 0) "Off" else it.toString() },
+                    valueText = { if (it == 0) stringResource(R.string.provider_off) else it.toString() },
                 )
             }
         }

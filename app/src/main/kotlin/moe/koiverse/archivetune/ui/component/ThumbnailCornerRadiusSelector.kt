@@ -235,7 +235,7 @@ fun ThumbnailCornerRadiusModal(
                             keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
                             trailingIcon = {
                                 Text(
-                                    text = "dp",
+                                    text = stringResource(R.string.dp_unit),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -259,7 +259,7 @@ fun ThumbnailCornerRadiusModal(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "0",
+                                text = stringResource(R.string.min_radius),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -283,7 +283,7 @@ fun ThumbnailCornerRadiusModal(
                             )
 
                             Text(
-                                text = "45",
+                                text = stringResource(R.string.max_radius),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

@@ -196,14 +196,14 @@ fun NewReleaseScreen(
                             )
                             Spacer(Modifier.height(16.dp))
                             Text(
-                                text = "New releases are temporarily unavailable",
+                                text = stringResource(R.string.new_releases_unavailable),
                                 style = MaterialTheme.typography.titleLarge,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 textAlign = TextAlign.Center,
                             )
                             Spacer(Modifier.height(8.dp))
                             Text(
-                                text = "ArchiveTune could not load this YouTube Music section. Try again later.",
+                                text = stringResource(R.string.new_releases_unavailable_desc),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center,

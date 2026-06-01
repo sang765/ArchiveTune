@@ -69,8 +69,8 @@ class DebugActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val stack = intent.getStringExtra(EXTRA_STACK_TRACE) ?: "No stack trace available"
-        val previewText = stack.lineSequence().firstOrNull()?.take(100) ?: "Unknown error"
+        val stack = intent.getStringExtra(EXTRA_STACK_TRACE) ?: getString(R.string.no_stack_trace)
+        val previewText = stack.lineSequence().firstOrNull()?.take(100) ?: getString(R.string.unknown_error)
         val timestampText = runCatching {
             SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
         }.getOrDefault("")
@@ -128,7 +128,7 @@ private fun CrashReportScreen(
                     type = "text/plain"
                     putExtra(Intent.EXTRA_TEXT, reportText)
                 }
-                context.startActivity(Intent.createChooser(share, "Share crash log"))
+                context.startActivity(Intent.createChooser(share, context.getString(R.string.share_crash_log)))
             },
             onRestart = onRestart,
             onClose = onClose,
@@ -160,14 +160,14 @@ private fun CrashReportScaffold(
                         contentDescription = null,
                     )
                 },
-                text = { Text("Share Logs") },
+                text = { Text(stringResource(R.string.share_logs)) },
             )
         },
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Crash Report",
+                        text = stringResource(R.string.crash_report),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
@@ -225,7 +225,7 @@ private fun CrashReportScaffold(
                             modifier = Modifier.size(22.dp),
                         )
                         Text(
-                            text = "Application crashed",
+                            text = stringResource(R.string.application_crashed),
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                             color = MaterialTheme.colorScheme.onErrorContainer,
                         )
@@ -260,7 +260,7 @@ private fun CrashReportScaffold(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Text(
-                        text = "Device info",
+                        text = stringResource(R.string.device_info),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                     )
                     deviceInfo.forEachIndexed { index, (k, v) ->
@@ -288,7 +288,7 @@ private fun CrashReportScaffold(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Text(
-                        text = "Stack trace",
+                        text = stringResource(R.string.stack_trace),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                     )
                     SelectionContainer {
@@ -314,7 +314,7 @@ private fun CrashReportScaffold(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     shapes = ButtonDefaults.shapes(),
                 ) {
-                    Text("Restart")
+                    Text(stringResource(R.string.restart))
                 }
                 Button(
                     onClick = onClose,
@@ -322,7 +322,7 @@ private fun CrashReportScaffold(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                     shapes = ButtonDefaults.shapes(),
                 ) {
-                    Text("Close")
+                    Text(stringResource(R.string.close))
                 }
             }
 
@@ -374,8 +374,8 @@ private fun buildCrashReport(
     }.getOrDefault("")
 
     val header = buildString {
-        appendLine("ArchiveTune crash report")
-        if (timestampText.isNotBlank()) appendLine("Time: $timestampText")
+        appendLine(context.getString(R.string.crash_report_header))
+        if (timestampText.isNotBlank()) appendLine(context.getString(R.string.crash_report_time, timestampText))
         val appVersionLabel = when {
             versionName.isNotBlank() && versionCode.isNotBlank() -> {
                 "${formatVersionName(versionName)} ($versionCode)"
@@ -386,14 +386,14 @@ private fun buildCrashReport(
             else -> null
         }
         if (appVersionLabel != null) {
-            appendLine("App: $appVersionLabel")
+            appendLine(context.getString(R.string.crash_report_app, appVersionLabel))
         }
-        appendLine("Package: $packageName")
+        appendLine(context.getString(R.string.crash_report_package, packageName))
     }
 
     val deviceBlock = buildString {
         appendLine()
-        appendLine("Device")
+        appendLine(context.getString(R.string.crash_report_device_section))
         deviceInfo.forEach { (k, v) ->
             appendLine("$k: $v")
         }
@@ -404,7 +404,7 @@ private fun buildCrashReport(
         append(deviceBlock)
         appendLine()
         appendLine()
-        appendLine("Stack trace")
+        appendLine(context.getString(R.string.crash_report_stack_trace_section))
         appendLine(stack)
     }
 }
@@ -421,7 +421,7 @@ private fun buildDeviceInfo(
                 ?.takeIf { it.isNotBlank() }
             ?: Build.DEVICE
 
-    val osVersion = "Android ${Build.VERSION.RELEASE} (SDK ${Build.VERSION.SDK_INT})"
+    val osVersion = context.getString(R.string.device_os_version_value, Build.VERSION.RELEASE, Build.VERSION.SDK_INT)
 
     val manufacturer = Build.MANUFACTURER.orEmpty().ifBlank { "-" }
     val brand = Build.BRAND.orEmpty().ifBlank { "-" }
@@ -432,14 +432,14 @@ private fun buildDeviceInfo(
     val fingerprint = Build.FINGERPRINT.orEmpty().ifBlank { "-" }
 
     return listOf(
-        "OS version" to osVersion,
-        "Phone name" to deviceName,
-        "Model" to model,
-        "Manufacturer" to manufacturer,
-        "Brand" to brand,
-        "Device" to Build.DEVICE.orEmpty().ifBlank { "-" },
-        "Product" to product,
-        "Hardware" to hardware,
-        "Fingerprint" to fingerprint,
+        context.getString(R.string.device_os_version) to osVersion,
+        context.getString(R.string.device_phone_name) to deviceName,
+        context.getString(R.string.device_model) to model,
+        context.getString(R.string.device_manufacturer) to manufacturer,
+        context.getString(R.string.device_brand) to brand,
+        context.getString(R.string.device_device) to Build.DEVICE.orEmpty().ifBlank { "-" },
+        context.getString(R.string.device_product) to product,
+        context.getString(R.string.device_hardware) to hardware,
+        context.getString(R.string.device_fingerprint) to fingerprint,
     )
 }

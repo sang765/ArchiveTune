@@ -1140,7 +1140,7 @@ fun EditablePreference(
         description = description ?: if (value.isEmpty()) defaultValue else value,
         icon = { Icon(painterResource(iconRes), null) },
         trailingContent = {
-            TextButton(onClick = { showDialog = true }, shapes = ButtonDefaults.shapes()) { Text("Edit") }
+            TextButton(onClick = { showDialog = true }, shapes = ButtonDefaults.shapes()) { Text(stringResource(R.string.edit)) }
         }
     )
     if (showDialog) {
@@ -1151,12 +1151,12 @@ fun EditablePreference(
                 TextButton(onClick = {
                     onValueChange(if (text.isBlank()) "" else text)
                     showDialog = false
-                }, shapes = ButtonDefaults.shapes()) { Text("Save") }
+                }, shapes = ButtonDefaults.shapes()) { Text(stringResource(R.string.save)) }
             },
             dismissButton = {
-                TextButton(onClick = { showDialog = false }, shapes = ButtonDefaults.shapes()) { Text("Cancel") }
+                TextButton(onClick = { showDialog = false }, shapes = ButtonDefaults.shapes()) { Text(stringResource(R.string.cancel)) }
             },
-            title = { Text("Edit $title") },
+            title = { Text(stringResource(R.string.edit_dialog_title, title)) },
             text = {
                 TextField(
                     value = text,

@@ -882,7 +882,7 @@ fun OnlinePlaylistScreen(
                                         ) {
                                             Icon(
                                                 painter = painterResource(R.drawable.mix),
-                                                contentDescription = "Start Mix",
+                                                contentDescription = stringResource(R.string.start_mix_cd),
                                                 modifier = Modifier.size(24.dp)
                                             )
                                         }

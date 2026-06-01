@@ -426,7 +426,7 @@ fun AccountSettings(
                     ExpressiveActionRow(
                         icon = painterResource(R.drawable.integration),
                         title = integrationLabel,
-                        subtitle = "Discord, Last.fm, ListenBrainz",
+                        subtitle = stringResource(R.string.integration_subtitle),
                         onClick = { navController.navigate("settings/integration") },
                     )
 
@@ -1161,7 +1161,7 @@ private fun VersionStamp() {
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.60f),
         )
         Text(
-            text = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+            text = stringResource(R.string.version_display, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.40f),
         )

@@ -495,7 +495,7 @@ fun CachePlaylistScreen(
                                     onCheckedChange = {
                                         playerConnection.playQueue(
                                             ListQueue(
-                                                title = "Cache Songs",
+                                                title = stringResource(R.string.cache_songs_title),
                                                 items = filteredSongs.map { it.item.toMediaItem() },
                                             )
                                         )
@@ -523,7 +523,7 @@ fun CachePlaylistScreen(
                                     onCheckedChange = {
                                         playerConnection.playQueue(
                                             ListQueue(
-                                                title = "Cache Songs",
+                                                title = stringResource(R.string.cache_songs_title),
                                                 items = filteredSongs.shuffled().map { it.item.toMediaItem() },
                                             )
                                         )
@@ -636,7 +636,7 @@ fun CachePlaylistScreen(
                                         } else {
                                             playerConnection.playQueue(
                                                 ListQueue(
-                                                    title = "Cache Songs",
+                                                    title = stringResource(R.string.cache_songs_title),
                                                     items = cachedSongs.map { it.toMediaItem() },
                                                     startIndex = cachedSongs.indexOfFirst { it.id == songWrapper.item.id }
                                                 )

@@ -395,7 +395,7 @@ fun LyricsMenu(
                                             )
                                             Spacer(Modifier.width(4.dp))
                                             Text(
-                                                text = "Synced",
+                                                text = stringResource(R.string.synced_badge),
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                                             )

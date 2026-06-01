@@ -365,4 +365,452 @@
     <string name="backup_category_account">Chi tiết tài khoản</string>
     <string name="backup_category_account_desc">Thông tin đăng nhập YouTube, Last.fm, Discord và proxy</string>
     <string name="login_success">Đăng nhập thành công</string>
+
+    <!-- New releases -->
+    <string name="new_releases">Bản phát hành mới</string>
+    <string name="total_releases">Tổng số bản phát hành</string>
+    <string name="singles">Đĩa đơn</string>
+    <string name="ep">EP</string>
+    <string name="no_releases_found">Không tìm thấy bản phát hành nào</string>
+
+    <!-- Android Auto -->
+    <string name="android_auto_suggested_songs">Bài hát gợi ý</string>
+    <string name="android_auto_mixes_and_radios">Tổng hợp và radio</string>
+    <string name="android_auto_sort_playlist">Sắp xếp danh sách phát</string>
+    <string name="android_auto_sort_option_format">%1$s - %2$s</string>
+
+    <!-- Monthly listeners -->
+    <string name="monthly_listeners">Người nghe hàng tháng</string>
+
+    <!-- Playlist sync -->
+    <string name="playlist_sync_progress_step">%1$d/%2$d bài hát</string>
+    <string name="playlist_sync_failed">Đồng bộ danh sách phát thất bại: %1$s</string>
+
+    <!-- Player designs -->
+    <string name="player_design_v8">Mở rộng đắm chìm</string>
+    <string name="player_design_v9">Mở rộng Material</string>
+    <string name="mini_player_background_style">Kiểu nền trình phát mini</string>
+
+    <!-- Force sync -->
+    <string name="force_sync_on_switch_account">Buộc đồng bộ khi chuyển tài khoản</string>
+    <string name="force_sync_on_switch_account_desc">Đồng bộ lại danh sách phát, bài hát đã thích, nghệ sĩ và album từ tài khoản đã chọn sau khi chuyển</string>
+
+    <!-- Top songs -->
+    <string name="top_songs">Bài hát hàng đầu</string>
+
+    <!-- Settings section titles and subtitles -->
+    <string name="settings_appearance_subtitle">Giao diện, bố cục và kiểu hình ảnh</string>
+    <string name="settings_playback_title">Phát lại</string>
+    <string name="settings_playback_subtitle">Hành vi âm thanh, chuyển bài và phát nền</string>
+    <string name="settings_behavior_title">Hành vi</string>
+    <string name="settings_behavior_subtitle">Lịch sử, mặc định và hành vi riêng tư</string>
+    <string name="settings_integration_subtitle">Discord, Last.fm và ListenBrainz</string>
+    <string name="settings_backup_restore_subtitle">Xuất và khôi phục dữ liệu ứng dụng cá nhân</string>
+    <string name="settings_developer_options_title">Tùy chọn nhà phát triển</string>
+    <string name="settings_developer_options_subtitle">Tính năng thử nghiệm và gỡ lỗi</string>
+    <string name="settings_lyrics_subtitle">Nhà cung cấp lời bài hát, tải trước và dịch thuật</string>
+    <string name="settings_content_subtitle">Mặc định ngôn ngữ, quốc gia và đề xuất</string>
+    <string name="settings_internet_subtitle">Proxy, DNS và hành vi phát mạng</string>
+    <string name="settings_po_token_subtitle">Xác minh phát lại và dữ liệu khách</string>
+    <string name="settings_storage_subtitle">Cache, tải xuống và lưu trữ ngoại tuyến</string>
+    <string name="settings_updates_subtitle">Phiên bản, ghi chú phát hành và kênh cập nhật</string>
+    <string name="settings_about_subtitle">Thông tin ứng dụng, giấy phép và người đóng góp</string>
+    <string name="settings_account_subtitle">Đăng nhập và quản lý đồng bộ tài khoản</string>
+    <string name="settings_stats_title">Thống kê nghe nhạc</string>
+    <string name="settings_stats_subtitle">Bài hát, nghệ sĩ hàng đầu và lịch sử phát của bạn</string>
+
+    <!-- Year in Music -->
+    <string name="year_in_music_recap">Tổng kết âm nhạc</string>
+    <string name="year_in_music_recap_word">TỔNG KẾT</string>
+    <string name="year_in_music_intro_title">Phát lại năm của bạn</string>
+    <string name="year_in_music_intro_subtitle">Bản tổng kết các bài hát, nghệ sĩ và album đã định hình %d.</string>
+    <string name="year_in_music_intro_hero">Đã đến! Năm trong âm nhạc của bạn.</string>
+    <string name="year_in_music_intro_details">Khám phá bài hát, nghệ sĩ, album và thời gian nghe hàng đầu của bạn.</string>
+    <string name="year_in_music_swipe_begin">Vuốt để bắt đầu</string>
+    <string name="year_in_music_totals_title">Bạn đã giữ cho âm nhạc luôn chuyển động</string>
+    <string name="year_in_music_top_track">Bài hát hàng đầu của bạn</string>
+    <string name="year_in_music_ranked_artists">Nghệ sĩ phát nhiều nhất</string>
+    <string name="year_in_music_ranked_albums">Album bạn đã quay lại</string>
+    <string name="year_in_music_final_title">Đó là năm của bạn</string>
+    <string name="year_in_music_musical_passport">Hộ chiếu âm nhạc của tôi</string>
+    <string name="year_in_music_empty_title">Chưa có gì để tổng kết</string>
+    <string name="year_in_music_empty_subtitle">Nghe nhiều nhạc hơn trong %d và bản tổng kết của bạn sẽ xuất hiện tại đây.</string>
+    <string name="year_in_music_minutes_label">Thời gian nghe</string>
+    <string name="year_in_music_minutes_unit">phút</string>
+    <string name="year_in_music_plays_label">Tổng lượt phát</string>
+    <string name="year_in_music_top_pick">Lựa chọn hàng đầu</string>
+    <string name="year_in_music_current_card">Chia sẻ thẻ</string>
+
+    <!-- New releases screen -->
+    <string name="new_releases_unavailable">Bản phát hành mới tạm thời không khả dụng</string>
+    <string name="new_releases_unavailable_desc">ArchiveTune không thể tải mục YouTube Music này. Thử lại sau.</string>
+
+    <!-- Local songs included folders -->
+    <string name="local_songs_scan_included_folders_title">Thư mục bao gồm</string>
+    <string name="local_songs_scan_included_folders_desc">Chỉ quét các bài hát trong thư mục khớp với bất kỳ đường dẫn nào sau đây.</string>
+    <string name="local_songs_scan_included_folders_empty">Tất cả thư mục đều được bao gồm.</string>
+    <string name="local_songs_scan_included_folders_add">Bao gồm thư mục</string>
+
+    <!-- AOD customization -->
+    <string name="aod_customize_title">Tùy chỉnh AOD</string>
+    <string name="aod_customize_subtitle">Hình dạng, bố cục, điều khiển và kiểu xung quanh</string>
+    <string name="aod_customize_entry_desc">Tùy chỉnh màn hình trình phát luôn bật</string>
+    <string name="aod_customize_preview">Xem trước trực tiếp</string>
+    <string name="aod_customize_visibility">Hiển thị</string>
+    <string name="aod_customize_show_thumbnail">Hiển thị hình nhỏ</string>
+    <string name="aod_customize_show_artist">Hiển thị nghệ sĩ</string>
+    <string name="aod_customize_show_album">Hiển thị album</string>
+    <string name="aod_customize_show_progress">Hiển thị tiến trình</string>
+    <string name="aod_customize_show_time_labels">Hiển thị nhãn thời gian</string>
+    <string name="aod_customize_show_controls">Hiển thị điều khiển</string>
+    <string name="aod_customize_show_exit_button">Hiển thị nút thoát</string>
+    <string name="aod_customize_thumbnail_shape">Hình dạng thumbnail</string>
+    <string name="aod_customize_thumbnail_shape_desc">Sử dụng hình dạng cho mặt nạ artwork AOD.</string>
+    <string name="aod_customize_layout">Bố cục</string>
+    <string name="aod_customize_background_style">Kiểu nền</string>
+    <string name="aod_customize_accent_style">Kiểu điểm nhấn</string>
+    <string name="aod_customize_content_position">Vị trí nội dung</string>
+    <string name="aod_customize_text_alignment">Căn chỉnh văn bản</string>
+    <string name="aod_customize_title_max_lines">Số dòng tối đa tiêu đề</string>
+    <string name="aod_customize_scale_and_spacing">Tỷ lệ và khoảng cách</string>
+    <string name="aod_customize_thumbnail_size">Kích thước thumbnail</string>
+    <string name="aod_customize_shape_rotation">Xoay hình dạng</string>
+    <string name="aod_customize_horizontal_padding">Đệm ngang</string>
+    <string name="aod_customize_vertical_spacing">Khoảng cách dọc</string>
+    <string name="aod_customize_ambient_intensity">Cường độ xung quanh</string>
+    <string name="aod_customize_artwork_glow">Phát sáng artwork</string>
+    <string name="aod_customize_controls">Điều khiển</string>
+    <string name="aod_customize_control_style">Kiểu điều khiển</string>
+    <string name="aod_customize_control_size">Kích thước điều khiển</string>
+    <string name="aod_customize_dp_value">%1$d dp</string>
+    <string name="aod_customize_degree_value">%1$d°</string>
+    <string name="aod_customize_percent_value">%1$d%%</string>
+    <string name="aod_customize_sample_title">Midnight Archive</string>
+    <string name="aod_customize_sample_artist">Koiverse Ensemble</string>
+    <string name="aod_customize_sample_album">Always On Sessions</string>
+    <string name="aod_customize_sample_elapsed">1:24</string>
+    <string name="aod_customize_sample_duration">3:48</string>
+
+    <!-- AOD shapes -->
+    <string name="aod_shape_rounded">Bo tròn</string>
+    <string name="aod_shape_square">Vuông</string>
+    <string name="aod_shape_circle">Hình tròn</string>
+    <string name="aod_shape_pill">Viên thuốc</string>
+    <string name="aod_shape_arch">Vòm</string>
+    <string name="aod_shape_slanted">Xiên</string>
+    <string name="aod_shape_diamond">Kim cương</string>
+    <string name="aod_shape_pentagon">Ngũ giác</string>
+    <string name="aod_shape_triangle">Tam giác</string>
+    <string name="aod_shape_heart">Trái tim</string>
+    <string name="aod_shape_flower">Hoa</string>
+    <string name="aod_shape_clover_4">Cỏ ba lá</string>
+    <string name="aod_shape_cookie_6">Cookie 6</string>
+    <string name="aod_shape_cookie_9">Cookie 9</string>
+    <string name="aod_shape_sunny">Nắng</string>
+    <string name="aod_shape_soft_burst">Bùng nổ mềm</string>
+    <string name="aod_shape_ghostish">Ma mị</string>
+    <string name="aod_shape_pixel_circle">Pixel tròn</string>
+
+    <!-- AOD backgrounds -->
+    <string name="aod_background_pure_black">Đen thuần</string>
+    <string name="aod_background_soft_radial">Tỏa tròn mềm</string>
+    <string name="aod_background_tonal_edge">Viền tông màu</string>
+    <string name="aod_background_ambient_glow">Phát sáng xung quanh</string>
+
+    <!-- AOD accents -->
+    <string name="aod_accent_monochrome">Đơn sắc</string>
+    <string name="aod_accent_theme">Giao diện</string>
+
+    <!-- AOD positions -->
+    <string name="aod_position_top">Trên</string>
+    <string name="aod_position_center">Giữa</string>
+    <string name="aod_position_bottom">Dưới</string>
+
+    <!-- AOD alignments -->
+    <string name="aod_alignment_start">Đầu</string>
+    <string name="aod_alignment_center">Giữa</string>
+    <string name="aod_alignment_end">Cuối</string>
+
+    <!-- AOD controls -->
+    <string name="aod_control_filled">Đặc</string>
+    <string name="aod_control_tonal">Tông màu</string>
+    <string name="aod_control_minimal">Tối giản</string>
+
+    <!-- AI Integration -->
+    <string name="ai_integration">Tích hợp AI</string>
+    <string name="ai_integration_desc">Cấu hình dịch thuật AI và tự động hóa cá nhân hóa.</string>
+    <string name="ai_provider_settings">Nhà cung cấp</string>
+    <string name="ai_provider">Nhà cung cấp AI</string>
+    <string name="ai_provider_desc">Chọn dịch vụ AI.</string>
+    <string name="ai_provider_none">Không (Đã tắt)</string>
+    <string name="ai_custom_endpoint">Endpoint tùy chỉnh</string>
+    <string name="ai_api_key">Khóa API</string>
+    <string name="ai_api_key_missing">Cần có khóa API để sử dụng tính năng AI.</string>
+    <string name="ai_api_key_configured">Đã cấu hình</string>
+    <string name="ai_test_api">Kiểm tra API</string>
+    <string name="ai_api_testing">Đang kiểm tra kết nối…</string>
+    <string name="ai_api_status_unknown">Chưa kiểm tra</string>
+    <string name="ai_api_status_success">API sẵn sàng</string>
+    <string name="ai_api_status_failed">API thất bại. Kiểm tra lại sau khi cập nhật cài đặt.</string>
+    <string name="ai_model">Mô hình</string>
+    <string name="ai_model_fetch_hint">Chạm làm mới để tải danh sách mô hình</string>
+    <string name="ai_model_api_key_required">Cần khóa API để tải mô hình</string>
+    <string name="ai_model_not_selected">Chưa chọn</string>
+    <string name="ai_model_loading">Đang lấy danh sách mô hình…</string>
+    <string name="ai_model_fetch_failed">Không thể lấy danh sách mô hình</string>
+    <string name="ai_fetch_models">Lấy danh sách mô hình</string>
+    <string name="ai_model_search">Tìm kiếm mô hình</string>
+    <string name="ai_model_no_results">Không có mô hình nào phù hợp</string>
+    <string name="ai_translation">Dịch AI</string>
+    <string name="ai_translation_target">Ngôn ngữ đích</string>
+    <string name="ai_api_connected">API đã kết nối</string>
+    <string name="ai_api_test_failed">Kiểm tra API thất bại</string>
+    <string name="ai_translation_menu">Dịch AI</string>
+    <string name="ai_translating_lyrics">Đang dịch lời bài hát…</string>
+
+    <!-- DebugActivity -->
+    <string name="share_logs">Chia sẻ nhật ký</string>
+    <string name="crash_report">Báo cáo sự cố</string>
+    <string name="application_crashed">Ứng dụng bị treo</string>
+    <string name="device_info">Thông tin thiết bị</string>
+    <string name="stack_trace">Stack trace</string>
+
+    <!-- PlayerComponents -->
+    <string name="copied_title">Đã sao chép tiêu đề</string>
+    <string name="copied_artist">Đã sao chép nghệ sĩ</string>
+    <string name="blurred_background">Nền mờ</string>
+    <string name="custom_background">Nền tùy chỉnh</string>
+    <string name="codec_lossless">Lossless</string>
+    <string name="codec_aac">AAC</string>
+    <string name="codec_vorbis">Vorbis</string>
+    <string name="codec_opus">OPUS</string>
+
+    <!-- LyricsAnimationSettings -->
+    <string name="animation_tuning">Tinh chỉnh hoạt ảnh</string>
+    <string name="line_bounce_effect">Hiệu ứng nảy dòng</string>
+    <string name="line_bounce_effect_desc">Bật hoạt ảnh nảy cho lời bài hát đồng bộ dòng (LRC)</string>
+    <string name="bounce_amplitude">Biên độ nảy</string>
+    <string name="bounce_amplitude_desc">Điều chỉnh hiệu ứng nảy khi một từ được hát (%d%%)</string>
+    <string name="glow_intensity">Cường độ phát sáng</string>
+    <string name="glow_intensity_desc">Điều chỉnh độ sáng phát sáng của từ đang hát (%d%%)</string>
+    <string name="fill_transition_smoothness">Độ mượt chuyển đổ đầy</string>
+    <string name="fill_transition_smoothness_desc">Điều chỉnh độ rộng cạnh gradient của hiệu ứng đổ đầy dạng lỏng (%d dp)</string>
+
+    <!-- UpdateScreen -->
+    <string name="update_dialog_intro">ArchiveTune cung cấp hai kênh tải xuống cho các bản dựng:</string>
+    <string name="stable_builds">• Bản dựng ổn định</string>
+    <string name="stable_builds_desc_1">Được phân phối qua GitHub Releases chính thức.</string>
+    <string name="stable_builds_desc_2">Các phiên bản này đã được kiểm tra và được khuyến nghị cho hầu hết người dùng.</string>
+    <string name="nightly_builds">• Bản dựng hàng đêm</string>
+    <string name="nightly_builds_desc_1">Các bản dựng phát triển được tạo tự động lưu trữ qua nightly.link.</string>
+    <string name="nightly_builds_desc_2">Bản dựng hàng đêm có thể bao gồm tính năng thử nghiệm, thay đổi chưa hoàn thiện hoặc lỗi tạm thời.</string>
+    <string name="nightly_builds_desc_3">Bản dựng hàng đêm chỉ dành cho mục đích thử nghiệm và truy cập sớm.\nKhông đảm bảo tính ổn định, tương thích và chức năng.</string>
+    <string name="nightly_builds_desc_4">Khi tiếp tục, bạn xác nhận rằng bản dựng hàng đêm có thể không ổn định và tự chịu rủi ro khi sử dụng.</string>
+
+    <!-- Lyrics provider names -->
+    <string name="paxsenix_apple_music">Paxsenix: Apple Music</string>
+    <string name="paxsenix_netease">Paxsenix: NetEase</string>
+    <string name="paxsenix_spotify">Paxsenix: Spotify</string>
+    <string name="paxsenix_musixmatch">Paxsenix: Musixmatch</string>
+    <string name="paxsenix_kugou">Paxsenix: KuGou</string>
+    <string name="provider_off">Tắt</string>
+    <string name="provider_lrclib">LrcLib</string>
+    <string name="provider_kugou">KuGou</string>
+    <string name="provider_better_lyrics">BetterLyrics</string>
+    <string name="provider_simpmusic">SimpMusic</string>
+    <string name="provider_unison">Unison</string>
+
+    <!-- AboutScreen -->
+    <string name="about_debug">Gỡ LỖI</string>
+    <string name="about_koiverse">Koiverse</string>
+    <string name="about_lead_developer">Nhà phát triển chính</string>
+    <string name="about_collaborators">Cộng tác viên</string>
+    <string name="about_contributors">Người đóng góp</string>
+
+    <!-- DiscordSettings -->
+    <string name="discord_listen_on_yt_music">Nghe trên YouTube Music</string>
+    <string name="discord_go_to_archivetune">Mở ArchiveTune</string>
+    <string name="edit_dialog_title">Chỉnh sửa %1$s</string>
+    <string name="bullet_item">• %1$s</string>
+    <string name="selection_queue_title">Lựa chọn</string>
+    <string name="unknown_error">Lỗi không xác định</string>
+    <string name="version_prefix">v%1$s</string>
+    <string name="together_default_port">42117</string>
+    <string name="tempo_pitch_display">x%1$.2f • x%2$.2f</string>
+    <string name="volume_percentage">%1$d%%</string>
+    <string name="tempo_multiplier">x%1$.2f</string>
+    <string name="pitch_multiplier">x%1$.2f</string>
+    <string name="semitone_value">%1$+d</string>
+    <string name="playback_error_decoder">%1$s (mã %2$d)</string>
+    <string name="playback_error_http">%1$s (HTTP %2$d)</string>
+    <string name="lastfm_api_key_not_configured">Khóa API Last.fm chưa được cấu hình</string>
+    <string name="seconds_format">%1$dgiây</string>
+    <string name="version_display">v%1$s (%2$d)</string>
+    <string name="no_playlists_yet">Chưa có danh sách phát nào</string>
+    <string name="add_to_n">Thêm vào %1$d</string>
+    <string name="add_to_playlist_short">Thêm</string>
+    <string name="no_stack_trace">Không có stack trace</string>
+    <string name="share_crash_log">Chia sẻ nhật ký sự cố</string>
+    <string name="time_am">SA</string>
+    <string name="time_pm">CH</string>
+    <string name="suggestions_available">Có gợi ý</string>
+    <string name="crash_report_header">Báo cáo sự cố ArchiveTune</string>
+    <string name="crash_report_time">Thời gian: %1$s</string>
+    <string name="crash_report_app">Ứng dụng: %1$s</string>
+    <string name="crash_report_package">Gói: %1$s</string>
+    <string name="crash_report_device_section">Thiết bị</string>
+    <string name="crash_report_stack_trace_section">Stack trace</string>
+    <string name="device_os_version">Phiên bản OS</string>
+    <string name="device_phone_name">Tên điện thoại</string>
+    <string name="device_model">Mẫu máy</string>
+    <string name="device_manufacturer">Nhà sản xuất</string>
+    <string name="device_brand">Thương hiệu</string>
+    <string name="device_device">Thiết bị</string>
+    <string name="device_product">Sản phẩm</string>
+    <string name="device_hardware">Phần cứng</string>
+    <string name="device_fingerprint">Fingerprint</string>
+    <string name="device_os_version_value">Android %1$s (SDK %2$d)</string>
+
+    <!-- AddToPlaylistDialogOnline -->
+    <string name="import_complete">Nhập hoàn tất</string>
+    <string name="total_processed">Đã xử lý: %1$d</string>
+    <string name="successfully_imported">Đã nhập thành công: %1$d</string>
+    <string name="failed_imports">Thất bại: %1$d</string>
+    <string name="failed_items_section">Mục thất bại:</string>
+
+    <!-- AddToPlaylistDialog -->
+    <string name="add_to_playlist">Thêm vào danh sách phát</string>
+    <string name="n_d_selected">Đã chọn %1$d</string>
+
+    <!-- NetworkStatusBanner -->
+    <string name="no_internet_connection">Không có kết nối internet</string>
+    <string name="back_online">Đã kết nối lại</string>
+
+    <!-- LyricsV2 -->
+    <string name="resume_lyrics">Tiếp tục</string>
+
+    <!-- SearchBar -->
+    <string name="search_cd">Tìm kiếm</string>
+
+    <!-- ThumbnailCornerRadiusSelector -->
+    <string name="dp_unit">dp</string>
+    <string name="min_radius">0</string>
+    <string name="max_radius">45</string>
+
+    <!-- StatsScreen -->
+    <string name="time_12am">12SA</string>
+    <string name="time_6am">6SA</string>
+    <string name="time_12pm">12CH</string>
+    <string name="time_6pm">6CH</string>
+
+    <!-- Start Mix -->
+    <string name="start_mix_cd">Bắt đầu Mix</string>
+
+    <!-- CachePlaylistScreen -->
+    <string name="cache_songs_title">Cache bài hát</string>
+
+    <!-- ShowMediaInfo -->
+    <string name="itag_label">Itag</string>
+    <string name="kbps_unit">%1$d Kbps</string>
+
+    <!-- App.kt -->
+    <string name="failed_to_parse_proxy">Không thể phân tích cài đặt proxy.</string>
+
+    <!-- Player.kt -->
+    <string name="by_prefix">của - %1$s</string>
+
+    <!-- Queue.kt -->
+    <string name="speaker_default">Loa</string>
+
+    <!-- LastFMSettings -->
+    <string name="login_enter_credentials">Vui lòng nhập tên người dùng và mật khẩu</string>
+    <string name="login_invalid_credentials">Tên người dùng hoặc mật khẩu không hợp lệ</string>
+    <string name="login_invalid_api_key">Khóa API không hợp lệ. Vui lòng liên hệ với nhà phát triển.</string>
+    <string name="login_auth_error">Lỗi xác thực. Vui lòng thử lại.</string>
+    <string name="login_api_key_suspended">Khóa API bị đình chỉ. Vui lòng liên hệ với nhà phát triển.</string>
+    <string name="login_network_error">Lỗi mạng. Kiểm tra kết nối của bạn.</string>
+    <string name="login_failed_generic">Đăng nhập thất bại. Vui lòng thử lại.</string>
+
+    <!-- AppearanceSettings -->
+    <string name="glow_animated">Phát sáng có hoạt ảnh</string>
+
+    <!-- AccountSettings -->
+    <string name="integration_subtitle">Discord, Last.fm, ListenBrainz</string>
+
+    <!-- PalettePickerScreen -->
+    <string name="default_theme_name">Giao diện ArchiveTune</string>
+
+    <!-- LocalMixQueue -->
+    <string name="mix_from_playlist">Trộn từ danh sách phát</string>
+
+    <!-- LyricsMenu -->
+    <string name="synced_badge">Đã đồng bộ</string>
+
+    <!-- ArtistSeparatorsDialog -->
+    <string name="separator_display">\"%1$s\"</string>
+
+    <!-- AboutScreen content descriptions -->
+    <string name="about_github">GitHub</string>
+    <string name="about_website">Trang web</string>
+    <string name="about_discord">Discord</string>
+
+    <!-- Internal/External -->
+    <string name="internal_service">Dịch vụ nội bộ</string>
+    <string name="external_service">Dịch vụ bên ngoài</string>
+
+    <!-- Backup -->
+    <string name="backup_data_safety">An toàn dữ liệu</string>
+    <string name="backup_data_safety_desc">Tạo bản sao lưu hoặc khôi phục dữ liệu ứng dụng đã chọn.</string>
+    <string name="backup_data_formats">Bản lưu .backup</string>
+    <string name="backup_create_backup_desc">Xuất thư viện, cài đặt và thông tin tài khoản.</string>
+    <string name="backup_restore_backup_desc">Khôi phục dữ liệu đã chọn từ bản sao lưu trước đó.</string>
+
+    <!-- Import -->
+    <string name="import_from_file">Nhập từ tệp</string>
+    <string name="import_from_file_desc">Mang danh sách phát từ tệp M3U hoặc CSV cục bộ.</string>
+    <string name="import_m3u_format">Danh sách phát âm thanh M3U</string>
+    <string name="import_csv_format">Tệp CSV danh sách phát</string>
+
+    <!-- Spotify -->
+    <string name="spotify_connect">Kết nối Spotify</string>
+    <string name="spotify_refresh">Làm mới thư viện Spotify</string>
+    <string name="spotify_available_count">%1$d danh sách phát có sẵn</string>
+    <string name="spotify_connected_as">Đã kết nối với tư cách %1$s</string>
+    <string name="spotify_not_connected">Spotify chưa được kết nối</string>
+    <string name="spotify_track_count">%1$d bài hát</string>
+    <string name="spotify_login_title">Đăng nhập Spotify</string>
+    <string name="spotify_loading_library">Đang tải thư viện Spotify</string>
+    <string name="spotify_no_sources">Không tìm thấy danh sách phát Spotify nào</string>
+    <string name="spotify_account">Tài khoản Spotify</string>
+    <string name="spotify_playlists">Danh sách phát Spotify</string>
+    <string name="spotify_waiting_for_login">Đang chờ đăng nhập Spotify</string>
+    <string name="spotify_show_playlist">Hiển thị danh sách phát</string>
+    <string name="spotify_show_playlist_desc">Hiển thị danh sách phát Spotify trong Thư viện.</string>
+    <string name="spotify_reload_playlist">Tải lại danh sách phát</string>
+    <string name="spotify_reload_playlist_desc">Làm mới danh sách phát Spotify từ tài khoản của bạn.</string>
+    <string name="spotify_no_tracks">Không tìm thấy bài hát Spotify nào.</string>
+
+    <!-- Restart -->
+    <string name="restart">Khởi động lại</string>
+
+    <!-- News -->
+    <string name="news">Tin Tức từ Nhà Phát Triển</string>
+    <string name="news_loading">Đang tải tin tức…</string>
+    <string name="news_empty_title">Chưa có gì ở đây</string>
+    <string name="news_empty_desc">Hiện không có thông báo nào. Quay lại sau nhé.</string>
+    <string name="news_error_title">Không thể tải tin tức</string>
+    <string name="news_error_desc">Kiểm tra kết nối internet của bạn và thử lại.</string>
+    <string name="news_retry">Thử lại</string>
+    <string name="news_search_placeholder">Tìm kiếm tin tức…</string>
+    <string name="news_search_results_title">Kết quả tìm kiếm</string>
+    <string name="news_no_results_title">Không có bài viết phù hợp</string>
+    <string name="news_no_results_desc">Thử một từ khóa khác.</string>
+    <string name="news_important_badge">Quan trọng</string>
+    <string name="news_tooltip_title">Thông Báo Mới</string>
+    <string name="news_tooltip_body">Bạn có thông báo chưa đọc từ nhà phát triển.</string>
+    <string name="news_author_on_date">%1$s · %2$s</string>
+    <plurals name="news_article_count">
+        <item quantity="one">%d bài viết</item>
+        <item quantity="other">%d bài viết</item>
+    </plurals>
 </resources>

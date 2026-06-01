@@ -240,7 +240,7 @@ fun SelectionSongMenu(
                                 onDismiss()
                                 playerConnection.playQueue(
                                     ListQueue(
-                                        title = "Selection",
+                                        title = stringResource(R.string.selection_queue_title),
                                         items = songSelection.map { it.toMediaItem() },
                                     ),
                                 )
@@ -261,7 +261,7 @@ fun SelectionSongMenu(
                                 onDismiss()
                                 playerConnection.playQueue(
                                     ListQueue(
-                                        title = "Selection",
+                                        title = stringResource(R.string.selection_queue_title),
                                         items = songSelection.shuffled().map { it.toMediaItem() },
                                     ),
                                 )
@@ -763,7 +763,7 @@ fun SelectionMediaMetadataMenu(
                                 onDismiss()
                                 playerConnection.playQueue(
                                     ListQueue(
-                                        title = "Selection",
+                                        title = stringResource(R.string.selection_queue_title),
                                         items = songSelection.map { it.toMediaItem() },
                                     ),
                                 )
@@ -784,7 +784,7 @@ fun SelectionMediaMetadataMenu(
                                 onDismiss()
                                 playerConnection.playQueue(
                                     ListQueue(
-                                        title = "Selection",
+                                        title = stringResource(R.string.selection_queue_title),
                                         items = songSelection.shuffled().map { it.toMediaItem() },
                                     ),
                                 )

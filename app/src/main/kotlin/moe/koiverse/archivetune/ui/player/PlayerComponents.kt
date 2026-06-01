@@ -170,9 +170,9 @@ fun PlayerTitleSection(
                         }
                     },
                     onLongClick = {
-                        val clip = ClipData.newPlainText("Copied Title", title)
+                        val clip = ClipData.newPlainText(context.getString(R.string.copied_title), title)
                         clipboardManager.setPrimaryClip(clip)
-                        Toast.makeText(context, "Copied Title", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.copied_title), Toast.LENGTH_SHORT).show()
                     }
                 ),
         )
@@ -239,9 +239,9 @@ fun PlayerTitleSection(
                         }
                     },
                     onLongClick = {
-                        val clip = ClipData.newPlainText("Copied Artist", annotatedString)
+                        val clip = ClipData.newPlainText(context.getString(R.string.copied_artist), annotatedString)
                         clipboardManager.setPrimaryClip(clip)
-                        Toast.makeText(context, "Copied Artist", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, context.getString(R.string.copied_artist), Toast.LENGTH_SHORT).show()
                     }
                 )
         )
@@ -1847,11 +1847,11 @@ fun PlayerControlsContent(
             {
                 val codec = currentFormat.mimeType.substringAfter("/").uppercase()
                 val label = when {
-                    codec.contains("FLAC") || codec.contains("ALAC") -> "Lossless"
-                    codec.contains("OPUS") -> codec
-                    codec.contains("AAC") -> codec
-                    codec.contains("MP4A") -> "AAC"
-                    codec.contains("VORBIS") -> "Vorbis"
+                    codec.contains("FLAC") || codec.contains("ALAC") -> stringResource(R.string.codec_lossless)
+                    codec.contains("OPUS") -> stringResource(R.string.codec_opus)
+                    codec.contains("AAC") -> stringResource(R.string.codec_aac)
+                    codec.contains("MP4A") -> stringResource(R.string.codec_aac)
+                    codec.contains("VORBIS") -> stringResource(R.string.codec_vorbis)
                     else -> codec
                 }
                 Surface(
@@ -3575,7 +3575,7 @@ fun PlayerBackground(
                         Box(modifier = Modifier.fillMaxSize()) {
                             AsyncImage(
                                 model = thumbnailUrl.highRes(),
-                                contentDescription = "Blurred background",
+                                contentDescription = stringResource(R.string.blurred_background),
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize().let {
                                     if (shouldApplyBlur) it.blur(radius = effectiveBlurRadius.dp) else it
@@ -3676,7 +3676,7 @@ fun PlayerBackground(
                         Box(modifier = Modifier.fillMaxSize()) {
                             AsyncImage(
                                 model = thumbnailUrl.highRes(),
-                                contentDescription = "Blurred background",
+                                contentDescription = stringResource(R.string.blurred_background),
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize().let {
                                     if (shouldApplyBlur) it.blur(radius = effectiveBlurRadius.dp) else it
@@ -3725,7 +3725,7 @@ fun PlayerBackground(
 
                             AsyncImage(
                                 model = Uri.parse(uri),
-                                contentDescription = "Custom background",
+                                contentDescription = stringResource(R.string.custom_background),
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize().let {
                                     if (disableBlur) it else it.blur(radius = blurPx.dp)

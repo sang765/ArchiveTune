@@ -441,4 +441,340 @@
     <string name="ai_api_test_failed">APIテストに失敗しました</string>
     <string name="ai_translation_menu">AI翻訳</string>
     <string name="ai_translating_lyrics">歌詞を翻訳中...</string>
+
+    <!-- AOD customization -->
+    <string name="aod_customize_title">AODカスタマイズ</string>
+    <string name="aod_customize_subtitle">形状、レイアウト、コントロール、アンビエントスタイル</string>
+    <string name="aod_customize_entry_desc">常時表示プレイヤー画面をカスタマイズ</string>
+    <string name="aod_customize_preview">ライブプレビュー</string>
+    <string name="aod_customize_visibility">表示設定</string>
+    <string name="aod_customize_show_thumbnail">サムネイルを表示</string>
+    <string name="aod_customize_show_artist">アーティスト名を表示</string>
+    <string name="aod_customize_show_album">アルバム名を表示</string>
+    <string name="aod_customize_show_progress">再生バーを表示</string>
+    <string name="aod_customize_show_time_labels">時間ラベルを表示</string>
+    <string name="aod_customize_show_controls">コントロールを表示</string>
+    <string name="aod_customize_show_exit_button">終了ボタンを表示</string>
+    <string name="aod_customize_thumbnail_shape">サムネイル形状</string>
+    <string name="aod_customize_thumbnail_shape_desc">AODアートワークのマスク形状を設定します。</string>
+    <string name="aod_customize_layout">レイアウト</string>
+    <string name="aod_customize_background_style">背景スタイル</string>
+    <string name="aod_customize_accent_style">アクセントスタイル</string>
+    <string name="aod_customize_content_position">コンテンツ位置</string>
+    <string name="aod_customize_text_alignment">テキスト配置</string>
+    <string name="aod_customize_title_max_lines">タイトルの最大行数</string>
+    <string name="aod_customize_scale_and_spacing">拡大率と間隔</string>
+    <string name="aod_customize_thumbnail_size">サムネイルサイズ</string>
+    <string name="aod_customize_shape_rotation">シェイプ回転</string>
+    <string name="aod_customize_horizontal_padding">水平パディング</string>
+    <string name="aod_customize_vertical_spacing">垂直間隔</string>
+    <string name="aod_customize_ambient_intensity">アンビエント強度</string>
+    <string name="aod_customize_artwork_glow">アートワークの発光</string>
+    <string name="aod_customize_controls">コントロール</string>
+    <string name="aod_customize_control_style">コントロールスタイル</string>
+    <string name="aod_customize_control_size">コントロールサイズ</string>
+    <string name="aod_customize_dp_value">%1$d dp</string>
+    <string name="aod_customize_degree_value">%1$d°</string>
+    <string name="aod_customize_percent_value">%1$d%%</string>
+    <string name="aod_customize_sample_title">Midnight Archive</string>
+    <string name="aod_customize_sample_artist">Koiverse Ensemble</string>
+    <string name="aod_customize_sample_album">Always On Sessions</string>
+    <string name="aod_customize_sample_elapsed">1:24</string>
+    <string name="aod_customize_sample_duration">3:48</string>
+    <string name="aod_shape_rounded">角丸</string>
+    <string name="aod_shape_square">四角</string>
+    <string name="aod_shape_circle">丸</string>
+    <string name="aod_shape_pill">ピル型</string>
+    <string name="aod_shape_arch">アーチ</string>
+    <string name="aod_shape_slanted">斜め</string>
+    <string name="aod_shape_diamond">ダイヤモンド</string>
+    <string name="aod_shape_pentagon">五角形</string>
+    <string name="aod_shape_triangle">三角形</string>
+    <string name="aod_shape_heart">ハート</string>
+    <string name="aod_shape_flower">花</string>
+    <string name="aod_shape_clover_4">クローバー</string>
+    <string name="aod_shape_cookie_6">クッキー6</string>
+    <string name="aod_shape_cookie_9">クッキー9</string>
+    <string name="aod_shape_sunny">サニー</string>
+    <string name="aod_shape_soft_burst">ソフトバースト</string>
+    <string name="aod_shape_ghostish">ゴースト</string>
+    <string name="aod_shape_pixel_circle">ピクセルサークル</string>
+    <string name="aod_background_pure_black">ピュアブラック</string>
+    <string name="aod_background_soft_radial">ソフトラジアル</string>
+    <string name="aod_background_tonal_edge">トーンのエッジ</string>
+    <string name="aod_background_ambient_glow">アンビエントグロー</string>
+    <string name="aod_accent_monochrome">モノクロ</string>
+    <string name="aod_accent_theme">テーマ</string>
+    <string name="aod_position_top">上</string>
+    <string name="aod_position_center">中央</string>
+    <string name="aod_position_bottom">下</string>
+    <string name="aod_alignment_start">左揃え</string>
+    <string name="aod_alignment_center">中央揃え</string>
+    <string name="aod_alignment_end">右揃え</string>
+    <string name="aod_control_filled">塗りつぶし</string>
+    <string name="aod_control_tonal">トーン</string>
+    <string name="aod_control_minimal">ミニマル</string>
+
+    <string name="playlist_sync_progress_step">%1$d/%2$d 曲</string>
+    <string name="playlist_sync_failed">プレイリスト同期エラー: %1$s</string>
+    <string name="mini_player_background_style">ミニプレイヤーの背景スタイル</string>
+    <string name="player_design_v8">イマーシブエクステンデッド</string>
+    <string name="player_design_v9">マテリアルエクステンデッド</string>
+    <string name="restart">再起動</string>
+    <string name="android_auto_suggested_songs">おすすめの曲</string>
+    <string name="android_auto_mixes_and_radios">ミックスとラジオ</string>
+    <string name="android_auto_sort_playlist">プレイリストを並べ替え</string>
+    <string name="android_auto_sort_option_format">%1$s - %2$s</string>
+
+    <!-- Backup & Restore -->
+    <string name="internal_service">内部サービス</string>
+    <string name="external_service">外部サービス</string>
+    <string name="backup_data_safety">データの安全性</string>
+    <string name="backup_data_safety_desc">ポータブルバックアップを作成するか、選択したアプリデータを復元します。</string>
+    <string name="backup_data_formats">.backup アーカイブ</string>
+    <string name="backup_create_backup_desc">ライブラリ、設定、アカウント情報をエクスポートします。</string>
+    <string name="backup_restore_backup_desc">以前のバックアップから選択したデータを復元します。</string>
+    <string name="import_from_file">ファイルからインポート</string>
+    <string name="import_from_file_desc">ローカルのM3UまたはCSVファイルからプレイリストを取り込みます。</string>
+    <string name="import_m3u_format">M3Uオーディオプレイリスト</string>
+    <string name="import_csv_format">CSVプレイリストファイル</string>
+
+    <!-- Spotify -->
+    <string name="spotify_connect">Spotifyに接続</string>
+    <string name="spotify_refresh">Spotifyライブラリを更新</string>
+    <string name="spotify_available_count">%1$d 個のプレイリストが利用可能</string>
+    <string name="spotify_connected_as">%1$s として接続中</string>
+    <string name="spotify_not_connected">Spotifyが接続されていません</string>
+    <string name="spotify_track_count">%1$d 曲</string>
+    <string name="spotify_login_title">Spotifyログイン</string>
+    <string name="spotify_loading_library">Spotifyライブラリを読み込み中</string>
+    <string name="spotify_no_sources">Spotifyのプレイリストが見つかりません</string>
+    <string name="spotify_account">Spotifyアカウント</string>
+    <string name="spotify_playlists">Spotifyプレイリスト</string>
+    <string name="spotify_waiting_for_login">Spotifyのログインを待機中</string>
+    <string name="spotify_show_playlist">プレイリストを表示</string>
+    <string name="spotify_show_playlist_desc">Spotifyのプレイリストをライブラリに表示します。</string>
+    <string name="spotify_reload_playlist">プレイリストを再読み込み</string>
+    <string name="spotify_reload_playlist_desc">Spotifyのプレイリストをアカウントから更新します。</string>
+    <string name="spotify_no_tracks">Spotifyの曲が見つかりませんでした。</string>
+
+    <!-- DebugActivity -->
+    <string name="share_logs">ログを共有</string>
+    <string name="crash_report">クラッシュレポート</string>
+    <string name="application_crashed">アプリケーションがクラッシュしました</string>
+    <string name="device_info">デバイス情報</string>
+    <string name="stack_trace">スタックトレース</string>
+
+    <!-- PlayerComponents -->
+    <string name="copied_title">タイトルをコピーしました</string>
+    <string name="copied_artist">アーティスト名をコピーしました</string>
+    <string name="blurred_background">ぼかし背景</string>
+    <string name="custom_background">カスタム背景</string>
+    <string name="codec_lossless">ロスレス</string>
+    <string name="codec_aac">AAC</string>
+    <string name="codec_vorbis">Vorbis</string>
+    <string name="codec_opus">OPUS</string>
+
+    <!-- LyricsAnimationSettings -->
+    <string name="animation_tuning">アニメーション調整</string>
+    <string name="line_bounce_effect">ラインバウンス効果</string>
+    <string name="line_bounce_effect_desc">ライン同期（LRC）歌詞のバウンスアニメーションを有効にします</string>
+    <string name="bounce_amplitude">バウンス振幅</string>
+    <string name="bounce_amplitude_desc">歌詞が歌われるときのバウンス効果を調整します（%d%%）</string>
+    <string name="glow_intensity">グロー強度</string>
+    <string name="glow_intensity_desc">歌詞のグローの明るさを調整します（%d%%）</string>
+    <string name="fill_transition_smoothness">塗りつぶしの遷移滑らかさ</string>
+    <string name="fill_transition_smoothness_desc">液体充填効果のグラデーションエッジ幅を調整します（%d dp）</string>
+
+    <!-- UpdateScreen -->
+    <string name="update_dialog_intro">ArchiveTuneでは、ビルド用に2つのダウンロードチャンネルを提供しています：</string>
+    <string name="stable_builds">• 安定版ビルド</string>
+    <string name="stable_builds_desc_1">公式のGitHubリリースを通じて配布されます。</string>
+    <string name="stable_builds_desc_2">これらのバージョンはテスト済みで、ほとんどのユーザーにおすすめです。</string>
+    <string name="nightly_builds">• ナイトリービルド</string>
+    <string name="nightly_builds_desc_1">nightly.linkを通じて自動生成される開発ビルドです。</string>
+    <string name="nightly_builds_desc_2">ナイトリービルドには実験的な機能、未完成の変更、一時的な不具合が含まれる場合があります。</string>
+    <string name="nightly_builds_desc_3">ナイトリービルドはテストおよび早期アクセス専用に提供されます。\n安定性、互換性、機能性は保証されません。</string>
+    <string name="nightly_builds_desc_4">続行することで、ナイトリービルドが不安定である可能性があることを了承し、自己責任で使用することに同意します。</string>
+
+    <!-- Lyrics provider names -->
+    <string name="paxsenix_apple_music">Paxsenix: Apple Music</string>
+    <string name="paxsenix_netease">Paxsenix: NetEase</string>
+    <string name="paxsenix_spotify">Paxsenix: Spotify</string>
+    <string name="paxsenix_musixmatch">Paxsenix: Musixmatch</string>
+    <string name="paxsenix_kugou">Paxsenix: KuGou</string>
+    <string name="provider_off">オフ</string>
+    <string name="provider_lrclib">LrcLib</string>
+    <string name="provider_kugou">KuGou</string>
+    <string name="provider_better_lyrics">BetterLyrics</string>
+    <string name="provider_simpmusic">SimpMusic</string>
+    <string name="provider_unison">Unison</string>
+
+    <!-- AboutScreen -->
+    <string name="about_debug">デバッグ</string>
+    <string name="about_koiverse">Koiverse</string>
+    <string name="about_lead_developer">リードデベロッパー</string>
+    <string name="about_collaborators">コラボレーター</string>
+    <string name="about_contributors">コントリビューター</string>
+
+    <!-- DiscordSettings -->
+    <string name="discord_listen_on_yt_music">YouTube Musicで聴く</string>
+    <string name="discord_go_to_archivetune">ArchiveTuneを開く</string>
+    <string name="edit_dialog_title">%1$s を編集</string>
+    <string name="bullet_item">• %1$s</string>
+    <string name="selection_queue_title">選択中</string>
+    <string name="unknown_error">不明なエラー</string>
+    <string name="version_prefix">v%1$s</string>
+    <string name="together_default_port">42117</string>
+    <string name="tempo_pitch_display">x%1$.2f • x%2$.2f</string>
+    <string name="volume_percentage">%1$d%%</string>
+    <string name="tempo_multiplier">x%1$.2f</string>
+    <string name="pitch_multiplier">x%1$.2f</string>
+    <string name="semitone_value">%1$+d</string>
+    <string name="playback_error_decoder">%1$s（コード %2$d）</string>
+    <string name="playback_error_http">%1$s（HTTP %2$d）</string>
+    <string name="lastfm_api_key_not_configured">Last.fm APIキーが設定されていません</string>
+    <string name="seconds_format">%1$d秒</string>
+    <string name="version_display">v%1$s（%2$d）</string>
+    <string name="no_playlists_yet">プレイリストがまだありません</string>
+    <string name="add_to_n">%1$dに追加</string>
+    <string name="add_to_playlist_short">追加</string>
+    <string name="no_stack_trace">利用可能なスタックトレースはありません</string>
+    <string name="share_crash_log">クラッシュログを共有</string>
+    <string name="time_am">午前</string>
+    <string name="time_pm">午後</string>
+    <string name="suggestions_available">おすすめがあります</string>
+    <string name="crash_report_header">ArchiveTune クラッシュレポート</string>
+    <string name="crash_report_time">日時: %1$s</string>
+    <string name="crash_report_app">アプリ: %1$s</string>
+    <string name="crash_report_package">パッケージ: %1$s</string>
+    <string name="crash_report_device_section">デバイス</string>
+    <string name="crash_report_stack_trace_section">スタックトレース</string>
+    <string name="device_os_version">OSバージョン</string>
+    <string name="device_phone_name">端末名</string>
+    <string name="device_model">モデル</string>
+    <string name="device_manufacturer">メーカー</string>
+    <string name="device_brand">ブランド</string>
+    <string name="device_device">デバイス</string>
+    <string name="device_product">製品</string>
+    <string name="device_hardware">ハードウェア</string>
+    <string name="device_fingerprint">フィンガープリント</string>
+    <string name="device_os_version_value">Android %1$s（SDK %2$d）</string>
+
+    <!-- AddToPlaylistDialogOnline -->
+    <string name="import_complete">インポート完了</string>
+    <string name="total_processed">処理合計: %1$d</string>
+    <string name="successfully_imported">正常にインポート: %1$d</string>
+    <string name="failed_imports">失敗: %1$d</string>
+    <string name="failed_items_section">失敗した項目:</string>
+
+    <!-- AddToPlaylistDialog -->
+    <string name="add_to_playlist">プレイリストに追加</string>
+    <string name="n_d_selected">%1$d 個選択済み</string>
+
+    <!-- NetworkStatusBanner -->
+    <string name="no_internet_connection">インターネット接続がありません</string>
+    <string name="back_online">オンラインに戻りました</string>
+
+    <!-- LyricsV2 -->
+    <string name="resume_lyrics">再開</string>
+
+    <!-- SearchBar -->
+    <string name="search_cd">検索</string>
+
+    <!-- ThumbnailCornerRadiusSelector -->
+    <string name="dp_unit">dp</string>
+    <string name="min_radius">0</string>
+    <string name="max_radius">45</string>
+
+    <!-- NewReleaseScreen -->
+    <string name="new_releases_unavailable">新着リリースは一時的に利用できません</string>
+    <string name="new_releases_unavailable_desc">ArchiveTuneがこのYouTube Musicセクションを読み込めませんでした。後でもう一度お試しください。</string>
+
+    <!-- StatsScreen -->
+    <string name="time_12am">午前0時</string>
+    <string name="time_6am">午前6時</string>
+    <string name="time_12pm">正午</string>
+    <string name="time_6pm">午後6時</string>
+
+    <!-- Start Mix -->
+    <string name="start_mix_cd">ミックスを開始</string>
+
+    <!-- CachePlaylistScreen -->
+    <string name="cache_songs_title">曲をキャッシュ</string>
+
+    <!-- ShowMediaInfo -->
+    <string name="itag_label">Itag</string>
+    <string name="kbps_unit">%1$d Kbps</string>
+
+    <!-- App.kt -->
+    <string name="failed_to_parse_proxy">プロキシ設定の解析に失敗しました。</string>
+
+    <!-- Player.kt -->
+    <string name="by_prefix">by - %1$s</string>
+
+    <!-- Queue.kt -->
+    <string name="speaker_default">スピーカー</string>
+
+    <!-- LastFMSettings -->
+    <string name="login_enter_credentials">ユーザー名とパスワードを入力してください</string>
+    <string name="login_invalid_credentials">ユーザー名またはパスワードが無効です</string>
+    <string name="login_invalid_api_key">無効なAPIキーです。開発者にお問い合わせください。</string>
+    <string name="login_auth_error">認証エラーです。もう一度お試しください。</string>
+    <string name="login_api_key_suspended">APIキーが停止されました。開発者にお問い合わせください。</string>
+    <string name="login_network_error">ネットワークエラーです。接続を確認してください。</string>
+    <string name="login_failed_generic">ログインに失敗しました。もう一度お試しください。</string>
+
+    <!-- AppearanceSettings -->
+    <string name="glow_animated">アニメーショングロー</string>
+
+    <!-- AccountSettings -->
+    <string name="integration_subtitle">Discord、Last.fm、ListenBrainz</string>
+
+    <!-- PalettePickerScreen -->
+    <string name="default_theme_name">ArchiveTune テーマ</string>
+
+    <!-- LocalMixQueue -->
+    <string name="mix_from_playlist">プレイリストからミックス</string>
+
+    <!-- LyricsMenu -->
+    <string name="synced_badge">同期済み</string>
+
+    <!-- ArtistSeparatorsDialog -->
+    <string name="separator_display">「%1$s」</string>
+
+    <!-- AboutScreen content descriptions -->
+    <string name="about_github">GitHub</string>
+    <string name="about_website">ウェブサイト</string>
+    <string name="about_discord">Discord</string>
+
+    <!-- Stats / Year in Music -->
+    <string name="top_songs">トップ曲</string>
+    <string name="year_in_music_recap">音楽まとめ</string>
+    <string name="year_in_music_recap_word">まとめ</string>
+    <string name="year_in_music_intro_title">今年をもう一度</string>
+    <string name="year_in_music_intro_subtitle">%d年のあなたを形作った曲、アーティスト、アルバムのまとめです。</string>
+    <string name="year_in_music_intro_hero">お待たせしました！あなたの年間音楽まとめ</string>
+    <string name="year_in_music_intro_details">トップ曲、アーティスト、アルバム、再生時間を表示します。</string>
+    <string name="year_in_music_swipe_begin">スワイプして開始</string>
+    <string name="year_in_music_totals_title">音楽とともに過ごした日々</string>
+    <string name="year_in_music_top_track">あなたのトップ曲</string>
+    <string name="year_in_music_ranked_artists">よく聴いたアーティスト</string>
+    <string name="year_in_music_ranked_albums">何度も聴いたアルバム</string>
+    <string name="year_in_music_final_title">これがあなたの一年でした</string>
+    <string name="year_in_music_musical_passport">私の音楽パスポート</string>
+    <string name="year_in_music_empty_title">まだまとめるデータがありません</string>
+    <string name="year_in_music_empty_subtitle">%d年にもっと音楽を聴くと、まとめがここに表示されます。</string>
+    <string name="year_in_music_minutes_label">再生時間</string>
+    <string name="year_in_music_minutes_unit">分</string>
+    <string name="year_in_music_plays_label">総再生数</string>
+    <string name="year_in_music_top_pick">トップピック</string>
+    <string name="year_in_music_current_card">カードを共有</string>
+
+    <!-- Local songs scan folders -->
+    <string name="local_songs_scan_included_folders_title">含めるフォルダー</string>
+    <string name="local_songs_scan_included_folders_desc">これらのパスのいずれかに一致するフォルダーに保存されている曲のみをスキャンします。</string>
+    <string name="local_songs_scan_included_folders_empty">すべてのフォルダーが含まれています。</string>
+    <string name="local_songs_scan_included_folders_add">フォルダーを含める</string>
+
 </resources>

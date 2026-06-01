@@ -2162,7 +2162,7 @@ private fun LittlePlayerContent(
                             label = "little_artists",
                         ) { artistLine ->
                             Text(
-                                text = "by - $artistLine",
+                                text = stringResource(R.string.by_prefix, artistLine),
                                 color = secondaryColor,
                                 style = MaterialTheme.typography.bodyMedium,
                                 maxLines = 1,

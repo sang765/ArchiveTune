@@ -338,7 +338,7 @@ fun InternetSettings(
                                         }
                                     }
                                 } catch (e: Exception) {
-                                    testResult = context.getString(R.string.proxy_connection_failed, e.message ?: "Unknown error")
+                                    testResult = context.getString(R.string.proxy_connection_failed, e.message ?: context.getString(R.string.unknown_error))
                                 } finally {
                                     testingProxy = false
                                 }

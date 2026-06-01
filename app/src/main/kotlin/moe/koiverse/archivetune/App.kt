@@ -147,7 +147,7 @@ class App : Application(), SingletonImageLoader.Factory {
                         YouTube.proxyPassword = prefs[ProxyPasswordKey]
                     } catch (e: Exception) {
                         withContext(Dispatchers.Main) {
-                            Toast.makeText(this@App, "Failed to parse proxy settings.", LENGTH_SHORT).show()
+                            Toast.makeText(this@App, context.getString(R.string.failed_to_parse_proxy), LENGTH_SHORT).show()
                         }
                         reportException(e)
                     }

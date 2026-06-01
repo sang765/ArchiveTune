@@ -78,8 +78,8 @@ fun PlaybackError(
             PlaybackErrorKind.Timeout -> fallbackTimeout
             PlaybackErrorKind.NoStream -> fallbackNoStream
             PlaybackErrorKind.MalformedStream -> fallbackMalformedStream
-            PlaybackErrorKind.Decoder -> "$fallbackUnknown (code ${error.errorCode})"
-            PlaybackErrorKind.Http -> "$fallbackUnknown (HTTP $httpCode)"
+            PlaybackErrorKind.Decoder -> stringResource(R.string.playback_error_decoder, fallbackUnknown, error.errorCode)
+            PlaybackErrorKind.Http -> stringResource(R.string.playback_error_http, fallbackUnknown, httpCode)
             PlaybackErrorKind.Unknown -> error.cause?.message?.takeIf { it.isNotBlank() }
                 ?: error.message?.takeIf { it.isNotBlank() }
                 ?: fallbackUnknown

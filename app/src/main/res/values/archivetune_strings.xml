@@ -221,6 +221,7 @@
     <string name="starting_radio">Starting radio</string>
     <string name="now_playing">Now Playing</string>
     <string name="close">Close</string>
+    <string name="restart">Restart</string>
     <string name="minimum_volume">Minimum Volume</string>
     <string name="maximum_volume">Maximum Volume</string>
     <string name="hide_player_thumbnail">Hide Player Thumbnail</string>
@@ -585,4 +586,194 @@
     <string name="ai_api_test_failed">API test failed</string>
     <string name="ai_translation_menu">AI Translation</string>
     <string name="ai_translating_lyrics">Translating The Lyrics...</string>
+
+    <!-- DebugActivity -->
+    <string name="share_logs">Share Logs</string>
+    <string name="crash_report">Crash Report</string>
+    <string name="application_crashed">Application crashed</string>
+    <string name="device_info">Device info</string>
+    <string name="stack_trace">Stack trace</string>
+
+    <!-- PlayerComponents -->
+    <string name="copied_title">Copied Title</string>
+    <string name="copied_artist">Copied Artist</string>
+    <string name="blurred_background">Blurred background</string>
+    <string name="custom_background">Custom background</string>
+    <string name="codec_lossless">Lossless</string>
+    <string name="codec_aac">AAC</string>
+    <string name="codec_vorbis">Vorbis</string>
+    <string name="codec_opus">OPUS</string>
+
+    <!-- LyricsAnimationSettings -->
+    <string name="animation_tuning">Animation Tuning</string>
+    <string name="line_bounce_effect">Line Bounce Effect</string>
+    <string name="line_bounce_effect_desc">Enable bounce animation for line-synced (LRC) lyrics</string>
+    <string name="bounce_amplitude">Bounce Amplitude</string>
+    <string name="bounce_amplitude_desc">Adjust the bounce effect when a word is sung (%d%%)</string>
+    <string name="glow_intensity">Glow Intensity</string>
+    <string name="glow_intensity_desc">Adjust the glow brightness of the sung word (%d%%)</string>
+    <string name="fill_transition_smoothness">Fill Transition Smoothness</string>
+    <string name="fill_transition_smoothness_desc">Adjust the gradient edge width of the liquid fill effect (%d dp)</string>
+
+    <!-- UpdateScreen -->
+    <string name="update_dialog_intro">ArchiveTune provides two download channels for builds:</string>
+    <string name="stable_builds">• Stable builds</string>
+    <string name="stable_builds_desc_1">Distributed via official GitHub Releases.</string>
+    <string name="stable_builds_desc_2">These versions are tested and recommended for most users.</string>
+    <string name="nightly_builds">• Nightly builds</string>
+    <string name="nightly_builds_desc_1">Automatically generated development builds hosted via nightly.link.</string>
+    <string name="nightly_builds_desc_2">Nightly builds may include experimental features, unfinished changes, or temporary regressions.</string>
+    <string name="nightly_builds_desc_3">Nightly builds are provided for testing and early access only.\nStability, compatibility, and functionality are not guaranteed.</string>
+    <string name="nightly_builds_desc_4">By continuing, you acknowledge that nightly builds may be unstable and use them at your own risk.</string>
+
+    <!-- LyricsSettings provider names -->
+    <string name="paxsenix_apple_music">Paxsenix: Apple Music</string>
+    <string name="paxsenix_netease">Paxsenix: NetEase</string>
+    <string name="paxsenix_spotify">Paxsenix: Spotify</string>
+    <string name="paxsenix_musixmatch">Paxsenix: Musixmatch</string>
+    <string name="paxsenix_kugou">Paxsenix: KuGou</string>
+    <string name="provider_off">Off</string>
+    <string name="provider_lrclib">LrcLib</string>
+    <string name="provider_kugou">KuGou</string>
+    <string name="provider_better_lyrics">BetterLyrics</string>
+    <string name="provider_simpmusic">SimpMusic</string>
+    <string name="provider_unison">Unison</string>
+
+    <!-- AboutScreen -->
+    <string name="about_debug">DEBUG</string>
+    <string name="about_koiverse">Koiverse</string>
+    <string name="about_lead_developer">Lead Developer</string>
+    <string name="about_collaborators">Collaborators</string>
+    <string name="about_contributors">Contributors</string>
+
+    <!-- DiscordSettings -->
+    <string name="discord_listen_on_yt_music">Listen on YouTube Music</string>
+    <string name="discord_go_to_archivetune">Go to ArchiveTune</string>
+    <string name="edit_dialog_title">Edit %1$s</string>
+    <string name="bullet_item">• %1$s</string>
+    <string name="selection_queue_title">Selection</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="version_prefix">v%1$s</string>
+    <string name="together_default_port">42117</string>
+    <string name="tempo_pitch_display">x%1$.2f • x%2$.2f</string>
+    <string name="volume_percentage">%1$d%%</string>
+    <string name="tempo_multiplier">x%1$.2f</string>
+    <string name="pitch_multiplier">x%1$.2f</string>
+    <string name="semitone_value">%1$+d</string>
+    <string name="playback_error_decoder">%1$s (code %2$d)</string>
+    <string name="playback_error_http">%1$s (HTTP %2$d)</string>
+    <string name="lastfm_api_key_not_configured">Last.fm API key not configured</string>
+    <string name="seconds_format">%1$ds</string>
+    <string name="version_display">v%1$s (%2$d)</string>
+    <string name="no_playlists_yet">No playlists yet</string>
+    <string name="add_to_n">Add to %1$d</string>
+    <string name="add_to_playlist_short">Add</string>
+    <string name="no_stack_trace">No stack trace available</string>
+    <string name="share_crash_log">Share crash log</string>
+    <string name="time_am">AM</string>
+    <string name="time_pm">PM</string>
+    <string name="suggestions_available">Suggestions available</string>
+    <string name="crash_report_header">ArchiveTune crash report</string>
+    <string name="crash_report_time">Time: %1$s</string>
+    <string name="crash_report_app">App: %1$s</string>
+    <string name="crash_report_package">Package: %1$s</string>
+    <string name="crash_report_device_section">Device</string>
+    <string name="crash_report_stack_trace_section">Stack trace</string>
+    <string name="device_os_version">OS version</string>
+    <string name="device_phone_name">Phone name</string>
+    <string name="device_model">Model</string>
+    <string name="device_manufacturer">Manufacturer</string>
+    <string name="device_brand">Brand</string>
+    <string name="device_device">Device</string>
+    <string name="device_product">Product</string>
+    <string name="device_hardware">Hardware</string>
+    <string name="device_fingerprint">Fingerprint</string>
+    <string name="device_os_version_value">Android %1$s (SDK %2$d)</string>
+
+    <!-- AddToPlaylistDialogOnline -->
+    <string name="import_complete">Import Complete</string>
+    <string name="total_processed">Total Processed: %1$d</string>
+    <string name="successfully_imported">Successfully Imported: %1$d</string>
+    <string name="failed_imports">Failed: %1$d</string>
+    <string name="failed_items_section">Failed Items:</string>
+
+    <!-- AddToPlaylistDialog -->
+    <string name="add_to_playlist">Add to playlist</string>
+    <string name="n_d_selected">%1$d selected</string>
+
+    <!-- NetworkStatusBanner -->
+    <string name="no_internet_connection">No internet connection</string>
+    <string name="back_online">Back online</string>
+
+    <!-- LyricsV2 -->
+    <string name="resume_lyrics">Resume</string>
+
+    <!-- SearchBar -->
+    <string name="search_cd">Search</string>
+
+    <!-- ThumbnailCornerRadiusSelector -->
+    <string name="dp_unit">dp</string>
+    <string name="min_radius">0</string>
+    <string name="max_radius">45</string>
+
+    <!-- NewReleaseScreen -->
+    <string name="new_releases_unavailable">New releases are temporarily unavailable</string>
+    <string name="new_releases_unavailable_desc">ArchiveTune could not load this YouTube Music section. Try again later.</string>
+
+    <!-- StatsScreen -->
+    <string name="time_12am">12AM</string>
+    <string name="time_6am">6AM</string>
+    <string name="time_12pm">12PM</string>
+    <string name="time_6pm">6PM</string>
+
+    <!-- Start Mix content description -->
+    <string name="start_mix_cd">Start Mix</string>
+
+    <!-- CachePlaylistScreen -->
+    <string name="cache_songs_title">Cache Songs</string>
+
+    <!-- ShowMediaInfo -->
+    <string name="itag_label">Itag</string>
+    <string name="kbps_unit">%1$d Kbps</string>
+
+    <!-- App.kt -->
+    <string name="failed_to_parse_proxy">Failed to parse proxy settings.</string>
+
+    <!-- Player.kt -->
+    <string name="by_prefix">by - %1$s</string>
+
+    <!-- Queue.kt -->
+    <string name="speaker_default">Speaker</string>
+
+    <!-- LastFMSettings -->
+    <string name="login_enter_credentials">Please enter username and password</string>
+    <string name="login_invalid_credentials">Invalid username or password</string>
+    <string name="login_invalid_api_key">Invalid API key. Please contact the developer.</string>
+    <string name="login_auth_error">Authentication error. Please try again.</string>
+    <string name="login_api_key_suspended">API key suspended. Please contact the developer.</string>
+    <string name="login_network_error">Network error. Check your connection.</string>
+    <string name="login_failed_generic">Login failed. Please try again.</string>
+
+    <!-- AppearanceSettings -->
+    <string name="glow_animated">Glow Animated</string>
+
+    <!-- AccountSettings -->
+    <string name="integration_subtitle">Discord, Last.fm, ListenBrainz</string>
+
+    <!-- PalettePickerScreen -->
+    <string name="default_theme_name">ArchiveTune Theme</string>
+
+    <!-- LocalMixQueue -->
+    <string name="mix_from_playlist">Mix from Playlist</string>
+
+    <!-- LyricsMenu -->
+    <string name="synced_badge">Synced</string>
+
+    <!-- ArtistSeparatorsDialog -->
+    <string name="separator_display">\"%1$s\"</string>
+
+    <!-- AboutScreen content descriptions -->
+    <string name="about_github">GitHub</string>
+    <string name="about_website">Website</string>
+    <string name="about_discord">Discord</string>
 </resources>

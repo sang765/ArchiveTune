@@ -300,9 +300,9 @@ private fun SearchBarInputField(
                     }
                 }
                 .semantics {
-                    contentDescription = "Search"
+                    contentDescription = stringResource(R.string.search_cd)
                     if (active) {
-                        stateDescription = "Suggestions available"
+                        stateDescription = stringResource(R.string.suggestions_available)
                     }
                 }
                 .onKeyEvent {

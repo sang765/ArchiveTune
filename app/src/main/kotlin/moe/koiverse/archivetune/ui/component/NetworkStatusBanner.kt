@@ -62,14 +62,14 @@ fun NetworkStatusBanner(
         when (lastVisibleState) {
             NetworkBannerUiState.Hidden,
             NetworkBannerUiState.Offline -> NetworkBannerVisuals(
-                message = "No internet connection",
+                message = stringResource(R.string.no_internet_connection),
                 icon = Icons.Default.CloudOff,
                 containerColor = Color(0xFF7F1D1D),
                 contentColor = Color.White,
             )
 
             NetworkBannerUiState.BackOnline -> NetworkBannerVisuals(
-                message = "Back online",
+                message = stringResource(R.string.back_online),
                 icon = Icons.Default.CloudDone,
                 containerColor = Color(0xFF1E8E3E),
                 contentColor = Color.White,

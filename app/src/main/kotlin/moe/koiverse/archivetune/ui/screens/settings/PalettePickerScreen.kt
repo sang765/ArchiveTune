@@ -1095,7 +1095,7 @@ fun ThemeCreatorScreen(
                     onClick = {
                         val safeName = themeName
                             .trim()
-                            .ifBlank { "ArchiveTune Theme" }
+                            .ifBlank { stringResource(R.string.default_theme_name) }
                             .replace(Regex("[^a-zA-Z0-9 _\\-]"), "_")
                             .take(64)
                         exportLauncher.launch("$safeName.json")

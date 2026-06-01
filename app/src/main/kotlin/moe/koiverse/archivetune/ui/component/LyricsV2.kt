@@ -851,7 +851,7 @@ fun LyricsV2(
                 shapes = ButtonDefaults.shapes(),
             ) {
                 Text(
-                    text = "Resume",
+                    text = stringResource(R.string.resume_lyrics),
                     style = MaterialTheme.typography.labelLarge,
                 )
             }

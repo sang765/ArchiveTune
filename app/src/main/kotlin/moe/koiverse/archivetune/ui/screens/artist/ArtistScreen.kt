@@ -661,7 +661,7 @@ fun ArtistScreen(
                                         val shuffledSongs = librarySongs.shuffled()
                                         playerConnection.playQueue(
                                             ListQueue(
-                                                title = libraryArtist?.artist?.name ?: "Unknown Artist",
+                                                title = libraryArtist?.artist?.name ?: stringResource(R.string.unknown_artist),
                                                 items = shuffledSongs.map { it.toMediaItem() }
                                             )
                                         )
@@ -784,7 +784,7 @@ fun ArtistScreen(
                                             } else {
                                                 playerConnection.playQueue(
                                                     ListQueue(
-                                                        title = libraryArtist?.artist?.name ?: "Unknown Artist",
+                                                        title = libraryArtist?.artist?.name ?: stringResource(R.string.unknown_artist),
                                                         items = librarySongs.map { it.toMediaItem() },
                                                         startIndex = index
                                                     )
@@ -1108,7 +1108,7 @@ fun ArtistScreen(
                 onClick = {
                     viewModel.artistPage?.artist?.shareLink?.let { link ->
                         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        val clip = ClipData.newPlainText("Artist Link", link)
+                        val clip = ClipData.newPlainText(context.getString(R.string.artist_link_label), link)
                         clipboard.setPrimaryClip(clip)
                         Toast.makeText(context, R.string.link_copied, Toast.LENGTH_SHORT).show()
                     }

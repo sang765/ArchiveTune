@@ -48,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -122,6 +123,7 @@ fun LastFMSettings(
     var loginError by rememberSaveable { mutableStateOf<String?>(null) }
 
     if (showLoginDialog) {
+        val context = LocalContext.current
         var tempUsername by rememberSaveable { mutableStateOf("") }
         var tempPassword by rememberSaveable { mutableStateOf("") }
 
@@ -195,12 +197,12 @@ fun LastFMSettings(
                 TextButton(
                     onClick = {
                         if (tempUsername.isBlank() || tempPassword.isBlank()) {
-                            loginError = "Please enter username and password"
+                            loginError = context.getString(R.string.login_enter_credentials)
                             return@TextButton
                         }
                         
                         if (!LastFM.isInitialized()) {
-                            loginError = "Last.fm API key not configured"
+                            loginError = context.getString(R.string.lastfm_api_key_not_configured)
                             Timber.e("Last.fm API key not configured")
                             return@TextButton
                         }
@@ -232,18 +234,18 @@ fun LastFMSettings(
                                                 // 13 = Invalid method signature
                                                 // 26 = API key suspended
                                                 when (exception.code) {
-                                                    4 -> "Invalid username or password"
-                                                    10 -> "Invalid API key. Please contact the developer."
-                                                    13 -> "Authentication error. Please try again."
-                                                    26 -> "API key suspended. Please contact the developer."
+                                                    4 -> context.getString(R.string.login_invalid_credentials)
+                                                    10 -> context.getString(R.string.login_invalid_api_key)
+                                                    13 -> context.getString(R.string.login_auth_error)
+                                                    26 -> context.getString(R.string.login_api_key_suspended)
                                                     else -> exception.message
                                                 }
                                             }
                                             else -> when {
                                                 exception.message?.contains("network", ignoreCase = true) == true ||
-                                                exception.message?.contains("connect", ignoreCase = true) == true ->
-                                                    "Network error. Check your connection."
-                                                else -> exception.message ?: "Login failed. Please try again."
+                                                    exception.message?.contains("connect", ignoreCase = true) == true ->
+                                                        context.getString(R.string.login_network_error)
+                                                    else -> exception.message ?: context.getString(R.string.login_failed_generic)
                                             }
                                         }
                                         loginError = errorMessage
@@ -304,7 +306,7 @@ fun LastFMSettings(
                         modifier = Modifier.padding(16.dp)
                     ) {
                         Text(
-                            text = "${tempMinTrackDuration}s",
+                            text = stringResource(R.string.seconds_format, tempMinTrackDuration),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
@@ -359,7 +361,7 @@ fun LastFMSettings(
                         modifier = Modifier.padding(16.dp)
                     ) {
                         Text(
-                            text = "${(tempScrobbleDelayPercent * 100).roundToInt()}%",
+                            text = stringResource(R.string.percentage_format, (tempScrobbleDelayPercent * 100).roundToInt()),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
@@ -414,7 +416,7 @@ fun LastFMSettings(
                         modifier = Modifier.padding(16.dp)
                     ) {
                         Text(
-                            text = "${tempScrobbleDelaySeconds}s",
+                            text = stringResource(R.string.seconds_format, tempScrobbleDelaySeconds),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )

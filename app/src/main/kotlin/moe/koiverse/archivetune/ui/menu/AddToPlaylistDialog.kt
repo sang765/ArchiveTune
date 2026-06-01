@@ -318,14 +318,14 @@ fun AddToPlaylistDialog(
 
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Add to playlist",
+                                    text = stringResource(R.string.add_to_playlist),
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.SemiBold,
                                     color = MaterialTheme.colorScheme.onSurface,
                                 )
                                 if (selectedPlaylistIds.isNotEmpty()) {
                                     Text(
-                                        text = "${selectedPlaylistIds.size} selected",
+                                        text = stringResource(R.string.n_d_selected, selectedPlaylistIds.size),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.primary,
                                     )
@@ -523,7 +523,7 @@ fun AddToPlaylistDialog(
                         ) {
                             Text(
                                 text = if (searchQuery.isBlank()) {
-                                    "No playlists yet"
+                                    stringResource(R.string.no_playlists_yet)
                                 } else {
                                     stringResource(R.string.no_matching_playlists)
                                 },
@@ -629,9 +629,9 @@ fun AddToPlaylistDialog(
                                 Spacer(modifier = Modifier.width(ButtonDefaults.IconSpacing))
                                 Text(
                                     text = if (selectedPlaylistIds.size > 1)
-                                        "Add to ${selectedPlaylistIds.size}"
+                                        stringResource(R.string.add_to_n, selectedPlaylistIds.size)
                                     else
-                                        "Add"
+                                        stringResource(R.string.add_to_playlist_short)
                                 )
                             }
                         }

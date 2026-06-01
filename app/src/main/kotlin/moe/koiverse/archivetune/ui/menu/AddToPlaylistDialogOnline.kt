@@ -309,21 +309,21 @@ fun AddToPlaylistDialogOnline(
     if (showResultDialog && processingSummary != null) {
         val summary = processingSummary!!
         DefaultDialog(
-            title = { Text("Import Complete") },
+            title = { Text(stringResource(R.string.import_complete)) },
             onDismiss = { showResultDialog = false },
             buttons = {
                 TextButton(onClick = { showResultDialog = false }, shapes = ButtonDefaults.shapes()) {
-                    Text("OK")
+                    Text(stringResource(android.R.string.ok))
                 }
             }
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Total Processed: ${summary.total}")
-                Text("Successfully Imported: ${summary.success}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.total_processed, summary.total))
+                Text(stringResource(R.string.successfully_imported, summary.success), color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 if (summary.failed > 0) {
-                    Text("Failed: ${summary.failed}", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.failed_imports, summary.failed), color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                    Text("Failed Items:", style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(R.string.failed_items_section), style = MaterialTheme.typography.labelLarge)
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -331,7 +331,7 @@ fun AddToPlaylistDialogOnline(
                     ) {
                         items(summary.failedItems) { title ->
                             Text(
-                                text = "• $title",
+                                text = stringResource(R.string.bullet_item, title),
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.padding(vertical = 2.dp)
                             )

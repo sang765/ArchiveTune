@@ -429,7 +429,7 @@ fun AboutScreen(
                 verticalAlignment = Alignment.Top,
             ) {
                 Text(
-                    text = "ArchiveTune",
+                    text = stringResource(R.string.app_name),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
@@ -447,7 +447,7 @@ fun AboutScreen(
                 Spacer(Modifier.width(4.dp))
 
                 if (BuildConfig.DEBUG) {
-                    AboutBadge(text = "DEBUG")
+                    AboutBadge(text = stringResource(R.string.about_debug))
                 } else {
                     AboutBadge(text = BuildConfig.ARCHITECTURE.uppercase())
                 }
@@ -456,7 +456,7 @@ fun AboutScreen(
             Spacer(Modifier.height(4.dp))
 
             Text(
-                text = "Koiverse",
+                text = stringResource(R.string.about_koiverse),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.secondary,
             )
@@ -510,7 +510,7 @@ fun AboutScreen(
             Spacer(Modifier.height(16.dp))
 
             SectionHeader(
-                title = "Lead Developer",
+                title = stringResource(R.string.about_lead_developer),
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
@@ -527,7 +527,7 @@ fun AboutScreen(
             Spacer(Modifier.height(24.dp))
 
             SectionHeader(
-                title = "Collaborators",
+                title = stringResource(R.string.about_collaborators),
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
@@ -550,7 +550,7 @@ fun AboutScreen(
             Spacer(Modifier.height(24.dp))
 
             SectionHeader(
-                title = "Contributors",
+                title = stringResource(R.string.about_contributors),
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
@@ -767,7 +767,7 @@ private fun LeadDeveloperCard(
                 member.github?.let { url ->
                     OutlinedIconChip(
                         iconRes = R.drawable.github,
-                        contentDescription = "GitHub",
+                        contentDescription = stringResource(R.string.about_github),
                         onClick = { onOpenUri(url) },
                     )
                 }
@@ -775,7 +775,7 @@ private fun LeadDeveloperCard(
                 member.website?.takeIf { it.isNotBlank() }?.let { url ->
                     OutlinedIconChip(
                         iconRes = R.drawable.website,
-                        contentDescription = "Website",
+                        contentDescription = stringResource(R.string.about_website),
                         onClick = { onOpenUri(url) },
                     )
                 }
@@ -783,7 +783,7 @@ private fun LeadDeveloperCard(
                 member.discord?.let { url ->
                     OutlinedIconChip(
                         iconRes = R.drawable.alternate_email,
-                        contentDescription = "Discord",
+                        contentDescription = stringResource(R.string.about_discord),
                         onClick = { onOpenUri(url) },
                     )
                 }
@@ -857,7 +857,7 @@ private fun CollaboratorCard(
                 member.github?.let { url ->
                     OutlinedIconChipMembers(
                         iconRes = R.drawable.github,
-                        contentDescription = "GitHub",
+                        contentDescription = stringResource(R.string.about_github),
                         onClick = { onOpenUri(url) },
                     )
                 }
@@ -865,7 +865,7 @@ private fun CollaboratorCard(
                 member.website?.takeIf { it.isNotBlank() }?.let { url ->
                     OutlinedIconChipMembers(
                         iconRes = R.drawable.website,
-                        contentDescription = "Website",
+                        contentDescription = stringResource(R.string.about_website),
                         onClick = { onOpenUri(url) },
                     )
                 }
@@ -873,7 +873,7 @@ private fun CollaboratorCard(
                 member.discord?.let { url ->
                     OutlinedIconChipMembers(
                         iconRes = R.drawable.alternate_email,
-                        contentDescription = "Discord",
+                        contentDescription = stringResource(R.string.about_discord),
                         onClick = { onOpenUri(url) },
                     )
                 }

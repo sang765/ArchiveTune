@@ -307,7 +307,7 @@ fun SettingsUpdateBanner(
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
                 Text(
-                    text = "v$latestVersion",
+                    text = stringResource(R.string.version_prefix, latestVersion),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.75f),
                     fontWeight = FontWeight.Medium,

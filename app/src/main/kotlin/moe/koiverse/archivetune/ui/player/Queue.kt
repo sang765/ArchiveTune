@@ -539,7 +539,7 @@ fun Queue(
                     val activeDevice = remember(audioManager) {
                         audioManager.getDevices(android.media.AudioManager.GET_DEVICES_OUTPUTS)
                             .firstOrNull { it.type == android.media.AudioDeviceInfo.TYPE_BLUETOOTH_A2DP || it.type == android.media.AudioDeviceInfo.TYPE_BLUETOOTH_SCO || it.type == android.media.AudioDeviceInfo.TYPE_BLE_HEADSET }
-                            ?.productName?.toString() ?: "Speaker"
+                            ?.productName?.toString() ?: stringResource(R.string.speaker_default)
                     }
                     QueueCollapsedContentV7(
                         showCodecOnPlayer = showCodecOnPlayer,

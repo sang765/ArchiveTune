@@ -177,13 +177,13 @@ fun ShowMediaInfo(videoId: String) {
     }
 
     val technicalDetails = buildList {
-        currentFormat?.itag?.toString()?.let { add(MediaInfoDetail(label = "Itag", value = it)) }
+        currentFormat?.itag?.toString()?.let { add(MediaInfoDetail(label = stringResource(R.string.itag_label), value = it)) }
         currentFormat?.mimeType?.takeIf { it.isNotBlank() }
             ?.let { add(MediaInfoDetail(label = mimeTypeLabel, value = it)) }
         currentFormat?.codecs?.takeIf { it.isNotBlank() }
             ?.let { add(MediaInfoDetail(label = codecsLabel, value = it)) }
         currentFormat?.bitrate?.takeIf { it > 0 }
-            ?.let { add(MediaInfoDetail(label = bitrateLabel, value = "${it / 1000} Kbps")) }
+            ?.let { add(MediaInfoDetail(label = bitrateLabel, value = stringResource(R.string.kbps_unit, it / 1000))) }
         currentFormat?.sampleRate?.takeIf { it > 0 }
             ?.let { add(MediaInfoDetail(label = sampleRateLabel, value = "$it Hz")) }
         currentFormat?.loudnessDb?.let { add(MediaInfoDetail(label = loudnessLabel, value = "$it dB")) }
@@ -205,7 +205,7 @@ fun ShowMediaInfo(videoId: String) {
             ?.takeIf { it.isNotBlank() }
             ?.let { add(MediaInfoQuickFact(iconRes = R.drawable.graphic_eq, text = it)) }
         currentFormat?.bitrate?.takeIf { it > 0 }
-            ?.let { add(MediaInfoQuickFact(iconRes = R.drawable.waves, text = "${it / 1000} Kbps")) }
+            ?.let { add(MediaInfoQuickFact(iconRes = R.drawable.waves, text = stringResource(R.string.kbps_unit, it / 1000))) }
         currentFormat?.contentLength?.takeIf { it > 0 }
             ?.let {
                 add(

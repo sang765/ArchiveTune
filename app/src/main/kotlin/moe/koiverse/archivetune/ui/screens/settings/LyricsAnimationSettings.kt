@@ -85,11 +85,11 @@ fun LyricsAnimationSettings(
                 )
                 .padding(bottom = 16.dp)
         ) {
-            PreferenceGroup(title = "Animation Tuning") {
+            PreferenceGroup(title = stringResource(R.string.animation_tuning)) {
                 item {
                     PreferenceEntry(
-                        title = { Text("Line Bounce Effect") },
-                        description = "Enable bounce animation for line-synced (LRC) lyrics",
+                        title = { Text(stringResource(R.string.line_bounce_effect)) },
+                        description = stringResource(R.string.line_bounce_effect_desc),
                         icon = { Icon(painterResource(R.drawable.animation), null) },
                         trailingContent = {
                             Switch(
@@ -102,8 +102,8 @@ fun LyricsAnimationSettings(
 
                 item {
                     PreferenceEntry(
-                        title = { Text("Bounce Amplitude") },
-                        description = "Adjust the bounce effect when a word is sung (${(bounceFactor * 100).toInt()}%)",
+                        title = { Text(stringResource(R.string.bounce_amplitude)) },
+                        description = stringResource(R.string.bounce_amplitude_desc, (bounceFactor * 100).toInt()),
                         icon = { Icon(painterResource(R.drawable.animation), null) },
                         content = {
                             Slider(
@@ -117,8 +117,8 @@ fun LyricsAnimationSettings(
 
                 item {
                     PreferenceEntry(
-                        title = { Text("Glow Intensity") },
-                        description = "Adjust the glow brightness of the sung word (${(glowFactor * 100).toInt()}%)",
+                        title = { Text(stringResource(R.string.glow_intensity)) },
+                        description = stringResource(R.string.glow_intensity_desc, (glowFactor * 100).toInt()),
                         icon = { Icon(painterResource(R.drawable.lyrics), null) },
                         content = {
                             Slider(
@@ -132,8 +132,8 @@ fun LyricsAnimationSettings(
 
                 item {
                     PreferenceEntry(
-                        title = { Text("Fill Transition Smoothness") },
-                        description = "Adjust the gradient edge width of the liquid fill effect (${fillTransitionWidth.toInt()} dp)",
+                        title = { Text(stringResource(R.string.fill_transition_smoothness)) },
+                        description = stringResource(R.string.fill_transition_smoothness_desc, fillTransitionWidth.toInt()),
                         icon = { Icon(painterResource(R.drawable.lyrics), null) },
                         content = {
                             Slider(

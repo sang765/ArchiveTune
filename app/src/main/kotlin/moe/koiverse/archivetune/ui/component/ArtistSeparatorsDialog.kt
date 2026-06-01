@@ -208,7 +208,7 @@ private fun SeparatorChip(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "\"$symbol\"",
+                text = stringResource(R.string.separator_display, symbol),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
