@@ -4,8 +4,10 @@ import moe.koiverse.archivetune.constants.AutomixMode
 import moe.koiverse.archivetune.models.MediaMetadata
 import kotlin.math.abs
 import kotlin.math.cos
+import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.PI
+import kotlin.math.sin
 
 data class TransitionPlan(
     val crossfadeDurationMs: Long,
@@ -74,7 +76,8 @@ class AutomixEngine(
 
         return TransitionPlan(
             crossfadeDurationMs = duration,
-            fadeCurve = if (isSameAlbum) FadeCurve.LOGARITHMIC else FadeCurve.SINUSOIDAL,
+            outgoingFadeCurve = if (isSameAlbum) FadeCurve.LOGARITHMIC else FadeCurve.SINUSOIDAL,
+            incomingFadeCurve = if (isSameAlbum) FadeCurve.LOGARITHMIC else FadeCurve.SINUSOIDAL,
         )
     }
 
@@ -118,10 +121,12 @@ class AutomixEngine(
             else -> (baseCrossfadeDurationMs * 0.6f).toLong()
         }.coerceIn(500L, 10000L)
 
+        val chosenCurve = if (isBpmMatch) FadeCurve.LOGARITHMIC else FadeCurve.SINUSOIDAL
         return TransitionPlan(
             crossfadeDurationMs = duration,
             incomingStartOffsetMs = if (isBpmMatch) computeBeatAlignedOffset(outgoingAnalysis, incomingAnalysis) else 0L,
-            fadeCurve = if (isBpmMatch) FadeCurve.LOGARITHMIC else FadeCurve.SINUSOIDAL,
+            outgoingFadeCurve = chosenCurve,
+            incomingFadeCurve = chosenCurve,
         )
     }
 

@@ -41,8 +41,9 @@ object AudioAnalyzer {
         if (envelope.size < 4) return 0f
 
         val acf = autocorrelate(envelope)
-        val minLag = (SAMPLE_RATE.toFloat() / MAX_BPM * HOP_SIZE / SAMPLE_RATE).roundToInt().coerceAtLeast(1)
-        val maxLag = (SAMPLE_RATE.toFloat() / MIN_BPM * HOP_SIZE / SAMPLE_RATE).roundToInt().coerceAtMost(acf.size - 1)
+        val framesPerSecond = SAMPLE_RATE.toFloat() / HOP_SIZE
+        val minLag = (60f * framesPerSecond / MAX_BPM).roundToInt().coerceAtLeast(1)
+        val maxLag = (60f * framesPerSecond / MIN_BPM).roundToInt().coerceAtMost(acf.size - 1)
         if (minLag >= maxLag || maxLag > acf.size) return 0f
 
         var peakLag = minLag
@@ -55,7 +56,7 @@ object AudioAnalyzer {
         }
         if (peakVal < 0.1f) return 0f
 
-        val bpm = (SAMPLE_RATE.toFloat() / peakLag) * (HOP_SIZE.toFloat() / SAMPLE_RATE) * 60f
+        val bpm = framesPerSecond / peakLag * 60f
         return bpm.coerceIn(MIN_BPM.toFloat(), MAX_BPM.toFloat())
     }
 

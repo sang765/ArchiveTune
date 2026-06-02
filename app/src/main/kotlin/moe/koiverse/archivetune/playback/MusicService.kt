@@ -1554,7 +1554,10 @@ class MusicService :
             currentTransitionPlan = TransitionPlan(crossfadeDurationMs = effectiveDuration)
         }
 
-        val scheduleDuration = currentTransitionPlan.crossfadeDurationMs.coerceAtLeast(effectiveDuration)
+        val scheduleDuration = currentTransitionPlan.crossfadeDurationMs.coerceIn(
+            MIN_CROSSFADE_DURATION_MS,
+            duration - CROSSFADE_END_GUARD_MS,
+        )
         val triggerAt = duration - scheduleDuration - CROSSFADE_END_GUARD_MS
 
         crossfadeTriggerJob =
