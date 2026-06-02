@@ -239,6 +239,13 @@ val AudioOffload = booleanPreferencesKey("audioOffload")
 val CrossfadeEnabledKey = booleanPreferencesKey("crossfadeEnabled")
 val CrossfadeDurationKey = floatPreferencesKey("crossfadeDuration")
 val CrossfadeGaplessKey = booleanPreferencesKey("crossfadeGapless")
+val AutomixModeKey = stringPreferencesKey("automixMode")
+enum class AutomixMode {
+    OFF,
+    SMOOTH,
+    ENERGY,
+    HARMONIC,
+}
 val AutoLoadMoreKey = booleanPreferencesKey("autoLoadMore")
 val AutoDownloadOnLikeKey = booleanPreferencesKey("autoDownloadOnLike")
 val AutoSkipNextOnErrorKey = booleanPreferencesKey("autoSkipNextOnError")

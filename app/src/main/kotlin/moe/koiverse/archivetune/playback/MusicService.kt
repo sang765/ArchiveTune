@@ -97,6 +97,8 @@ import moe.koiverse.archivetune.R
 import moe.koiverse.archivetune.constants.AudioNormalizationKey
 import moe.koiverse.archivetune.constants.AudioOffload
 import moe.koiverse.archivetune.constants.AudioQuality
+import moe.koiverse.archivetune.constants.AutomixMode
+import moe.koiverse.archivetune.constants.AutomixModeKey
 import moe.koiverse.archivetune.constants.CrossfadeDurationKey
 import moe.koiverse.archivetune.constants.CrossfadeEnabledKey
 import moe.koiverse.archivetune.constants.CrossfadeGaplessKey
@@ -416,6 +418,9 @@ class MusicService :
     private var crossfadeBaseVolume = 1f
     private var crossfadeProgress = 0f
     private var crossfadePlaybackRequested = false
+    private var automixMode = AutomixMode.OFF
+    private var automixEngine = AutomixEngine(AutomixMode.OFF, 5000L)
+    private var currentTransitionPlan = TransitionPlan(crossfadeDurationMs = 5000L)
     private var lyricsPreloadManager: LyricsPreloadManager? = null
 
     private val secondaryCrossfadeListener =
@@ -433,6 +438,7 @@ class MusicService :
         val enabled: Boolean,
         val durationSeconds: Float,
         val gapless: Boolean,
+        val automixMode: AutomixMode = AutomixMode.OFF,
     )
 
     private data class CrossfadeTarget(
@@ -936,10 +942,13 @@ class MusicService :
                 val enabled = prefs[CrossfadeEnabledKey] ?: false
                 val durationSeconds = prefs[CrossfadeDurationKey] ?: 5f
                 val gapless = prefs[CrossfadeGaplessKey] ?: true
+                val rawMode = prefs[AutomixModeKey]
+                val mode = rawMode?.let { runCatching { AutomixMode.valueOf(it) }.getOrNull() } ?: AutomixMode.OFF
                 CrossfadeConfig(
                     enabled = enabled && togetherState is moe.koiverse.archivetune.together.TogetherSessionState.Idle,
                     durationSeconds = durationSeconds,
                     gapless = gapless,
+                    automixMode = mode,
                 )
             }
             .distinctUntilChanged()
@@ -949,6 +958,8 @@ class MusicService :
                     .roundToLong()
                     .coerceAtLeast(0L)
                 crossfadeGapless = config.gapless
+                automixMode = config.automixMode
+                automixEngine = AutomixEngine(config.automixMode, crossfadeDurationMs)
                 if (crossfadeEnabled && crossfadeDurationMs > 0L) {
                     scheduleCrossfade()
                 } else {
@@ -1485,11 +1496,13 @@ class MusicService :
         baseVolume: Float,
         outgoingPlayer: ExoPlayer,
         incomingPlayer: ExoPlayer,
+        plan: TransitionPlan = currentTransitionPlan,
     ) {
         val clampedProgress = progress.coerceIn(0f, 1f)
-        val radians = clampedProgress.toDouble() * (PI / 2.0)
-        outgoingPlayer.volume = (baseVolume * cos(radians).toFloat()).coerceIn(0f, maxSafeGainFactor)
-        incomingPlayer.volume = (baseVolume * sin(radians).toFloat()).coerceIn(0f, maxSafeGainFactor)
+        val outgoingVolume = automixEngine.computeCrossfadeVolume(clampedProgress, baseVolume, plan, outgoing = true)
+        val incomingVolume = automixEngine.computeCrossfadeVolume(clampedProgress, baseVolume, plan, outgoing = false)
+        outgoingPlayer.volume = outgoingVolume.coerceIn(0f, maxSafeGainFactor)
+        incomingPlayer.volume = incomingVolume.coerceIn(0f, maxSafeGainFactor)
     }
 
     private fun scheduleCrossfade() {
@@ -1515,7 +1528,34 @@ class MusicService :
 
         val currentMediaId = player.currentMediaItem?.mediaId ?: return
         val currentIndex = player.currentMediaItemIndex
-        val triggerAt = duration - effectiveDuration - CROSSFADE_END_GUARD_MS
+
+        if (automixMode != AutomixMode.OFF) {
+            val outgoingMeta = currentMediaMetadata.value
+            val incomingItem = runCatching { player.getMediaItemAt(target.index) }.getOrNull()
+            val incomingMeta = incomingItem?.metadata?.let { meta ->
+                runCatching {
+                    moe.koiverse.archivetune.models.MediaMetadata(
+                        id = target.mediaId,
+                        title = meta.title?.toString().orEmpty(),
+                        artists = emptyList(),
+                        duration = (incomingItem.mediaMetadata.durationMs?.div(1000L) ?: 0L).toInt(),
+                    )
+                }.getOrNull()
+            }
+            val outgoingAnalysis = automixEngine.getAnalysis(currentMediaId)
+            val incomingAnalysis = automixEngine.getAnalysis(target.mediaId)
+            currentTransitionPlan = automixEngine.planTransition(
+                outgoing = outgoingMeta,
+                incoming = incomingMeta,
+                outgoingAnalysis = outgoingAnalysis,
+                incomingAnalysis = incomingAnalysis,
+            )
+        } else {
+            currentTransitionPlan = TransitionPlan(crossfadeDurationMs = effectiveDuration)
+        }
+
+        val scheduleDuration = currentTransitionPlan.crossfadeDurationMs.coerceAtLeast(effectiveDuration)
+        val triggerAt = duration - scheduleDuration - CROSSFADE_END_GUARD_MS
 
         crossfadeTriggerJob =
             scope.launch {
@@ -1535,9 +1575,10 @@ class MusicService :
                         hasPreparedSecondaryPlayer = true
                     }
                     if (remainingToTrigger <= 0L) {
+                        val planDuration = currentTransitionPlan.crossfadeDurationMs
                         val adjustedDuration =
                             (duration - player.currentPosition - CROSSFADE_END_GUARD_MS)
-                                .coerceAtMost(effectiveDuration)
+                                .coerceAtMost(planDuration)
                         if (adjustedDuration >= MIN_CROSSFADE_DURATION_MS) {
                             startCrossfade(target, adjustedDuration)
                         }
@@ -1656,6 +1697,7 @@ class MusicService :
 
         val incomingPlayer = prepareSecondaryCrossfadePlayer(target) ?: return
         val outgoingMediaId = player.currentMediaItem?.mediaId ?: return
+        val plan = currentTransitionPlan
 
         crossfadeTriggerJob?.cancel()
         crossfadeTriggerJob = null
@@ -1669,7 +1711,8 @@ class MusicService :
                 player.pauseAtEndOfMediaItems = true
 
                 try {
-                    val requiredBufferedMs = requiredCrossfadeStartBufferMs(durationMs)
+                    val planDuration = plan.crossfadeDurationMs.coerceAtMost(durationMs)
+                    val requiredBufferedMs = requiredCrossfadeStartBufferMs(planDuration)
                     if (!awaitCrossfadePlayerReady(incomingPlayer, CROSSFADE_READY_TIMEOUT_MS, requiredBufferedMs)) {
                         cancelCrossfade(resetVolume = true, resetPauseAtEnd = true)
                         scheduleCrossfade()
@@ -1677,6 +1720,9 @@ class MusicService :
                     }
 
                     incomingPlayer.playbackParameters = player.playbackParameters
+                    if (plan.incomingStartOffsetMs > 0L) {
+                        incomingPlayer.seekTo(plan.incomingStartOffsetMs.coerceAtLeast(0L))
+                    }
                     incomingPlayer.playWhenReady = crossfadePlaybackRequested
                     if (crossfadePlaybackRequested) {
                         incomingPlayer.play()
@@ -1684,7 +1730,7 @@ class MusicService :
 
                     var elapsedMs = 0L
                     var lastTickMs = android.os.SystemClock.elapsedRealtime()
-                    while (isActive && elapsedMs < durationMs) {
+                    while (isActive && elapsedMs < planDuration) {
                         if (player.currentMediaItem?.mediaId != outgoingMediaId) {
                             cancelCrossfade(resetVolume = true, resetPauseAtEnd = true)
                             return@launch
@@ -1693,9 +1739,15 @@ class MusicService :
                         val nowMs = android.os.SystemClock.elapsedRealtime()
                         if (crossfadePlaybackRequested) {
                             incomingPlayer.playWhenReady = true
-                            elapsedMs = (elapsedMs + (nowMs - lastTickMs)).coerceAtMost(durationMs)
-                            crossfadeProgress = (elapsedMs.toFloat() / durationMs.toFloat()).coerceIn(0f, 1f)
-                            applyCrossfadeVolumes(crossfadeProgress, crossfadeBaseVolume, player, incomingPlayer)
+                            elapsedMs = (elapsedMs + (nowMs - lastTickMs)).coerceAtMost(planDuration)
+                            crossfadeProgress = (elapsedMs.toFloat() / planDuration.toFloat()).coerceIn(0f, 1f)
+                            applyCrossfadeVolumes(
+                                progress = crossfadeProgress,
+                                baseVolume = crossfadeBaseVolume,
+                                outgoingPlayer = player,
+                                incomingPlayer = incomingPlayer,
+                                plan = plan,
+                            )
                         } else {
                             incomingPlayer.pause()
                         }
@@ -2617,6 +2669,7 @@ class MusicService :
 
     fun clearAutomix() {
         autoAddedMediaIds.clear()
+        automixEngine.clearCache()
     }
 
     fun onInfiniteQueueDisabled() {

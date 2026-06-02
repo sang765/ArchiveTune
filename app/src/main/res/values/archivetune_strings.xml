@@ -398,6 +398,16 @@
     <string name="audio_crossfade_seconds">%1$s s</string>
     <string name="crossfade_gapless_title">Skip gapless albums</string>
     <string name="crossfade_gapless_description">Do not crossfade consecutive songs from the same album.</string>
+    <string name="automix_title">Smart Automix</string>
+    <string name="automix_description">AI-powered intelligent transitions between songs.</string>
+    <string name="automix_mode_title">Automix mode</string>
+    <string name="automix_mode_off">Off</string>
+    <string name="automix_mode_smooth">Smooth</string>
+    <string name="automix_mode_smooth_desc">Seamless transitions with variable crossfade duration</string>
+    <string name="automix_mode_energy">Energy-matched</string>
+    <string name="automix_mode_energy_desc">Matches song energy levels for dynamic transitions</string>
+    <string name="automix_mode_harmonic">Harmonic</string>
+    <string name="automix_mode_harmonic_desc">BPM and key-aware beat-matched transitions</string>
     <string name="disable_load_more_when_repeat_all">Disable load more when repeat all</string>
     <string name="disable_load_more_when_repeat_all_desc">Don\'t auto load more songs and similar content when repeat all mode is enabled</string>
     <string name="player_stream_client">Playback client</string>

@@ -49,6 +49,8 @@ import moe.koiverse.archivetune.constants.SkipSilenceKey
 import moe.koiverse.archivetune.constants.StopMusicOnTaskClearKey
 import moe.koiverse.archivetune.constants.WakelockKey
 import moe.koiverse.archivetune.constants.HistoryDuration
+import moe.koiverse.archivetune.constants.AutomixMode
+import moe.koiverse.archivetune.constants.AutomixModeKey
 import moe.koiverse.archivetune.constants.CrossfadeDurationKey
 import moe.koiverse.archivetune.constants.CrossfadeEnabledKey
 import moe.koiverse.archivetune.constants.CrossfadeGaplessKey
@@ -151,6 +153,10 @@ fun PlayerSettings(
     val (crossfadeGapless, onCrossfadeGaplessChange) = rememberPreference(
         CrossfadeGaplessKey,
         defaultValue = true
+    )
+    val (automixMode, onAutomixModeChange) = rememberEnumPreference(
+        AutomixModeKey,
+        defaultValue = AutomixMode.OFF
     )
 
     val (artistSeparators, onArtistSeparatorsChange) = rememberPreference(
@@ -312,6 +318,24 @@ fun PlayerSettings(
                     checked = crossfadeGapless,
                     onCheckedChange = onCrossfadeGaplessChange,
                     isEnabled = crossfadeEnabled,
+                )
+            }
+
+            item {
+                EnumListPreference(
+                    title = { Text(stringResource(R.string.automix_title)) },
+                    description = stringResource(R.string.automix_description),
+                    icon = { Icon(painterResource(R.drawable.auto_awesome), null) },
+                    selectedValue = automixMode,
+                    onValueSelected = onAutomixModeChange,
+                    valueText = {
+                        when (it) {
+                            AutomixMode.OFF -> stringResource(R.string.automix_mode_off)
+                            AutomixMode.SMOOTH -> stringResource(R.string.automix_mode_smooth)
+                            AutomixMode.ENERGY -> stringResource(R.string.automix_mode_energy)
+                            AutomixMode.HARMONIC -> stringResource(R.string.automix_mode_harmonic)
+                        }
+                    },
                 )
             }
 
