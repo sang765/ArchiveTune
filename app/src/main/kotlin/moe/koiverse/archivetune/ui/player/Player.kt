@@ -92,7 +92,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
@@ -224,7 +223,6 @@ private const val V7CanvasZoomScale = 1.08f
 private const val V7SharpStagePortraitFraction = 0.62f
 private const val V7SharpStageLandscapeFraction = 0.58f
 private const val V7BackdropOverlapDp = 72
-private const val V7SharpStageBottomScrimStartFraction = 0.82f
 private const val V8BackdropArtworkSizePx = 1_024
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1741,17 +1739,6 @@ private fun V7PlayerBackdrop(
     val backdropArtworkModel = remember(backdropArtworkUrl, backdropArtworkSizePx) {
         backdropArtworkUrl?.resize(backdropArtworkSizePx, backdropArtworkSizePx)
     }
-    val sharpStageBottomScrim = remember(vibrantBackdropColor) {
-        vibrantBackdropColor?.let { backdropColor ->
-            Brush.verticalGradient(
-                colorStops = arrayOf(
-                    0f to Color.Transparent,
-                    V7SharpStageBottomScrimStartFraction to Color.Transparent,
-                    1f to backdropColor,
-                )
-            )
-        }
-    }
     val backdropImageModifier = remember(disableBlur) {
         Modifier
             .fillMaxSize()
@@ -1808,6 +1795,11 @@ private fun V7PlayerBackdrop(
                     modifier = backdropImageModifier,
                 )
             }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(vibrantBackdropModifier),
+            )
         }
 
         AnimatedContent(
@@ -1850,17 +1842,12 @@ private fun V7PlayerBackdrop(
                         modifier = canvasStageModifier,
                     )
                 }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .then(vibrantBackdropModifier),
+                )
             }
-        }
-
-        if (sharpStageBottomScrim != null) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .fillMaxWidth()
-                    .height(sharpStageHeight)
-                    .background(sharpStageBottomScrim),
-            )
         }
     }
 }
