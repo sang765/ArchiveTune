@@ -357,6 +357,17 @@ class MusicService :
 
     private var currentQueue: Queue = EmptyQueue
     var queueTitle: String? = null
+
+    // Highlight preview state
+    private var highlightJob: Job? = null
+    private var savedHighlightItems: List<MediaItem> = emptyList()
+    private var savedHighlightIndex: Int = 0
+    private var savedHighlightPosition: Long = 0L
+    private var savedHighlightPlayWhenReady: Boolean = false
+    private var savedHighlightQueue: Queue = EmptyQueue
+    val isHighlightPlaying = MutableStateFlow(false)
+    val highlightSongId = MutableStateFlow<String?>(null)
+
     private val persistentStateLock = Any()
     private val persistentSaveGeneration = AtomicLong(0L)
     @Volatile
@@ -2500,6 +2511,77 @@ class MusicService :
                 if (player.shuffleModeEnabled) {
                     applyCurrentFirstShuffleOrder()
                 }
+            }
+        }
+    }
+
+    fun playHighlight(mediaMetadata: moe.koiverse.archivetune.models.MediaMetadata) {
+        if (isHighlightPlaying.value) {
+            stopHighlight()
+            if (highlightSongId.value == mediaMetadata.id) return
+        }
+
+        if (player.mediaItemCount > 0 && player.playbackState != Player.STATE_IDLE) {
+            savedHighlightItems = (0 until player.mediaItemCount).map { player.getMediaItemAt(it) }
+            savedHighlightIndex = player.currentMediaItemIndex
+            savedHighlightPosition = player.currentPosition
+            savedHighlightPlayWhenReady = player.playWhenReady
+            savedHighlightQueue = currentQueue
+        } else {
+            savedHighlightItems = emptyList()
+            savedHighlightIndex = 0
+            savedHighlightPosition = 0L
+            savedHighlightPlayWhenReady = false
+            savedHighlightQueue = EmptyQueue
+        }
+
+        isHighlightPlaying.value = true
+        highlightSongId.value = mediaMetadata.id
+
+        val durationMs = if (mediaMetadata.duration > 0) mediaMetadata.duration * 1000L else 0L
+        val highlightStartMs = if (durationMs > 30000L) {
+            (durationMs / 3).coerceAtMost(durationMs - 30000L)
+        } else {
+            0L
+        }
+
+        cancelCrossfade(resetVolume = true, resetPauseAtEnd = true)
+        player.stop()
+        player.clearMediaItems()
+        player.setMediaItem(mediaMetadata.toMediaItem())
+        player.prepare()
+        if (highlightStartMs > 0) {
+            player.seekTo(highlightStartMs)
+        }
+        player.playWhenReady = true
+
+        highlightJob?.cancel()
+        highlightJob = scope.launch(SilentHandler) {
+            delay(30_000L)
+            stopHighlight()
+        }
+    }
+
+    fun stopHighlight() {
+        highlightJob?.cancel()
+        highlightJob = null
+
+        if (isHighlightPlaying.value) {
+            isHighlightPlaying.value = false
+            highlightSongId.value = null
+
+            if (savedHighlightItems.isNotEmpty()) {
+                currentQueue = savedHighlightQueue
+                player.stop()
+                player.clearMediaItems()
+                player.setMediaItems(
+                    savedHighlightItems,
+                    savedHighlightIndex,
+                    savedHighlightPosition,
+                )
+                player.prepare()
+                player.playWhenReady = savedHighlightPlayWhenReady
+                savedHighlightItems = emptyList()
             }
         }
     }

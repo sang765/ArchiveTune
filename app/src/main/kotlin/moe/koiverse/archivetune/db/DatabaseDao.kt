@@ -400,7 +400,7 @@ interface DatabaseDao {
     @Transaction
     @Query(
         """
-             SELECT song.id, song.title, song.thumbnailUrl,
+             SELECT song.id, song.title, song.thumbnailUrl, song.duration,
                (SELECT COUNT(1)
                 FROM event
                 WHERE songId = song.id

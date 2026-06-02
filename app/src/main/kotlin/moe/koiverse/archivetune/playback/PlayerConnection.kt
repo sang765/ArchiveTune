@@ -130,6 +130,17 @@ class PlayerConnection(
         service.toggleLike()
     }
 
+    val isHighlightPlaying = service.isHighlightPlaying
+    val highlightSongId = service.highlightSongId
+
+    fun playHighlight(mediaMetadata: moe.koiverse.archivetune.models.MediaMetadata) {
+        service.playHighlight(mediaMetadata)
+    }
+
+    fun stopHighlight() {
+        service.stopHighlight()
+    }
+
     fun seekToNext() {
         val state = service.togetherSessionState.value as? moe.koiverse.archivetune.together.TogetherSessionState.Joined
         if (state?.role is moe.koiverse.archivetune.together.TogetherRole.Guest) {

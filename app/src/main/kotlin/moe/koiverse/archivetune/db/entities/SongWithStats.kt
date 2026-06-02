@@ -14,6 +14,7 @@ data class SongWithStats(
     val id: String,
     val title: String,
     val thumbnailUrl: String,
+    val duration: Int = -1,
     val songCountListened: Int,
     val timeListened: Long?,
 )

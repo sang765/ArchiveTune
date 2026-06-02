@@ -53,6 +53,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -95,12 +96,7 @@ import moe.koiverse.archivetune.db.entities.ListeningBySlot
 import moe.koiverse.archivetune.db.entities.ListeningSummary
 import moe.koiverse.archivetune.db.entities.Song
 import moe.koiverse.archivetune.db.entities.SongWithStats
-import moe.koiverse.archivetune.extensions.togglePlayPause
-import moe.koiverse.archivetune.extensions.toMediaItem
-import moe.koiverse.archivetune.innertube.models.WatchEndpoint
 import moe.koiverse.archivetune.models.toMediaMetadata
-import moe.koiverse.archivetune.playback.queues.ListQueue
-import moe.koiverse.archivetune.playback.queues.YouTubeQueue
 import moe.koiverse.archivetune.ui.component.ChoiceChipsRow
 import moe.koiverse.archivetune.ui.component.HideOnScrollFAB
 import moe.koiverse.archivetune.ui.component.IconButton
@@ -132,7 +128,15 @@ fun StatsScreen(
     val playerConnection = LocalPlayerConnection.current ?: return
     val isPlaying by playerConnection.isPlaying.collectAsStateWithLifecycle()
     val mediaMetadata by playerConnection.mediaMetadata.collectAsStateWithLifecycle()
+    val isHighlightPlaying by playerConnection.isHighlightPlaying.collectAsStateWithLifecycle()
+    val highlightSongId by playerConnection.highlightSongId.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    DisposableEffect(Unit) {
+        onDispose {
+            playerConnection.stopHighlight()
+        }
+    }
 
     val indexChips by viewModel.indexChips.collectAsStateWithLifecycle()
     val mostPlayedSongs by viewModel.mostPlayedSongs.collectAsStateWithLifecycle()
@@ -422,15 +426,9 @@ fun StatsScreen(
                         }
                         .combinedClickable(
                             onClick = {
-                                if (song.id == mediaMetadata?.id) {
-                                    playerConnection.player.togglePlayPause()
-                                } else {
-                                    playerConnection.playQueue(
-                                        YouTubeQueue(
-                                            endpoint = WatchEndpoint(song.id),
-                                            preloadItem = mostPlayedSongs[index].toMediaMetadata(),
-                                        ),
-                                    )
+                                val meta = mostPlayedSongs.getOrNull(index)?.toMediaMetadata()
+                                if (meta != null) {
+                                    playerConnection.playHighlight(meta)
                                 }
                             },
                             onLongClick = {
