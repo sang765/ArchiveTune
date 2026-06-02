@@ -2370,6 +2370,7 @@ class MusicService :
         queue: Queue,
         playWhenReady: Boolean = true,
     ) {
+        cancelHighlight()
         val joined = togetherSessionState.value as? moe.koiverse.archivetune.together.TogetherSessionState.Joined
         if (!isTogetherApplyingRemote() && joined?.role is moe.koiverse.archivetune.together.TogetherRole.Guest) {
             if (!joined.roomState.settings.allowGuestsToControlPlayback) {
@@ -2515,10 +2516,25 @@ class MusicService :
         }
     }
 
+    private fun cancelHighlight() {
+        highlightJob?.cancel()
+        highlightJob = null
+        isHighlightPlaying.value = false
+        highlightSongId.value = null
+        savedHighlightItems = emptyList()
+        savedHighlightIndex = 0
+        savedHighlightPosition = 0L
+        savedHighlightPlayWhenReady = false
+        savedHighlightQueue = EmptyQueue
+    }
+
     fun playHighlight(mediaMetadata: moe.koiverse.archivetune.models.MediaMetadata) {
         if (isHighlightPlaying.value) {
-            stopHighlight()
-            if (highlightSongId.value == mediaMetadata.id) return
+            if (highlightSongId.value == mediaMetadata.id) {
+                stopHighlight()
+                return
+            }
+            cancelHighlight()
         }
 
         if (player.mediaItemCount > 0 && player.playbackState != Player.STATE_IDLE) {
@@ -2563,27 +2579,32 @@ class MusicService :
     }
 
     fun stopHighlight() {
+        if (!isHighlightPlaying.value) return
         highlightJob?.cancel()
         highlightJob = null
+        isHighlightPlaying.value = false
 
-        if (isHighlightPlaying.value) {
-            isHighlightPlaying.value = false
-            highlightSongId.value = null
-
-            if (savedHighlightItems.isNotEmpty()) {
-                currentQueue = savedHighlightQueue
-                player.stop()
-                player.clearMediaItems()
-                player.setMediaItems(
-                    savedHighlightItems,
-                    savedHighlightIndex,
-                    savedHighlightPosition,
-                )
-                player.prepare()
-                player.playWhenReady = savedHighlightPlayWhenReady
-                savedHighlightItems = emptyList()
-            }
+        if (savedHighlightItems.isNotEmpty()) {
+            currentQueue = savedHighlightQueue
+            queueTitle = null
+            player.stop()
+            player.clearMediaItems()
+            player.setMediaItems(
+                savedHighlightItems,
+                savedHighlightIndex,
+                savedHighlightPosition,
+            )
+            player.prepare()
+            player.playWhenReady = savedHighlightPlayWhenReady
+        } else {
+            player.stop()
+            player.clearMediaItems()
+            currentQueue = EmptyQueue
+            queueTitle = null
         }
+
+        highlightSongId.value = null
+        savedHighlightItems = emptyList()
     }
 
     private fun applyCurrentFirstShuffleOrder() {
@@ -2648,6 +2669,7 @@ class MusicService :
     }
 
     fun startRadioSeamlessly() {
+        cancelHighlight()
         val joined = togetherSessionState.value as? moe.koiverse.archivetune.together.TogetherSessionState.Joined
         if (!isTogetherApplyingRemote() && joined?.role is moe.koiverse.archivetune.together.TogetherRole.Guest) {
             if (!joined.roomState.settings.allowGuestsToControlPlayback) {
@@ -2752,6 +2774,7 @@ class MusicService :
     }
 
     fun stopAndClearPlayback(clearPersistentState: Boolean = false) {
+        cancelHighlight()
         cancelRestoredQueueHydration()
         suppressAutoPlayback = true
         cancelCrossfade(resetVolume = true, resetPauseAtEnd = true)
@@ -2772,6 +2795,7 @@ class MusicService :
     }
 
     fun playNext(items: List<MediaItem>) {
+        cancelHighlight()
         val joined = togetherSessionState.value as? moe.koiverse.archivetune.together.TogetherSessionState.Joined
         if (joined?.role is moe.koiverse.archivetune.together.TogetherRole.Guest) {
             if (!joined.roomState.settings.allowGuestsToAddTracks) {
@@ -2811,6 +2835,7 @@ class MusicService :
     }
 
     fun addToQueue(items: List<MediaItem>) {
+        cancelHighlight()
         val joined = togetherSessionState.value as? moe.koiverse.archivetune.together.TogetherSessionState.Joined
         if (joined?.role is moe.koiverse.archivetune.together.TogetherRole.Guest) {
             if (!joined.roomState.settings.allowGuestsToAddTracks) {
@@ -4321,6 +4346,7 @@ class MusicService :
     }
 
     private fun updateHistoryTrackingPlaybackState() {
+        if (isHighlightPlaying.value) return
         val mediaId = currentHistoryMediaId
         if (mediaId == null || currentHistorySessionQueued) {
             historyThresholdJob?.cancel()
@@ -5957,6 +5983,7 @@ private fun onMediaItemTransitionInternal() {
     }
 
     private suspend fun saveQueueToDisk() {
+        if (isHighlightPlaying.value) return
         val saveGeneration = persistentSaveGeneration.get()
         val snapshot =
             withContext(Dispatchers.Main.immediate) {
