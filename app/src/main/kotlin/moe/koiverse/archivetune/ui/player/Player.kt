@@ -14,6 +14,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.media.MediaMetadataRetriever
 import android.os.SystemClock
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -223,8 +224,7 @@ private const val V7CanvasZoomScale = 1.08f
 private const val V7SharpStagePortraitFraction = 0.62f
 private const val V7SharpStageLandscapeFraction = 0.58f
 private const val V7BackdropOverlapDp = 72
-private const val V7SharpStageBottomScrimStartFraction = 0.68f
-private const val V7BackdropFloorBlackStartFraction = 0.88f
+private const val V7SharpStageBottomScrimStartFraction = 0.82f
 private const val V8BackdropArtworkSizePx = 1_024
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1684,7 +1684,6 @@ private fun V7PlayerBackdrop(
     val configuration = LocalConfiguration.current
     val context = LocalContext.current
     val density = LocalDensity.current
-    val fallbackColor = Color.Black.toArgb()
     val backdropArtworkSizePx = remember(
         configuration.screenWidthDp,
         configuration.screenHeightDp,
@@ -1705,45 +1704,30 @@ private fun V7PlayerBackdrop(
     val sharpArtworkUrl = coverArtworkUrl ?: canvasStatic
     val backdropArtworkUrl = coverArtworkUrl ?: canvasStatic
     val hasCanvas = !canvasPrimary.isNullOrBlank() || !canvasFallback.isNullOrBlank()
-    var backdropPalette by remember(backdropArtworkUrl, fallbackColor) {
-        mutableStateOf(V7BackdropPalette.fromColors(emptyList(), fallbackColor))
+    val vibrantColorSource =
+        if (hasCanvas) {
+            canvasPrimary ?: canvasFallback
+        } else {
+            coverArtworkUrl
+        }
+    var vibrantBackdropColor by remember(vibrantColorSource) {
+        mutableStateOf<Color?>(null)
     }
 
-    LaunchedEffect(backdropArtworkUrl, fallbackColor) {
-        backdropPalette = V7BackdropPalette.fromColors(emptyList(), fallbackColor)
-        if (backdropArtworkUrl == null) return@LaunchedEffect
+    LaunchedEffect(vibrantColorSource, hasCanvas) {
+        vibrantBackdropColor = null
+        if (vibrantColorSource == null) return@LaunchedEffect
 
-        val request = ImageRequest.Builder(context)
-            .data(backdropArtworkUrl)
-            .size(PlayerColorExtractor.Config.IMAGE_SIZE, PlayerColorExtractor.Config.IMAGE_SIZE)
-            .allowHardware(false)
-            .build()
-
-        val extractedColors = try {
-            val image = withContext(Dispatchers.IO) {
-                context.imageLoader.execute(request)
-            }.image
-            if (image == null) {
-                null
+        vibrantBackdropColor =
+            if (hasCanvas) {
+                extractVibrantColorFromVideoFrame(vibrantColorSource)
             } else {
-                withContext(Dispatchers.Default) {
-                    val palette = Palette.from(image.toBitmap())
-                        .maximumColorCount(PlayerColorExtractor.Config.MAX_COLOR_COUNT)
-                        .resizeBitmapArea(PlayerColorExtractor.Config.BITMAP_AREA)
-                        .generate()
-                    PlayerColorExtractor.extractGradientColors(
-                        palette = palette,
-                        fallbackColor = fallbackColor,
-                    )
-                }
+                extractVibrantColorFromImage(context, vibrantColorSource)
             }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (_: Exception) {
-            null
-        }
+    }
 
-        backdropPalette = V7BackdropPalette.fromColors(extractedColors.orEmpty(), fallbackColor)
+    val vibrantBackdropModifier = remember(vibrantBackdropColor) {
+        vibrantBackdropColor?.let { Modifier.background(it) } ?: Modifier
     }
 
     val backdropState =
@@ -1757,23 +1741,16 @@ private fun V7PlayerBackdrop(
     val backdropArtworkModel = remember(backdropArtworkUrl, backdropArtworkSizePx) {
         backdropArtworkUrl?.resize(backdropArtworkSizePx, backdropArtworkSizePx)
     }
-    val sharpStageBottomScrim = remember(backdropPalette) {
-        Brush.verticalGradient(
-            colorStops = arrayOf(
-                0f to Color.Transparent,
-                V7SharpStageBottomScrimStartFraction to Color.Transparent,
-                1f to backdropPalette.bottom,
+    val sharpStageBottomScrim = remember(vibrantBackdropColor) {
+        vibrantBackdropColor?.let { backdropColor ->
+            Brush.verticalGradient(
+                colorStops = arrayOf(
+                    0f to Color.Transparent,
+                    V7SharpStageBottomScrimStartFraction to Color.Transparent,
+                    1f to backdropColor,
+                )
             )
-        )
-    }
-    val backdropFloor = remember(backdropPalette) {
-        Brush.verticalGradient(
-            colorStops = arrayOf(
-                0f to backdropPalette.bottom,
-                V7BackdropFloorBlackStartFraction to backdropPalette.bottom,
-                1f to backdropPalette.bottom,
-            )
-        )
+        }
     }
     val backdropImageModifier = remember(disableBlur) {
         Modifier
@@ -1803,7 +1780,7 @@ private fun V7PlayerBackdrop(
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
-            .background(backdropPalette.top),
+            .then(vibrantBackdropModifier),
     ) {
         val sharpStageFraction =
             if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -1821,7 +1798,7 @@ private fun V7PlayerBackdrop(
                 .fillMaxWidth()
                 .height(backdropHeight)
                 .clipToBounds()
-                .background(backdropPalette.bottom),
+                .then(vibrantBackdropModifier),
         ) {
             if (backdropArtworkModel != null) {
                 AsyncImage(
@@ -1831,11 +1808,6 @@ private fun V7PlayerBackdrop(
                     modifier = backdropImageModifier,
                 )
             }
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(backdropFloor),
-            )
         }
 
         AnimatedContent(
@@ -1857,7 +1829,7 @@ private fun V7PlayerBackdrop(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(backdropPalette.top),
+                    .then(vibrantBackdropModifier),
                 contentAlignment = Alignment.Center,
             ) {
                 if (sharpArtworkModel != null) {
@@ -1881,50 +1853,16 @@ private fun V7PlayerBackdrop(
             }
         }
 
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .fillMaxWidth()
-                .height(sharpStageHeight)
-                .background(sharpStageBottomScrim),
-        )
-    }
-}
-
-@Immutable
-private data class V7BackdropPalette(
-    val top: Color,
-    val mid: Color,
-    val bottom: Color,
-) {
-    companion object {
-        fun fromColors(colors: List<Color>, fallbackColor: Int): V7BackdropPalette {
-            val fallback = Color(fallbackColor).v7BackdropTone(valueMin = 0.12f, valueMax = 0.42f)
-            val top = colors.getOrNull(0)?.v7BackdropTone(valueMin = 0.16f, valueMax = 0.88f) ?: fallback
-            val mid = colors.getOrNull(1)?.v7BackdropTone(valueMin = 0.14f, valueMax = 0.72f) ?: top
-            val bottom = colors.getOrNull(2)?.v7BackdropTone(valueMin = 0.10f, valueMax = 0.56f) ?: mid
-            return V7BackdropPalette(
-                top = top,
-                mid = mid,
-                bottom = bottom,
+        if (sharpStageBottomScrim != null) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+                    .height(sharpStageHeight)
+                    .background(sharpStageBottomScrim),
             )
         }
     }
-}
-
-private fun Color.v7BackdropTone(
-    valueMin: Float,
-    valueMax: Float,
-): Color {
-    val hsv = FloatArray(3)
-    android.graphics.Color.colorToHSV(toArgb(), hsv)
-    hsv[1] = if (hsv[1] < 0.12f) {
-        hsv[1].coerceAtMost(0.08f)
-    } else {
-        (hsv[1] * 1.22f).coerceIn(0f, 1f)
-    }
-    hsv[2] = hsv[2].coerceIn(valueMin, valueMax)
-    return Color(android.graphics.Color.HSVToColor(hsv))
 }
 
 @Immutable
@@ -1933,6 +1871,59 @@ private data class V7PlayerBackdropState(
     val canvasPrimaryUrl: String?,
     val canvasFallbackUrl: String?,
 )
+
+private suspend fun extractVibrantColorFromImage(
+    context: Context,
+    imageUrl: String,
+): Color? {
+    val request = ImageRequest.Builder(context)
+        .data(imageUrl)
+        .size(PlayerColorExtractor.Config.IMAGE_SIZE, PlayerColorExtractor.Config.IMAGE_SIZE)
+        .allowHardware(false)
+        .build()
+
+    return try {
+        val image = withContext(Dispatchers.IO) {
+            context.imageLoader.execute(request)
+        }.image ?: return null
+
+        extractVibrantColorFromBitmap(image.toBitmap())
+    } catch (e: CancellationException) {
+        throw e
+    } catch (_: Exception) {
+        null
+    }
+}
+
+private suspend fun extractVibrantColorFromVideoFrame(videoUrl: String): Color? =
+    try {
+        val bitmap = withContext(Dispatchers.IO) {
+            val retriever = MediaMetadataRetriever()
+            try {
+                retriever.setDataSource(videoUrl, emptyMap())
+                retriever.getFrameAtTime(0L, MediaMetadataRetriever.OPTION_CLOSEST_SYNC)
+            } finally {
+                retriever.release()
+            }
+        } ?: return null
+
+        extractVibrantColorFromBitmap(bitmap)
+    } catch (e: CancellationException) {
+        throw e
+    } catch (_: Exception) {
+        null
+    }
+
+private suspend fun extractVibrantColorFromBitmap(bitmap: android.graphics.Bitmap): Color? =
+    withContext(Dispatchers.Default) {
+        Palette.from(bitmap)
+            .maximumColorCount(PlayerColorExtractor.Config.MAX_COLOR_COUNT)
+            .resizeBitmapArea(PlayerColorExtractor.Config.BITMAP_AREA)
+            .generate()
+            .vibrantSwatch
+            ?.rgb
+            ?.let { Color(it) }
+    }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
