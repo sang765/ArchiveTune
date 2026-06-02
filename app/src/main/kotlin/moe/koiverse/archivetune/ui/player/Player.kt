@@ -89,7 +89,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -114,7 +113,6 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -139,7 +137,6 @@ import androidx.media3.common.Player
 import androidx.media3.common.Player.STATE_BUFFERING
 import androidx.media3.common.Player.STATE_ENDED
 import androidx.media3.common.Player.STATE_READY
-import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.palette.graphics.Palette
 import androidx.navigation.NavController
 import coil3.ImageLoader
@@ -214,15 +211,6 @@ import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 private const val SeekbarSettleToleranceMs = 1_500L
-private const val V7BackdropMinArtworkSizePx = 1_024
-private const val V7BackdropMaxArtworkSizePx = 2_048
-private const val V7BackdropBlurDp = 44
-private const val V7BackdropBlurScale = 1.18f
-private const val V7BackdropArtworkOverscanFactor = 1.15f
-private const val V7CanvasZoomScale = 1.08f
-private const val V7SharpStagePortraitFraction = 0.62f
-private const val V7SharpStageLandscapeFraction = 0.58f
-private const val V7BackdropOverlapDp = 72
 private const val V8BackdropArtworkSizePx = 1_024
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -1089,12 +1077,8 @@ fun BottomSheetPlayer(
                     ) {
                         V7PlayerBackdrop(
                             thumbnailUrl = mediaMetadata?.thumbnailUrl,
-                            canvasStaticUrl = v7CanvasArtwork?.static,
                             canvasPrimaryUrl = v7CanvasArtwork?.animatedVertical,
                             canvasFallbackUrl = v7CanvasArtwork?.videoUrlVertical,
-                            isPlaying = isPlaying,
-                            disableBlur = disableBlur,
-                            label = "v7BackdropLandscape",
                         )
 
                         Column(
@@ -1108,7 +1092,7 @@ fun BottomSheetPlayer(
                             enrichedMetadata?.let { metadata ->
                                 V8PlayerControlsContent(
                                     mediaMetadata = metadata,
-                                    queueTitle = queueTitle,
+                                    queueTitle = "",
                                     playbackState = playbackState,
                                     isPlaying = isPlaying,
                                     isLoading = isLoading,
@@ -1343,12 +1327,8 @@ fun BottomSheetPlayer(
                     ) {
                         V7PlayerBackdrop(
                             thumbnailUrl = mediaMetadata?.thumbnailUrl,
-                            canvasStaticUrl = v7CanvasArtwork?.static,
                             canvasPrimaryUrl = v7CanvasArtwork?.animatedVertical,
                             canvasFallbackUrl = v7CanvasArtwork?.videoUrlVertical,
-                            isPlaying = isPlaying,
-                            disableBlur = disableBlur,
-                            label = "v7BackdropPortrait",
                         )
 
                         Column(
@@ -1362,7 +1342,7 @@ fun BottomSheetPlayer(
                             enrichedMetadata?.let { metadata ->
                                 V8PlayerControlsContent(
                                     mediaMetadata = metadata,
-                                    queueTitle = queueTitle,
+                                    queueTitle = "",
                                     playbackState = playbackState,
                                     isPlaying = isPlaying,
                                     isLoading = isLoading,
@@ -1671,56 +1651,34 @@ private fun V8PlayerBackdrop(
 @Composable
 private fun V7PlayerBackdrop(
     thumbnailUrl: String?,
-    canvasStaticUrl: String?,
     canvasPrimaryUrl: String?,
     canvasFallbackUrl: String?,
-    isPlaying: Boolean,
-    disableBlur: Boolean,
-    label: String,
     modifier: Modifier = Modifier,
 ) {
-    val configuration = LocalConfiguration.current
     val context = LocalContext.current
-    val density = LocalDensity.current
-    val backdropArtworkSizePx = remember(
-        configuration.screenWidthDp,
-        configuration.screenHeightDp,
-        density.density,
-    ) {
-        with(density) {
-            (maxOf(configuration.screenWidthDp, configuration.screenHeightDp).dp.toPx() *
-                V7BackdropArtworkOverscanFactor)
-                .roundToInt()
-                .coerceIn(V7BackdropMinArtworkSizePx, V7BackdropMaxArtworkSizePx)
-        }
-    }
-
     val canvasPrimary = canvasPrimaryUrl?.takeIf { it.isNotBlank() }
     val canvasFallback = canvasFallbackUrl?.takeIf { it.isNotBlank() }
-    val canvasStatic = canvasStaticUrl?.takeIf { it.isNotBlank() }
     val coverArtworkUrl = thumbnailUrl?.takeIf { it.isNotBlank() }
-    val sharpArtworkUrl = coverArtworkUrl ?: canvasStatic
-    val backdropArtworkUrl = coverArtworkUrl ?: canvasStatic
     val hasCanvas = !canvasPrimary.isNullOrBlank() || !canvasFallback.isNullOrBlank()
-    val vibrantColorSource =
+    val vibrantColorSourceKey =
         if (hasCanvas) {
-            canvasPrimary ?: canvasFallback
+            listOfNotNull(canvasPrimary, canvasFallback).joinToString(separator = "|")
         } else {
             coverArtworkUrl
         }
-    var vibrantBackdropColor by remember(vibrantColorSource) {
+    var vibrantBackdropColor by remember(vibrantColorSourceKey) {
         mutableStateOf<Color?>(null)
     }
 
-    LaunchedEffect(vibrantColorSource, hasCanvas) {
+    LaunchedEffect(vibrantColorSourceKey, hasCanvas) {
         vibrantBackdropColor = null
-        if (vibrantColorSource == null) return@LaunchedEffect
+        if (vibrantColorSourceKey == null) return@LaunchedEffect
 
         vibrantBackdropColor =
             if (hasCanvas) {
-                extractVibrantColorFromVideoFrame(vibrantColorSource)
+                extractVibrantColorFromVideoFrames(listOfNotNull(canvasPrimary, canvasFallback))
             } else {
-                extractVibrantColorFromImage(context, vibrantColorSource)
+                extractVibrantColorFromImage(context, vibrantColorSourceKey)
             }
     }
 
@@ -1728,136 +1686,12 @@ private fun V7PlayerBackdrop(
         vibrantBackdropColor?.let { Modifier.background(it) } ?: Modifier
     }
 
-    val backdropState =
-        remember(sharpArtworkUrl, canvasPrimary, canvasFallback) {
-            V7PlayerBackdropState(
-                artworkUrl = sharpArtworkUrl,
-                canvasPrimaryUrl = canvasPrimary,
-                canvasFallbackUrl = canvasFallback,
-            )
-        }
-    val backdropArtworkModel = remember(backdropArtworkUrl, backdropArtworkSizePx) {
-        backdropArtworkUrl?.resize(backdropArtworkSizePx, backdropArtworkSizePx)
-    }
-    val backdropImageModifier = remember(disableBlur) {
-        Modifier
-            .fillMaxSize()
-            .let { base ->
-                if (disableBlur) {
-                    base
-                } else {
-                    base.blur(V7BackdropBlurDp.dp)
-                }
-            }
-            .graphicsLayer {
-                scaleX = V7BackdropBlurScale
-                scaleY = V7BackdropBlurScale
-                alpha = if (disableBlur) 0.20f else 0.58f
-            }
-    }
-    val canvasStageModifier = remember {
-        Modifier
-            .fillMaxSize()
-            .graphicsLayer {
-                scaleX = V7CanvasZoomScale
-                scaleY = V7CanvasZoomScale
-            }
-    }
-
-    BoxWithConstraints(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .then(vibrantBackdropModifier),
-    ) {
-        val sharpStageFraction =
-            if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                V7SharpStageLandscapeFraction
-            } else {
-                V7SharpStagePortraitFraction
-            }
-        val sharpStageHeight = maxHeight * sharpStageFraction
-        val backdropTopOffset = (sharpStageHeight - V7BackdropOverlapDp.dp).coerceAtLeast(0.dp)
-        val backdropHeight = maxHeight - backdropTopOffset
-
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .height(backdropHeight)
-                .clipToBounds()
-                .then(vibrantBackdropModifier),
-        ) {
-            if (backdropArtworkModel != null) {
-                AsyncImage(
-                    model = backdropArtworkModel,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = backdropImageModifier,
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .then(vibrantBackdropModifier),
-            )
-        }
-
-        AnimatedContent(
-            targetState = backdropState,
-            transitionSpec = {
-                fadeIn(tween(900)) togetherWith fadeOut(tween(900))
-            },
-            label = label,
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .fillMaxWidth()
-                .height(sharpStageHeight)
-                .clipToBounds(),
-        ) { backdrop ->
-            val sharpArtworkModel = remember(backdrop.artworkUrl, backdropArtworkSizePx) {
-                backdrop.artworkUrl?.resize(backdropArtworkSizePx, backdropArtworkSizePx)
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .then(vibrantBackdropModifier),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (sharpArtworkModel != null) {
-                    AsyncImage(
-                        model = sharpArtworkModel,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                }
-
-                if (hasCanvas) {
-                    CanvasArtworkPlayer(
-                        primaryUrl = backdrop.canvasPrimaryUrl,
-                        fallbackUrl = backdrop.canvasFallbackUrl,
-                        isPlaying = isPlaying,
-                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM,
-                        modifier = canvasStageModifier,
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .then(vibrantBackdropModifier),
-                )
-            }
-        }
-    }
+    )
 }
-
-@Immutable
-private data class V7PlayerBackdropState(
-    val artworkUrl: String?,
-    val canvasPrimaryUrl: String?,
-    val canvasFallbackUrl: String?,
-)
 
 private suspend fun extractVibrantColorFromImage(
     context: Context,
@@ -1880,6 +1714,14 @@ private suspend fun extractVibrantColorFromImage(
     } catch (_: Exception) {
         null
     }
+}
+
+private suspend fun extractVibrantColorFromVideoFrames(videoUrls: List<String>): Color? {
+    for (videoUrl in videoUrls) {
+        val color = extractVibrantColorFromVideoFrame(videoUrl)
+        if (color != null) return color
+    }
+    return null
 }
 
 private suspend fun extractVibrantColorFromVideoFrame(videoUrl: String): Color? =
