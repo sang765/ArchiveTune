@@ -5,6 +5,7 @@ import com.discord.sdk.DiscordConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.serialization.json.*
 import timber.log.Timber
 
@@ -14,9 +15,18 @@ object DiscordSocialNativeBridge {
     val isAvailable: Boolean get() = true
 
     private var client: DiscordClient? = null
-    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private var clientScope: CoroutineScope? = null
 
     fun start(applicationId: Long, accessToken: String): Result<Unit> = runCatching {
+        client?.let { old ->
+            old.clearPresence()
+            old.disconnectGateway()
+            old.close()
+        }
+        clientScope?.cancel()
+        clientScope = null
+
+        val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
         val config = DiscordConfig(
             clientId = applicationId.toString(),
             token = accessToken,
@@ -26,6 +36,7 @@ object DiscordSocialNativeBridge {
         val newClient = DiscordClient(config, scope)
         newClient.connectGateway()
         client = newClient
+        clientScope = scope
         Timber.tag(TAG).d("Gateway connected for app %d", applicationId)
     }
 
@@ -34,7 +45,7 @@ object DiscordSocialNativeBridge {
         accessToken: String,
         activity: DiscordPresenceActivity,
     ): Result<Unit> = runCatching {
-        val c = client ?: return@runCatching
+        val c = client ?: throw IllegalStateException("Discord client not started — call start() first")
 
         val buttons = activity.buttons.take(2)
 
@@ -91,6 +102,8 @@ object DiscordSocialNativeBridge {
         client?.disconnectGateway()
         client?.close()
         client = null
+        clientScope?.cancel()
+        clientScope = null
     }
 
     fun runCallbacks(): Result<Unit> = Result.success(Unit)

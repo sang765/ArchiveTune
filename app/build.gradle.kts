@@ -326,7 +326,7 @@ dependencies {
     implementation(libs.accompanist.lyrics.core)
 
     if (discordSocialSdkAvailable) {
-        implementation("com.github.sang765:discord-social-sdk:v1.0.0")
+        "gmsImplementation"("com.github.sang765:discord-social-sdk:v1.0.0")
     }
 }
 
