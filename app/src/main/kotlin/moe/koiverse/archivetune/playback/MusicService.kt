@@ -1550,6 +1550,14 @@ class MusicService :
                 outgoingAnalysis = outgoingAnalysis,
                 incomingAnalysis = incomingAnalysis,
             )
+            Timber.tag(TAG).d(
+                "Automix mode=%s plan=%dms outgoingCurve=%s incomingCurve=%s offset=%d",
+                automixMode,
+                currentTransitionPlan.crossfadeDurationMs,
+                currentTransitionPlan.outgoingFadeCurve,
+                currentTransitionPlan.incomingFadeCurve,
+                currentTransitionPlan.incomingStartOffsetMs,
+            )
         } else {
             currentTransitionPlan = TransitionPlan(crossfadeDurationMs = effectiveDuration)
         }
@@ -1701,6 +1709,7 @@ class MusicService :
         val incomingPlayer = prepareSecondaryCrossfadePlayer(target) ?: return
         val outgoingMediaId = player.currentMediaItem?.mediaId ?: return
         val plan = currentTransitionPlan
+        Timber.tag(TAG).d("Crossfade start target=%s duration=%dms automix=%s", target.mediaId, durationMs, automixMode)
 
         crossfadeTriggerJob?.cancel()
         crossfadeTriggerJob = null
