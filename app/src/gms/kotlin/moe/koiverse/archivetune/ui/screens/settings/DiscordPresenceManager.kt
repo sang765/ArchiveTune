@@ -1,10 +1,3 @@
-/*
- * ArchiveTune (2026)
- * © Chartreux Westia — github.com/koiverse
- * GPL-3.0 License | Contributors: see git history
- * Do not remove or alter this notice. - Per GPL-3.0 Section 4 & Section 5
- */
-
 package moe.koiverse.archivetune.ui.screens.settings
 
 import android.content.Context
@@ -18,8 +11,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ProcessLifecycleOwner
 import moe.koiverse.archivetune.db.entities.Song
 import moe.koiverse.archivetune.discord.DiscordOAuthRepository
-import moe.koiverse.archivetune.discord.DiscordSocialNativeBridge
-import moe.koiverse.archivetune.discord.DiscordSocialPresenceClient
 import moe.koiverse.archivetune.utils.DiscordRPC
 import moe.koiverse.archivetune.utils.DiscordImageResolver
 import timber.log.Timber
@@ -29,15 +20,11 @@ object DiscordPresenceManager {
     private val started = AtomicBoolean(false)
     private var scope: CoroutineScope? = null
     private var job: Job? = null
-    private var callbacksJob: Job? = null
     private var lifecycleObserver: LifecycleEventObserver? = null
     private var rpcInstance: DiscordRPC? = null
     private var rpcToken: String? = null
     private val logTag = "DiscordPresenceManager"
 
-    // Stored start parameters so we can restart the updater later.
-    // We intentionally store the application Context (or whatever the caller passed) — callers
-    // should prefer passing an Application context to avoid leaking Activities.
     private var lastStartContext: Context? = null
     private var lastToken: String? = null
     private var lastSongProvider: (() -> Song?)? = null
@@ -45,16 +32,14 @@ object DiscordPresenceManager {
     private var lastIsPausedProvider: (() -> Boolean)? = null
     private var lastIntervalProvider: (() -> Long)? = null
     private var lastPresenceUpdateTime = 0L
-    private const val MIN_PRESENCE_UPDATE_INTERVAL = 20_000L // 20 seconds debounce
+    private const val MIN_PRESENCE_UPDATE_INTERVAL = 20_000L
     private var consecutiveFailures = 0
     private const val MAX_CONSECUTIVE_FAILURES = 3
     private var lastRestartTime = 0L
-    private const val MIN_RESTART_INTERVAL = 30_000L 
+    private const val MIN_RESTART_INTERVAL = 30_000L
     private var lastFailedRestartDueToParams = 0L
     private const val FAILED_RESTART_LOCKOUT = 60_000L
 
-
-    // Last successful RPC timestamps (nullable). Exposed as StateFlow so Compose can observe changes.
     private val _lastRpcStartTime = MutableStateFlow<Long?>(null)
     val lastRpcStartTimeFlow = _lastRpcStartTime.asStateFlow()
     val lastRpcStartTime: Long? get() = _lastRpcStartTime.value
@@ -64,7 +49,6 @@ object DiscordPresenceManager {
     val lastRpcEndTime: Long? get() = _lastRpcEndTime.value
     private val rpcMutex = Mutex()
 
-    /** Public helper to update the last RPC timestamps from callers. */
     fun setLastRpcTimestamps(start: Long?, end: Long?) {
         _lastRpcStartTime.value = start
         _lastRpcEndTime.value = end
@@ -91,9 +75,6 @@ object DiscordPresenceManager {
         return rpcInstance!!
     }
 
-    /**
-     * Core updater: update or clear Discord presence.
-     */
     suspend fun updatePresence(
         context: Context,
         token: String,
@@ -144,7 +125,7 @@ object DiscordPresenceManager {
                     true
                 } else {
                     consecutiveFailures++
-                    Timber.tag(logTag).w("updatePresence failed silently — updateSong returned failure (consecutive=%d)", consecutiveFailures)
+                    Timber.tag(logTag).w("updatePresence failed silently (consecutive=%d)", consecutiveFailures)
                     false
                 }
             } catch (ex: Exception) {
@@ -155,9 +136,6 @@ object DiscordPresenceManager {
         }
     }
 
-    /**
-     * Start background updater.
-     */
     fun start(
         context: Context,
         token: String,
@@ -177,25 +155,12 @@ object DiscordPresenceManager {
 
         resetFailureCount()
         scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-        callbacksJob = if (DiscordSocialNativeBridge.isAvailable) {
-            scope!!.launch {
-                while (isActive) {
-                    DiscordSocialPresenceClient.runCallbacks()
-                    delay(1_000L)
-                }
-            }
-        } else {
-            null
-        }
         job = scope!!.launch {
-            // Perform an immediate first update (or at the first second of the interval).
             try {
-                // switch to Main for player access
                 val (firstSong, firstPosition, firstIsPaused) = withContext(Dispatchers.Main) {
                     Triple(songProvider(), positionProvider(), isPausedProvider())
                 }
 
-                // Try resolving and persisting image URLs before update so DiscordRPC can use saved artwork immediately.
                 try {
                     firstSong?.let { song ->
                         DiscordImageResolver.resolveImagesForSong(context, song)
@@ -204,7 +169,6 @@ object DiscordPresenceManager {
                     Timber.tag(logTag).v(e, "initial image resolution failed")
                 }
 
-                // Run the first update immediately
                 try {
                     val firstResult = updatePresence(
                         context = context,
@@ -213,7 +177,7 @@ object DiscordPresenceManager {
                         positionMs = firstPosition,
                         isPaused = firstIsPaused,
                     )
-                    Timber.tag(logTag).d("initial updatePresence result=%s songId=%s", firstResult, firstSong?.song?.id)
+                    Timber.tag(logTag).d("initial updatePresence result=%s", firstResult)
                 } catch (e: Exception) {
                     Timber.tag(logTag).e(e, "initial updatePresence failed")
                 }
@@ -223,25 +187,22 @@ object DiscordPresenceManager {
 
             while (isActive) {
                 try {
-                    // switch to Main for player access
                     val (song, position, isPaused) = withContext(Dispatchers.Main) {
                         Triple(songProvider(), positionProvider(), isPausedProvider())
                     }
 
-                    val success = updatePresence(
+                    updatePresence(
                         context = context,
                         token = token,
                         song = song,
                         positionMs = position,
                         isPaused = isPaused,
                     )
-
-                    // optional: handle `success` if needed
                 } catch (e: CancellationException) {
                     Timber.tag(logTag).d("updater cancelled")
                     break
                 } catch (e: Exception) {
-                    Timber.tag(logTag).e(e, "loop error → ${e.message}")
+                    Timber.tag(logTag).e(e, "loop error")
                 }
 
                 val delayMs = intervalProvider()
@@ -258,18 +219,14 @@ object DiscordPresenceManager {
         ProcessLifecycleOwner.get().lifecycle.addObserver(lifecycleObserver!!)
     }
 
-    /**
-     * Restart the manager using the most recent parameters passed to `start()`.
-     * Returns true if restart was scheduled, false if there were no stored parameters or too many recent failures.
-     */
     fun restart(): Boolean {
         val now = System.currentTimeMillis()
         if (now - lastRestartTime < MIN_RESTART_INTERVAL) {
-            Timber.tag(logTag).w("restart skipped (too soon since last restart, wait %dms)", MIN_RESTART_INTERVAL - (now - lastRestartTime))
+            Timber.tag(logTag).w("restart skipped (too soon)")
             return false
         }
         if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-            Timber.tag(logTag).w("restart skipped (too many consecutive failures: %d)", consecutiveFailures)
+            Timber.tag(logTag).w("restart skipped (too many failures: %d)", consecutiveFailures)
             return false
         }
 
@@ -282,11 +239,11 @@ object DiscordPresenceManager {
 
         if (ctx == null || token == null || songProv == null || posProv == null || pausedProv == null || intervalProv == null) {
             if (now - lastFailedRestartDueToParams < FAILED_RESTART_LOCKOUT) {
-                Timber.tag(logTag).w("restart skipped (lockout after missing params, wait %dms)", FAILED_RESTART_LOCKOUT - (now - lastFailedRestartDueToParams))
+                Timber.tag(logTag).w("restart skipped (lockout)")
                 return false
             }
             lastFailedRestartDueToParams = now
-            Timber.tag(logTag).w("restart skipped (missing previous start parameters)")
+            Timber.tag(logTag).w("restart skipped (missing params)")
             return false
         }
 
@@ -297,12 +254,11 @@ object DiscordPresenceManager {
         Timber.tag(logTag).d("restarted")
         return true
     }
-    
+
     fun resetFailureCount() {
         consecutiveFailures = 0
     }
 
-    /** Run update immediately. */
     suspend fun updateNow(
         context: Context,
         token: String,
@@ -317,18 +273,15 @@ object DiscordPresenceManager {
         isPaused = isPaused,
     )
 
-    /** Stop the manager. */
     fun stop() {
         if (!started.getAndSet(false)) return
-        
+
         val rpcToClose = rpcInstance
         rpcInstance = null
         rpcToken = null
-        
+
         job?.cancel()
         job = null
-        callbacksJob?.cancel()
-        callbacksJob = null
         scope?.cancel()
         scope = null
         lifecycleObserver?.let { ProcessLifecycleOwner.get().lifecycle.removeObserver(it) }

@@ -15,8 +15,7 @@ if (localPropertiesFile.exists()) {
     localProperties.load(localPropertiesFile.inputStream())
 }
 
-val discordSocialSdkAar = file("libs/discord_partner_sdk.aar")
-val discordSocialSdkAvailable = discordSocialSdkAar.exists()
+val discordSocialSdkAvailable = true
 val discordApplicationId =
     (
         localProperties.getProperty("DISCORD_APPLICATION_ID")
@@ -87,21 +86,12 @@ android {
             buildConfigField("long", "DISCORD_APPLICATION_ID_LONG", "${discordApplicationIdLong}L")
             buildConfigField("String", "DISCORD_REDIRECT_SCHEME", "\"$discordRedirectScheme\"")
             manifestPlaceholders["discordRedirectScheme"] = discordRedirectScheme
-            externalNativeBuild {
-                cmake {
-                    arguments += "-DARCHIVETUNE_ENABLE_DISCORD_SOCIAL_SDK=${if (discordSocialSdkAvailable) "ON" else "OFF"}"
-                }
-            }
         }
         create("foss") {
             dimension = "distribution"
             buildConfigField("String", "DISTRIBUTION", "\"foss\"")
             buildConfigField("boolean", "DISCORD_SOCIAL_ENABLED", "false")
             buildConfigField("boolean", "UPDATER_AVAILABLE", "true")
-            externalNativeBuild {
-                cmake {
-                    arguments += "-DARCHIVETUNE_ENABLE_DISCORD_SOCIAL_SDK=OFF"
-                }
             }
         }
         create("izzy") {
@@ -109,10 +99,6 @@ android {
             buildConfigField("String", "DISTRIBUTION", "\"izzy\"")
             buildConfigField("boolean", "DISCORD_SOCIAL_ENABLED", "false")
             buildConfigField("boolean", "UPDATER_AVAILABLE", "false")
-            externalNativeBuild {
-                cmake {
-                    arguments += "-DARCHIVETUNE_ENABLE_DISCORD_SOCIAL_SDK=OFF"
-                }
             }
         }
         create("mobile") {
@@ -340,7 +326,7 @@ dependencies {
     implementation(libs.accompanist.lyrics.core)
 
     if (discordSocialSdkAvailable) {
-        "gmsImplementation"(files(discordSocialSdkAar))
+        implementation("com.github.sang765:discord-social-sdk:v1.0.0")
     }
 }
 

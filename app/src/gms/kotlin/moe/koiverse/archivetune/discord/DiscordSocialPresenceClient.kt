@@ -1,10 +1,3 @@
-/*
- * ArchiveTune (2026)
- * © Chartreux Westia — github.com/koiverse
- * GPL-3.0 License | Contributors: see git history
- * Do not remove or alter this notice. - Per GPL-3.0 Section 4 & Section 5
- */
-
 package moe.koiverse.archivetune.discord
 
 import android.content.Context
@@ -47,7 +40,7 @@ object DiscordSocialPresenceClient {
                 accessToken = token,
                 activity = activity,
             ).onFailure {
-                Timber.tag(TAG).w(it, "Discord Social SDK updatePresence failed")
+                Timber.tag(TAG).w(it, "updatePresence failed")
             }
         }
     }
@@ -86,7 +79,7 @@ object DiscordSocialPresenceClient {
         }.onFailure {
             activeApplicationId = null
             activeAccessToken = null
-            Timber.tag(TAG).w(it, "Discord Social SDK start failed")
+            Timber.tag(TAG).w(it, "start failed")
         }
     }
 }
