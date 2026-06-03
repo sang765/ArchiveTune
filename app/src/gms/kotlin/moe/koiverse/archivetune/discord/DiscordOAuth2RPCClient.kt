@@ -6,7 +6,8 @@ import com.discord.oauth2rpc.IdentifyPayload
 import com.discord.oauth2rpc.structures.RichPresence
 import com.discord.oauth2rpc.utils.GatewayOp
 import com.discord.oauth2rpc.utils.JsonObjectMapper
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.*
@@ -16,90 +17,17 @@ object DiscordOAuth2RPCClient {
     private const val TAG = "DiscordOAuth2RPCClient"
 
     private val mutex = Mutex()
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var gateway: GatewayClient? = null
     private var sessionId: String? = null
     private var activeToken: String? = null
     private var ready = false
-    private var connectJob: Job? = null
 
     val isConnected: Boolean
         get() = ready && gateway != null
 
     suspend fun connect(accessToken: String): Result<Unit> = withContext(Dispatchers.IO) {
         mutex.withLock {
-            if (isConnected && activeToken == accessToken) {
-                return@withLock Result.success(Unit)
-            }
-
-            disconnectInternal()
-
-            val token = accessToken.trim()
-            if (token.isBlank()) {
-                return@withLock Result.failure(IllegalArgumentException("Discord access token is missing"))
-            }
-
-            activeToken = token
-            ready = false
-
-            val gws = GatewayClient()
-            val connectResult = CompletableDeferred<Result<Unit>>()
-            var timeout = true
-
-            gws.onReady = { ev ->
-                sessionId = ev.sessionId
-                ready = true
-                timeout = false
-                if (!connectResult.isCompleted) {
-                    connectResult.complete(Result.success(Unit))
-                }
-                Timber.tag(TAG).i("Gateway connected: user=%s session=%s", ev.user.username, ev.sessionId)
-            }
-
-            gws.onClose = { info ->
-                ready = false
-                gateway = null
-                if (!connectResult.isCompleted) {
-                    connectResult.complete(Result.failure(Exception("Gateway closed: code=${info.code} reason=${info.reason}")))
-                }
-                Timber.tag(TAG).w("Gateway closed: code=%d reason=%s resumable=%s", info.code, info.reason, info.resumable)
-            }
-
-            gws.onError = { err ->
-                Timber.tag(TAG).e(err, "Gateway error")
-            }
-
-            gws.onDebug = { msg ->
-                Timber.tag(TAG).v("Gateway: %s", msg)
-            }
-
-            gateway = gws
-
-            connectJob = scope.launch {
-                try {
-                    gws.connect(GatewayConnectOptions(
-                        token = token,
-                        identify = IdentifyPayload(capabilities = 0),
-                        helloTimeoutMs = 15_000L,
-                    ))
-                } catch (e: Exception) {
-                    if (!connectResult.isCompleted) {
-                        connectResult.complete(Result.failure(e))
-                    }
-                }
-            }
-
-            val result = withTimeout(20_000L) {
-                connectResult.await()
-            }
-
-            if (result.isFailure) {
-                gateway = null
-                activeToken = null
-                sessionId = null
-            }
-
-            result
+            connectInternal(accessToken)
         }
     }
 
@@ -108,7 +36,7 @@ object DiscordOAuth2RPCClient {
         activity: DiscordPresenceActivity,
     ): Result<Unit> = withContext(Dispatchers.IO) {
         mutex.withLock {
-            val connectResult = connect(accessToken)
+            val connectResult = connectInternal(accessToken)
             if (connectResult.isFailure) {
                 return@withLock connectResult
             }
@@ -172,9 +100,66 @@ object DiscordOAuth2RPCClient {
         }
     }
 
+    private suspend fun connectInternal(accessToken: String): Result<Unit> {
+        if (isConnected && activeToken == accessToken) {
+            return Result.success(Unit)
+        }
+
+        disconnectInternal()
+
+        val token = accessToken.trim()
+        if (token.isBlank()) {
+            return Result.failure(IllegalArgumentException("Discord access token is missing"))
+        }
+
+        activeToken = token
+        ready = false
+
+        val gws = GatewayClient()
+
+        gws.onReady = { ev ->
+            sessionId = ev.sessionId
+            ready = true
+            Timber.tag(TAG).i("Gateway connected: user=%s session=%s", ev.user.username, ev.sessionId)
+        }
+
+        gws.onClose = { info ->
+            ready = false
+            gateway = null
+            Timber.tag(TAG).w("Gateway closed: code=%d reason=%s resumable=%s", info.code, info.reason, info.resumable)
+        }
+
+        gws.onError = { err ->
+            Timber.tag(TAG).e(err, "Gateway error")
+        }
+
+        gws.onDebug = { msg ->
+            Timber.tag(TAG).v("Gateway: %s", msg)
+        }
+
+        gateway = gws
+
+        val result = try {
+            gws.connect(GatewayConnectOptions(
+                token = token,
+                identify = IdentifyPayload(capabilities = 0),
+                helloTimeoutMs = 20_000L,
+            ))
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Timber.tag(TAG).e(e, "Gateway connect failed")
+            gateway?.disconnect()
+            gateway = null
+            activeToken = null
+            sessionId = null
+            ready = false
+            Result.failure(e)
+        }
+
+        return result
+    }
+
     private fun disconnectInternal() {
-        connectJob?.cancel()
-        connectJob = null
         gateway?.disconnect()
         gateway = null
         sessionId = null
