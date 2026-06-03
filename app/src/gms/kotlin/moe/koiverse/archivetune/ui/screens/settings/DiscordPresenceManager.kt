@@ -201,9 +201,15 @@ object DiscordPresenceManager {
                         isPaused = firstIsPaused,
                     )
                     Timber.tag(logTag).d("initial updatePresence result=%s songId=%s", firstResult, firstSong?.song?.id)
+                } catch (e: CancellationException) {
+                    Timber.tag(logTag).e(e, "initial updatePresence CANCELLED — scope may be shutting down")
+                    throw e
                 } catch (e: Exception) {
                     Timber.tag(logTag).e(e, "initial updatePresence failed")
                 }
+            } catch (e: CancellationException) {
+                Timber.tag(logTag).e(e, "initial first-run CANCELLED — scope may be shutting down")
+                throw e
             } catch (e: Exception) {
                 Timber.tag(logTag).e(e, "initial first-run failed")
             }

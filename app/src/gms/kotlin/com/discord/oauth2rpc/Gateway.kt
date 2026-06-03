@@ -62,39 +62,70 @@ class GatewayClient {
         connectReady = ready
 
         debug("[gateway] connecting $url")
+        debug("[gateway] token_present=${token.isNotBlank()} token_len=${token.length}")
 
         httpClient = HttpClient { install(WebSockets) }
-        val session = httpClient!!.webSocketSession(url)
+        debug("[gateway] created HttpClient, opening WebSocket...")
+        val session = try {
+            httpClient!!.webSocketSession(url)
+        } catch (e: Exception) {
+            debug("[gateway] webSocketSession threw: $e")
+            throw e
+        }
         wsSession = session
+        debug("[gateway] WebSocket opened successfully")
         onOpen?.invoke()
 
         val helloTimeout = opts.helloTimeoutMs ?: DEFAULTS.HELLO_TIMEOUT_MS
+        debug("[gateway] starting hello timeout job (${helloTimeout}ms)")
         helloTimerJob = scope.launch {
             delay(helloTimeout)
-            debug("[gateway] HELLO timeout")
+            debug("[gateway] HELLO timeout fired")
             session.close(CloseReason(4009, "HELLO timeout"))
-            ready.completeExceptionally(Exception("HELLO timeout"))
+            if (!ready.isCompleted) {
+                ready.completeExceptionally(Exception("HELLO timeout"))
+                debug("[gateway] completed ready with HELLO timeout exception")
+            }
         }
 
+        debug("[gateway] starting processing job")
         processingJob = scope.launch {
             try {
                 for (frame in session.incoming) {
                     when (frame) {
                         is Frame.Text -> handleMessage(frame.readText(), opts, ready)
                         is Frame.Close -> {
-                            handleClose("", 1000)
-                            if (!ready.isCompleted) ready.completeExceptionally(Exception("Gateway closed before ready"))
+                            val reason = (frame as? Frame.Close)?.readReason()?.message ?: ""
+                            val code = (frame as? Frame.Close)?.readReason()?.code?.toInt() ?: 1000
+                            debug("[gateway] processing got close frame code=$code reason=$reason")
+                            handleClose(reason, code)
+                            if (!ready.isCompleted) {
+                                ready.completeExceptionally(Exception("Gateway closed before ready: code=$code reason=$reason"))
+                                debug("[gateway] completed ready with close-before-ready exception")
+                            }
                         }
                         else -> {}
                     }
                 }
+                debug("[gateway] processing loop ended (session.incoming closed)")
             } catch (e: Exception) {
-                if (!ready.isCompleted) ready.completeExceptionally(e)
+                debug("[gateway] processing job caught: $e")
+                if (!ready.isCompleted) {
+                    ready.completeExceptionally(e)
+                    debug("[gateway] completed ready with processing exception: $e")
+                }
                 onError?.invoke(e)
             }
         }
 
-        ready.await()
+        debug("[gateway] awaiting ready...")
+        try {
+            ready.await()
+            debug("[gateway] ready completed successfully")
+        } catch (e: Exception) {
+            debug("[gateway] ready.await() threw: $e")
+            throw e
+        }
     }
 
     fun send(op: Int, d: JsonObject?): Boolean {
@@ -187,12 +218,14 @@ class GatewayClient {
                 touchSession(re.sessionId, liveSeq, re.resumeGatewayUrl)
                 onReady?.invoke(re)
                 connectReady?.complete(Unit)
+                debug("[gateway] connectReady completed on READY")
             }
             "RESUMED" -> {
                 debug("[gateway] RESUMED: session restored, seq=$liveSeq")
                 touchSession(sessionState?.sessionId, liveSeq, sessionState?.resumeGatewayUrl)
                 onResumed?.invoke(d)
                 connectReady?.complete(Unit)
+                debug("[gateway] connectReady completed on RESUMED")
             }
             else -> debug("[gateway] dispatch $t seq=${s ?: liveSeq}")
         }
