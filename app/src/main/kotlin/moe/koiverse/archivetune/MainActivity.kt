@@ -205,7 +205,7 @@ import moe.koiverse.archivetune.db.entities.Album
 import moe.koiverse.archivetune.db.entities.Artist
 import moe.koiverse.archivetune.db.entities.Playlist
 import moe.koiverse.archivetune.db.entities.Song
-import moe.koiverse.archivetune.discord.DiscordSocialSdkAndroidInitializer
+
 import moe.koiverse.archivetune.innertube.YouTube
 import moe.koiverse.archivetune.innertube.models.AlbumItem
 import moe.koiverse.archivetune.innertube.models.ArtistItem
@@ -381,7 +381,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
-        DiscordSocialSdkAndroidInitializer.setEngineActivity(this)
         isMusicServiceBound =
             bindService(
                 Intent(this, MusicService::class.java),
@@ -445,7 +444,6 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        DiscordSocialSdkAndroidInitializer.setEngineActivity(this)
         window.decorView.layoutDirection = View.LAYOUT_DIRECTION_LTR
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
