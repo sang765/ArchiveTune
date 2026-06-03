@@ -82,7 +82,10 @@ class DiscordRPC(
         currentPlaybackTimeMillis: Long,
         isPaused: Boolean = false,
     ) = runCatching {
+        Timber.tag(TAG).d("updateSong: songId=%s playbackMs=%d isPaused=%s", song.song.id, currentPlaybackTimeMillis, isPaused)
+
         if (lastSongId != song.song.id) {
+            Timber.tag(TAG).v("song changed: %s -> %s, clearing caches", lastSongId, song.song.id)
             translationCache.clear()
             DiscordImageResolver.clearCache()
             lastSongId = song.song.id
@@ -122,6 +125,8 @@ class DiscordRPC(
             default = song.artists.joinToString { it.name }.ifBlank { appName },
         ).toDiscordText(maxLength = 128, fallback = appName)
 
+        Timber.tag(TAG).v("resolved fields: name=%s details=%s state=%s", activityName, activityDetails, activityState)
+
         val baseSongUrl = "https://music.youtube.com/watch?v=${song.song.id}"
         val resolvedImages = DiscordImageResolver.resolveImagesForSong(context, song)
         val largeImageType = context.dataStore[DiscordLargeImageTypeKey] ?: "thumbnail"
@@ -150,6 +155,8 @@ class DiscordRPC(
             )
         }
 
+        Timber.tag(TAG).v("images: large=%s small=%s", largeImage, smallImage)
+
         val largeText = resolveLargeText(song, translatedMap)
         val smallText = if (isPaused) {
             context.getString(R.string.discord_paused)
@@ -157,7 +164,6 @@ class DiscordRPC(
             resolveSmallText(song, translatedMap, smallImageType, appName)
         }
 
-        val buttons = resolveButtons(song)
         val activityType = DiscordActivityType.fromPreference(
             context.dataStore[DiscordActivityTypeKey] ?: "LISTENING",
         )
@@ -168,12 +174,17 @@ class DiscordRPC(
             context.dataStore[DiscordPresenceStatusKey] ?: "online",
         )
 
+        val buttons = resolveButtons(song)
+        Timber.tag(TAG).v("buttons=%d activityType=%s platform=%s status=%s", buttons.size, activityType, platform, status)
+
         val timestamps = buildTimestamps(
             song = song,
             currentPlaybackTimeMillis = currentPlaybackTimeMillis,
             isPaused = isPaused,
             showWhenPaused = showWhenPaused,
         )
+
+        Timber.tag(TAG).v("timestamps: start=%d end=%d", timestamps.startEpochSeconds ?: -1, timestamps.endEpochSeconds ?: -1)
 
         val activity = DiscordPresenceActivity(
             applicationId = BuildConfig.DISCORD_APPLICATION_ID_LONG,
@@ -196,6 +207,8 @@ class DiscordRPC(
             supportedPlatforms = platform,
             onlineStatus = status,
         )
+
+        Timber.tag(TAG).d("sending presence: type=%s details=%s state=%s buttons=%d", activityType, activityDetails, activityState, buttons.size)
 
         DiscordOAuth2RPCClient.updatePresence(
             accessToken = accessToken,
