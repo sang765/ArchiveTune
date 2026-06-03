@@ -25,6 +25,7 @@ class GatewayClient {
     private var liveSeq = 0
     private var token = ""
     private var closed = false
+    private var connectReady: CompletableDeferred<Unit>? = null
 
     var onReady: ((ReadyEvent) -> Unit)? = null
     var onClose: ((GatewayCloseInfo) -> Unit)? = null
@@ -58,6 +59,7 @@ class GatewayClient {
         val version = opts.version ?: DEFAULTS.GATEWAY_VERSION
         val url = "$base/?v=$version&encoding=json"
         val ready = CompletableDeferred<Unit>()
+        connectReady = ready
 
         debug("[gateway] connecting $url")
 
@@ -116,6 +118,7 @@ class GatewayClient {
         stopHeartbeat()
         helloTimerJob?.cancel()
         processingJob?.cancel()
+        connectReady = null
         scope.launch {
             try { wsSession?.close() } catch (_: Exception) {}
             wsSession = null
@@ -183,11 +186,13 @@ class GatewayClient {
                 sessionState = SessionState(re.sessionId, liveSeq, re.resumeGatewayUrl)
                 touchSession(re.sessionId, liveSeq, re.resumeGatewayUrl)
                 onReady?.invoke(re)
+                connectReady?.complete(Unit)
             }
             "RESUMED" -> {
                 debug("[gateway] RESUMED: session restored, seq=$liveSeq")
                 touchSession(sessionState?.sessionId, liveSeq, sessionState?.resumeGatewayUrl)
                 onResumed?.invoke(d)
+                connectReady?.complete(Unit)
             }
             else -> debug("[gateway] dispatch $t seq=${s ?: liveSeq}")
         }
