@@ -210,10 +210,17 @@ class DiscordRPC(
 
         Timber.tag(TAG).d("sending presence: type=%s details=%s state=%s buttons=%d", activityType, activityDetails, activityState, buttons.size)
 
-        DiscordOAuth2RPCClient.updatePresence(
+        val updateResult = DiscordOAuth2RPCClient.updatePresence(
             accessToken = accessToken,
             activity = activity,
-        ).getOrThrow()
+        )
+        if (updateResult.isFailure) {
+            Timber.tag(TAG).w(
+                "OAuth2RPCClient.updatePresence failed: %s",
+                updateResult.exceptionOrNull()?.message ?: "unknown"
+            )
+        }
+        updateResult.getOrThrow()
 
         Timber.tag(TAG).i(
             "Updated Discord presence via OAuth2 Gateway name=%s details=%s state=%s",

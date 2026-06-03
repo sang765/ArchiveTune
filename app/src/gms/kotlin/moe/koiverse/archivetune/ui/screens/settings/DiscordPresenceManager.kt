@@ -141,7 +141,15 @@ object DiscordPresenceManager {
                     true
                 } else {
                     consecutiveFailures++
-                    Timber.tag(logTag).w("updatePresence failed silently — updateSong returned failure (consecutive=%d)", consecutiveFailures)
+                    val err = result.exceptionOrNull()
+                    Timber.tag(logTag).w(
+                        "updatePresence failed — updateSong returned failure (consecutive=%d): %s",
+                        consecutiveFailures,
+                        err?.message ?: "unknown"
+                    )
+                    if (err != null) {
+                        Timber.tag(logTag).e(err, "updatePresence failure cause")
+                    }
                     false
                 }
             } catch (ex: Exception) {
