@@ -76,8 +76,8 @@ class AutomixEngine(
 
         return TransitionPlan(
             crossfadeDurationMs = duration,
-            outgoingFadeCurve = if (isSameAlbum) FadeCurve.LOGARITHMIC else FadeCurve.SINUSOIDAL,
-            incomingFadeCurve = if (isSameAlbum) FadeCurve.LOGARITHMIC else FadeCurve.SINUSOIDAL,
+            outgoingFadeCurve = FadeCurve.LOGARITHMIC,
+            incomingFadeCurve = FadeCurve.LOGARITHMIC,
         )
     }
 
@@ -89,16 +89,16 @@ class AutomixEngine(
         val energyDropping = energyDelta < -0.15f
 
         val duration = when {
-            energyRising -> (baseCrossfadeDurationMs * 0.6f).toLong()
-            energyDropping -> (baseCrossfadeDurationMs * 1.3f).toLong()
-            matchScore > 0.5f -> baseCrossfadeDurationMs
-            else -> (baseCrossfadeDurationMs * 0.8f).toLong()
+            energyRising -> (baseCrossfadeDurationMs * 0.5f).toLong()
+            energyDropping -> (baseCrossfadeDurationMs * 1.5f).toLong()
+            matchScore > 0.5f -> (baseCrossfadeDurationMs * 0.7f).toLong()
+            else -> (baseCrossfadeDurationMs * 0.6f).toLong()
         }.coerceIn(500L, 10000L)
 
         return TransitionPlan(
             crossfadeDurationMs = duration,
-            outgoingFadeCurve = if (energyRising) FadeCurve.LINEAR else FadeCurve.SINUSOIDAL,
-            incomingFadeCurve = if (energyDropping) FadeCurve.LINEAR else FadeCurve.SINUSOIDAL,
+            outgoingFadeCurve = FadeCurve.LINEAR,
+            incomingFadeCurve = FadeCurve.LINEAR,
             lowCutOnOutgoing = energyRising,
         )
     }
@@ -114,19 +114,18 @@ class AutomixEngine(
         val isHalfTime = bpmRatio in 0.45f..0.55f || bpmRatio in 1.9f..2.1f
 
         val duration = when {
-            isSameArtist -> baseCrossfadeDurationMs + 2000L
-            isBpmMatch -> (baseCrossfadeDurationMs * 1.3f).toLong()
+            isSameArtist -> baseCrossfadeDurationMs + 3000L
+            isBpmMatch -> (baseCrossfadeDurationMs * 1.5f).toLong()
             isHalfTime -> baseCrossfadeDurationMs
             matchScore > 0.5f -> baseCrossfadeDurationMs
-            else -> (baseCrossfadeDurationMs * 0.6f).toLong()
+            else -> (baseCrossfadeDurationMs * 0.5f).toLong()
         }.coerceIn(500L, 10000L)
 
-        val chosenCurve = if (isBpmMatch) FadeCurve.LOGARITHMIC else FadeCurve.SINUSOIDAL
         return TransitionPlan(
             crossfadeDurationMs = duration,
             incomingStartOffsetMs = if (isBpmMatch) computeBeatAlignedOffset(outgoingAnalysis, incomingAnalysis) else 0L,
-            outgoingFadeCurve = chosenCurve,
-            incomingFadeCurve = chosenCurve,
+            outgoingFadeCurve = FadeCurve.HOLD_THEN_FADE,
+            incomingFadeCurve = FadeCurve.HOLD_THEN_FADE,
         )
     }
 
