@@ -12,12 +12,12 @@ object JsonObjectMapper {
             null -> sb.append("null")
             is String -> {
                 sb.append('"')
-                value.replace("\\", "\\\\")
+                sb.append(value
+                    .replace("\\", "\\\\")
                     .replace("\"", "\\\"")
                     .replace("\n", "\\n")
                     .replace("\r", "\\r")
-                    .replace("\t", "\\t")
-                    .also { sb.append(it) }
+                    .replace("\t", "\\t"))
                 sb.append('"')
             }
             is Number -> sb.append(value)

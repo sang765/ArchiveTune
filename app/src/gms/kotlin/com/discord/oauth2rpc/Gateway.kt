@@ -46,8 +46,12 @@ class GatewayClient {
 
     fun getSession(): SessionState? = sessionState?.copy()
 
+    private val connectLock = Any()
+
     suspend fun connect(opts: GatewayConnectOptions) {
-        if (wsSession != null) throw IllegalStateException("GatewayClient already connected")
+        synchronized(connectLock) {
+            if (wsSession != null) throw IllegalStateException("GatewayClient already connected")
+        }
 
         token = opts.token
         sessionState = opts.session?.copy()
@@ -193,7 +197,7 @@ class GatewayClient {
                     forceClose(4000, "server reconnect")
                 }
                 GatewayOp.INVALID_SESSION -> {
-                    val resumable = d?.jsonPrimitive?.boolean ?: false
+                    val resumable = d?.jsonPrimitive?.booleanOrNull ?: false
                     debug("[gateway] INVALID_SESSION resumable=$resumable")
                     if (!resumable) { sessionState = null; touchSession(sessionId = null, resumeGatewayUrl = null, seq = 0) }
                     onInvalidSession?.invoke(resumable)
