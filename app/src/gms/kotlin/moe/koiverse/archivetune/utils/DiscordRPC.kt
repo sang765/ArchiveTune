@@ -46,6 +46,7 @@ import moe.koiverse.archivetune.discord.DiscordPresenceButton
 import moe.koiverse.archivetune.discord.DiscordPresenceTimestamps
 import moe.koiverse.archivetune.discord.DiscordOAuth2RPCClient
 import moe.koiverse.archivetune.discord.DiscordStatusDisplayType
+import kotlinx.coroutines.CancellationException
 import timber.log.Timber
 
 class DiscordRPC(
