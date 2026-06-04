@@ -123,7 +123,11 @@ object DiscordPresenceManager {
                 }
 
                 val rpc = getOrCreateRpc(context, activeToken)
-                val result = rpc.updateSong(song, positionMs, isPaused)
+                val result = try {
+                    rpc.updateSong(song, positionMs, isPaused)
+                } catch (e: CancellationException) {
+                    throw e
+                }
                 if (result.isSuccess) {
                     consecutiveFailures = 0
                     Timber.tag(logTag).d(
@@ -152,6 +156,8 @@ object DiscordPresenceManager {
                     }
                     false
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (ex: Exception) {
                 consecutiveFailures++
                 Timber.tag(logTag).e(ex, "updatePresence failed (consecutive=%d)", consecutiveFailures)

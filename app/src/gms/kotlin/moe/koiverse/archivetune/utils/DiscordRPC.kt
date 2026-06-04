@@ -81,7 +81,7 @@ class DiscordRPC(
         song: Song,
         currentPlaybackTimeMillis: Long,
         isPaused: Boolean = false,
-    ) = runCatching {
+    ): Result<Unit> = runCatching {
         Timber.tag(TAG).d("updateSong: songId=%s playbackMs=%d isPaused=%s", song.song.id, currentPlaybackTimeMillis, isPaused)
 
         if (lastSongId != song.song.id) {
@@ -228,7 +228,7 @@ class DiscordRPC(
             activityDetails,
             activityState,
         )
-    }
+    }.onFailure { e -> if (e is CancellationException) throw e }
 
     suspend fun refreshActivity(
         song: Song,
