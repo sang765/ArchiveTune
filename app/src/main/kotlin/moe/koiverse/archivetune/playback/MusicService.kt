@@ -881,8 +881,6 @@ class MusicService :
             updateNotification()
             if (song != null && player.playWhenReady && player.playbackState == Player.STATE_READY) {
                 ensurePresenceManager()
-            } else {
-                try { DiscordPresenceManager.stop() } catch (_: Exception) {}
             }
         }
 
