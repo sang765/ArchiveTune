@@ -308,6 +308,10 @@ dependencies {
     implementation(project(":canvas"))
     implementation(project(":shazamkit"))
     implementation(project(":spotifycore"))
+    // librespot — direct Spotify audio playback
+    implementation("xyz.gianlu.librespot:librespot-player:${libs.versions.librespot.get()}:thin") {
+        exclude(group = "com.google.protobuf")
+    }
     implementation("com.materialkolor:material-kolor:5.0.0-alpha07")
 
     implementation(libs.ktor.client.core)
@@ -347,6 +351,12 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 }
 
 configurations.configureEach {
+    resolutionStrategy.dependencySubstitution {
+        substitute(module("com.google.protobuf:protobuf-javalite"))
+            .because("protobuf-java contains both full (GeneratedMessageV3) and lite (GeneratedMessageLite) runtimes — avoids duplicate class conflict with librespot")
+            .using(module("com.google.protobuf:protobuf-java:${libs.versions.protobufJava.get()}"))
+    }
+
     resolutionStrategy.force(
         "androidx.compose.runtime:runtime:${libs.versions.compose.get()}",
         "androidx.compose.foundation:foundation:${libs.versions.compose.get()}",
@@ -355,5 +365,6 @@ configurations.configureEach {
         "androidx.compose.ui:ui-tooling:${libs.versions.compose.get()}",
         "androidx.compose.animation:animation-graphics:${libs.versions.compose.get()}",
         "org.jetbrains.kotlin:kotlin-metadata-jvm:${libs.versions.kotlinMetadata.get()}",
+        "com.google.protobuf:protobuf-java:${libs.versions.protobufJava.get()}",
     )
 }
