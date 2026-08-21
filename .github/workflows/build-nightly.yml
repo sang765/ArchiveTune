@@ -149,26 +149,16 @@ jobs:
           find app/build/outputs/apk -maxdepth 8 -type d -print || true
           exit 1
 
-      - name: Sign APK
-        uses: ilharp/sign-android-release@v2.0.0
-        with:
-          releaseDir: ${{ steps.nightly_dir.outputs.nightly_dir }}/
-          signingKey: ${{ secrets.KEYSTORE }}
-          keyAlias: ${{ secrets.KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
-          buildToolsVersion: 35.0.0
-      
-      - name: Move signed APK
+      - name: Move unsigned APK
         shell: bash
         run: |
           set -euo pipefail
           NIGHTLY_DIR="${{ steps.nightly_dir.outputs.nightly_dir }}"
           mkdir -p "$NIGHTLY_DIR/out"
-          SIGNED_APK=$(find "$NIGHTLY_DIR" -type f \( -name "*-signed.apk" -o -name "*-unsigned-signed.apk" \) | head -n 1)
-          mv "$SIGNED_APK" "$NIGHTLY_DIR/out/${{ steps.variant.outputs.apk_name }}"
+          UNSIGNED_APK=$(find "$NIGHTLY_DIR" -type f -name "*.apk" ! -name "*-signed.apk" | head -n 1)
+          mv "$UNSIGNED_APK" "$NIGHTLY_DIR/out/${{ steps.variant.outputs.apk_name }}"
   
-      - name: Upload Signed APK
+      - name: Upload Unsigned APK
         uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.variant.outputs.artifact_name }}
