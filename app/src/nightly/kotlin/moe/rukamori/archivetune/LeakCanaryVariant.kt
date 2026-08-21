@@ -7,7 +7,12 @@
 package moe.rukamori.archivetune
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.ComponentName
 import android.content.Context
+import android.content.pm.PackageManager
+import androidx.core.app.NotificationCompat
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CoroutineScope
@@ -33,23 +38,43 @@ internal object LeakCanaryVariant {
       }
     }
 
+  private const val LEAK_LAUNCHER_COMPONENT =
+    "moe.rukamori.archivetune.nightly/leakcanary.internal.activity.LeakLauncherActivity"
+  private const val NOTIFICATION_CHANNEL_ID = "leak_canary_status"
+  private const val NOTIFICATION_ID = 9_500
+
   @JvmStatic
   fun initialize(application: Application) {
+    ensureNotificationChannel(application)
     installWatchers(application)
+    // Disable icon by default on startup
+    setLauncherIconEnabled(application, false)
     applyTrackingEnabled(false)
     scope.launch {
       application.dataStore.data
         .map { preferences -> preferences[leakCanaryEnabledKey] ?: false }
         .distinctUntilChanged()
         .collect { enabled ->
-          application.mainExecutor.execute { applyTrackingEnabled(enabled) }
+          application.mainExecutor.execute {
+            applyTrackingEnabled(enabled)
+            setLauncherIconEnabled(application, enabled)
+            if (enabled) {
+              showLauncherIconNotification(application)
+            }
+          }
         }
     }
   }
 
   @JvmStatic
   fun setEnabled(context: Context, enabled: Boolean) {
-    (context.applicationContext as? Application)?.let { applyTrackingEnabled(enabled) }
+    (context.applicationContext as? Application)?.let { app ->
+      applyTrackingEnabled(enabled)
+      setLauncherIconEnabled(app, enabled)
+      if (enabled) {
+        showLauncherIconNotification(app)
+      }
+    }
   }
 
   private fun installWatchers(application: Application) {
@@ -64,5 +89,46 @@ internal object LeakCanaryVariant {
   private fun applyTrackingEnabled(enabled: Boolean) {
     trackingEnabled.set(enabled)
     LeakCanary.config = LeakCanary.config.copy(dumpHeap = enabled)
+  }
+
+  private fun setLauncherIconEnabled(context: Context, enabled: Boolean) {
+    try {
+      val componentName = ComponentName.unflattenFromString(LEAK_LAUNCHER_COMPONENT) ?: return
+      val newState = if (enabled) {
+        PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+      } else {
+        PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+      }
+      context.packageManager.setComponentEnabledSetting(
+        componentName,
+        newState,
+        PackageManager.DONT_KILL_APP,
+      )
+    } catch (_: Exception) {
+      // Component may not exist in this build variant
+    }
+  }
+
+  private fun ensureNotificationChannel(context: Context) {
+    val manager = context.getSystemService(NotificationManager::class.java) ?: return
+    val channel = NotificationChannel(
+      NOTIFICATION_CHANNEL_ID,
+      context.getString(R.string.app_name),
+      NotificationManager.IMPORTANCE_LOW,
+    ).apply {
+      description = "LeakCanary launcher icon status"
+    }
+    manager.createNotificationChannel(channel)
+  }
+
+  private fun showLauncherIconNotification(context: Context) {
+    val manager = context.getSystemService(NotificationManager::class.java) ?: return
+    val notification = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
+      .setSmallIcon(R.drawable.mic)
+      .setContentTitle("LeakCanary enabled")
+      .setContentText("Check your launcher app list")
+      .setAutoCancel(true)
+      .build()
+    manager.notify(NOTIFICATION_ID, notification)
   }
 }
