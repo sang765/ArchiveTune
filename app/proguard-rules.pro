@@ -20,6 +20,15 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+## LeakCanary — reflection-based init requires these classes/fields
+-keep class leakcanary.internal.InternalLeakCanary { *; }
+-keep class leakcanary.internal.LeakCanaryDelegate { *; }
+-keep class leakcanary.internal.HeapDumpTrigger { *; }
+-keep class leakcanary.AppWatcher { *; }
+-keep class leakcanary.LeakCanary { *; }
+-keep class leakcanary.internal.activity.** { *; }
+-dontwarn leakcanary.internal.**
+
 ## Kotlin Serialization
 # Keep `Companion` object fields of serializable classes.
 # This avoids serializer lookup through `getDeclaredClasses` as done for named companion objects.
