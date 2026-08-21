@@ -1,0 +1,175 @@
+name: Build Nightly APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ 'fix/nightly-shortcut-leakcanary' ]
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  build_nightly:
+    name: Build Nightly APK (${{ matrix.distribution }}-${{ matrix.device }}-${{ matrix.abi }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - device: mobile
+            distribution: gms
+            distributionName: Gms
+            deviceName: Mobile
+            abi: arm64
+          - device: mobile
+            distribution: gms
+            distributionName: Gms
+            deviceName: Mobile
+            abi: universal
+          - device: mobile
+            distribution: foss
+            distributionName: Foss
+            deviceName: Mobile
+            abi: universal
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+          ref: fix/nightly-shortcut-leakcanary
+      
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+      
+      - name: Set Up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-cleanup: on-success
+          
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Resolve variant names
+        id: variant
+        shell: bash
+        run: |
+          set -euo pipefail
+          DISTRIBUTION="${{ matrix.distribution }}"
+          DISTRIBUTION_CAP="${{ matrix.distributionName }}"
+          DEVICE="${{ matrix.device }}"
+          ABI="${{ matrix.abi }}"
+          DEVICE_CAP="${{ matrix.deviceName }}"
+          ABI_CAP="$(tr '[:lower:]' '[:upper:]' <<< "${ABI:0:1}")${ABI:1}"
+          echo "distribution=$DISTRIBUTION" >> "$GITHUB_OUTPUT"
+          echo "distribution_cap=$DISTRIBUTION_CAP" >> "$GITHUB_OUTPUT"
+          echo "device=$DEVICE" >> "$GITHUB_OUTPUT"
+          echo "abi=$ABI" >> "$GITHUB_OUTPUT"
+          echo "device_cap=$DEVICE_CAP" >> "$GITHUB_OUTPUT"
+          echo "abi_cap=$ABI_CAP" >> "$GITHUB_OUTPUT"
+          echo "gradle_task=assemble${DISTRIBUTION_CAP}${DEVICE_CAP}${ABI_CAP}Nightly" >> "$GITHUB_OUTPUT"
+          echo "artifact_name=app-${DISTRIBUTION}-${DEVICE}-${ABI}-nightly" >> "$GITHUB_OUTPUT"
+          echo "apk_name=app-${DISTRIBUTION}-${DEVICE}-${ABI}-nightly.apk" >> "$GITHUB_OUTPUT"
+
+      - name: Build Nightly APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          GRADLE_TASK="${{ steps.variant.outputs.gradle_task }}"
+          ./gradlew "$GRADLE_TASK"
+        env:
+          PULL_REQUEST: 'false'
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
+          LASTFM_SECRET: ${{ secrets.LASTFM_SECRET }}
+          API_BEARER_TOKEN: ${{ secrets.API_BEARER_TOKEN }}
+          TOGETHER_BEARER_TOKEN: ${{ secrets.TOGETHER_BEARER_TOKEN }}
+          CANVAS_BEARER_TOKEN: ${{ secrets.CANVAS_BEARER_TOKEN }}
+          EXTRACTOR_BEARER: ${{ secrets.EXTRACTOR_BEARER }}
+          NIGHTLY_BUILD_HASH: ${{ github.sha }}
+
+      - name: Resolve nightly output directory
+        id: nightly_dir
+        shell: bash
+        run: |
+          set -euo pipefail
+          DISTRIBUTION="${{ steps.variant.outputs.distribution }}"
+          DEVICE="${{ steps.variant.outputs.device }}"
+          ABI="${{ steps.variant.outputs.abi }}"
+          DEVICE_CAP="${{ steps.variant.outputs.device_cap }}"
+          ABI_CAP="${{ steps.variant.outputs.abi_cap }}"
+          CANDIDATES=(
+            "app/build/outputs/apk/${DISTRIBUTION}${DEVICE_CAP}${ABI_CAP}/nightly"
+            "app/build/outputs/apk/${DISTRIBUTION}${DEVICE}${ABI_CAP}/nightly"
+            "app/build/outputs/apk/${DISTRIBUTION}/${DEVICE}/${ABI}/nightly"
+            "app/build/outputs/apk/${DISTRIBUTION}/${DEVICE}${ABI_CAP}/nightly"
+            "app/build/outputs/apk/${DISTRIBUTION}/${DEVICE_CAP}${ABI_CAP}/nightly"
+            "app/build/outputs/apk/gms${DEVICE_CAP}${ABI_CAP}/nightly"
+            "app/build/outputs/apk/gms${DEVICE}${ABI_CAP}/nightly"
+            "app/build/outputs/apk/gms/${DEVICE}/${ABI}/nightly"
+            "app/build/outputs/apk/gms/${DEVICE}${ABI_CAP}/nightly"
+            "app/build/outputs/apk/gms/${DEVICE_CAP}${ABI_CAP}/nightly"
+            "app/build/outputs/apk/${DEVICE}/${ABI}/nightly"
+            "app/build/outputs/apk/${DEVICE}${ABI_CAP}/nightly"
+            "app/build/outputs/apk/${DEVICE_CAP}${ABI_CAP}/nightly"
+            "app/build/outputs/apk/${ABI}/${DEVICE}/nightly"
+          )
+          for d in "${CANDIDATES[@]}"; do
+            if [ -d "$d" ]; then
+              echo "nightly_dir=$d" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+
+          FOUND_METADATA="$(
+            find app/build/outputs/apk -type f -name "output-metadata.json" \
+              \( \
+                -path "*/${DISTRIBUTION}/${DEVICE}/${ABI}/nightly/output-metadata.json" -o \
+                -path "*/${DISTRIBUTION}${DEVICE}${ABI_CAP}/nightly/output-metadata.json" -o \
+                -path "*/${DISTRIBUTION}${DEVICE_CAP}${ABI_CAP}/nightly/output-metadata.json" -o \
+                -path "*/${DISTRIBUTION}/${DEVICE}/${ABI}/*/nightly/output-metadata.json" -o \
+                -path "*/${DISTRIBUTION}${DEVICE}${ABI_CAP}/*/nightly/output-metadata.json" -o \
+                -path "*/${DISTRIBUTION}${DEVICE_CAP}${ABI_CAP}/*/nightly/output-metadata.json" -o \
+                -path "*/${DEVICE}/${ABI}/nightly/output-metadata.json" -o \
+                -path "*/${DEVICE}${ABI_CAP}/nightly/output-metadata.json" -o \
+                -path "*/${DEVICE_CAP}${ABI_CAP}/nightly/output-metadata.json" -o \
+                -path "*/${ABI}/${DEVICE}/nightly/output-metadata.json" \
+              \) \
+              | head -n 1 || true
+          )"
+          if [ -n "${FOUND_METADATA:-}" ]; then
+            echo "nightly_dir=$(dirname "$FOUND_METADATA")" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Could not resolve APK nightly output directory for DISTRIBUTION=$DISTRIBUTION DEVICE=$DEVICE ABI=$ABI"
+          find app/build/outputs/apk -maxdepth 8 -type d -print || true
+          exit 1
+
+      - name: Sign APK
+        uses: ilharp/sign-android-release@v2.0.0
+        with:
+          releaseDir: ${{ steps.nightly_dir.outputs.nightly_dir }}/
+          signingKey: ${{ secrets.KEYSTORE }}
+          keyAlias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+          buildToolsVersion: 35.0.0
+      
+      - name: Move signed APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          NIGHTLY_DIR="${{ steps.nightly_dir.outputs.nightly_dir }}"
+          mkdir -p "$NIGHTLY_DIR/out"
+          SIGNED_APK=$(find "$NIGHTLY_DIR" -type f \( -name "*-signed.apk" -o -name "*-unsigned-signed.apk" \) | head -n 1)
+          mv "$SIGNED_APK" "$NIGHTLY_DIR/out/${{ steps.variant.outputs.apk_name }}"
+  
+      - name: Upload Signed APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.variant.outputs.artifact_name }}
+          path: ${{ steps.nightly_dir.outputs.nightly_dir }}/out/${{ steps.variant.outputs.apk_name }}
