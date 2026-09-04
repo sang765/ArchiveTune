@@ -9,6 +9,7 @@ package moe.rukamori.archivetune.utils
 
 import android.content.Context
 import moe.rukamori.archivetune.db.entities.Song
+import moe.rukamori.archivetune.innertube.YouTube
 import moe.rukamori.archivetune.ui.utils.getMusicVideoYTThumbnail
 import timber.log.Timber
 
@@ -17,6 +18,7 @@ data class ResolvedDiscordImages(
     val thumbnailResolvedId: String?,
     val artistOriginalUrl: String?,
     val artistResolvedId: String?,
+    val channelAvatarUrl: String? = null,
 )
 
 object DiscordImageResolver {
@@ -80,12 +82,27 @@ object DiscordImageResolver {
                 ?.takeUnless { it == savedArtwork?.thumbnail?.asHttpUrl() }
         val persistedArtist = artistUrl ?: savedArtistUrl
 
+        // Fetch channel avatar from YouTube API when playing a music video
+        val channelAvatar = if (isMusicVideo) {
+            val artistId = song.artists.firstOrNull()?.id
+            if (artistId != null && artistId.startsWith("UC")) {
+                runCatching {
+                    YouTube.artist(artistId).getOrNull()?.artist?.thumbnail
+                }.getOrNull()
+            } else {
+                null
+            }
+        } else {
+            null
+        }
+
         val images =
             ResolvedDiscordImages(
                 thumbnailOriginalUrl = thumbnailUrl,
                 thumbnailResolvedId = thumbnail,
                 artistOriginalUrl = artistUrl,
                 artistResolvedId = persistedArtist,
+                channelAvatarUrl = channelAvatar,
             )
 
         if (thumbnail != savedArtwork?.thumbnail || persistedArtist != savedArtwork?.artist) {
@@ -122,7 +139,8 @@ object DiscordImageResolver {
             }
 
             "artist" -> {
-                resolvedImages.artistResolvedId
+                resolvedImages.channelAvatarUrl
+                    ?: resolvedImages.artistResolvedId
                     ?: resolvedImages.artistOriginalUrl
             }
 
